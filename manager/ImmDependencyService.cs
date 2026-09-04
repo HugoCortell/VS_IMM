@@ -34,6 +34,7 @@ public sealed class ImmDependencyService
 	private readonly ImmExternalManagerOwnership ExternalManagers;
 
 	private List<ImmActiveDependency> Active = new();
+	private readonly HashSet<int> PendingRestartRuntimeIds = new();
 	public IReadOnlyList<ImmActiveDependency> ActiveDependencies => Active;
 
 	public int WarningCount => Active.Count(dependency => dependency.Severity == ImmDependencySeverity.Warning);
@@ -57,7 +58,7 @@ public sealed class ImmDependencyService
 
 		foreach (ImmRegisteredDependency registered in Registry.Dependencies)
 		{
-			if (IsActive(registered, configs, recipeCounts)) { active.Add(new ImmActiveDependency(registered.RuntimeId, registered.SourceModId, registered.EntryIndex, registered.Entry.Severity)); }
+			if (PendingRestartRuntimeIds.Contains(registered.RuntimeId) || IsActive(registered, configs, recipeCounts)) { active.Add(new ImmActiveDependency(registered.RuntimeId, registered.SourceModId, registered.EntryIndex, registered.Entry.Severity)); }
 		}
 
 		Active = active;
@@ -75,7 +76,7 @@ public sealed class ImmDependencyService
 		Dictionary<string, JObject?> configs = new(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, int> recipeCounts = new(StringComparer.OrdinalIgnoreCase);
 
-		if (!IsActive(registered, configs, recipeCounts))
+		if (!PendingRestartRuntimeIds.Contains(runtimeId) && !IsActive(registered, configs, recipeCounts))
 		{
 			EvaluateAll();
 			error = "This dependency issue is no longer active.";
@@ -111,6 +112,7 @@ public sealed class ImmDependencyService
 			break;
 		}
 
+		if (success) { PendingRestartRuntimeIds.Add(runtimeId); }
 		if (success && resolution.Type == ImmDependencyResolutionType.SetSetting) { warning = GetResolutionWarning(registered.SourceModId, resolution); }
 		if (success && string.IsNullOrWhiteSpace(chatCommand)) { EvaluateAll(); }
 

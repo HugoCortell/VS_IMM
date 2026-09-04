@@ -51,6 +51,8 @@ public sealed class GuiDialogModManager : GuiDialog
 	private const double DependencyInspectWidth = 105;
 	private const double DependencyInspectHeight = 30;
 	private const double DependencyLabelGap = 12;
+	private const double DependencyRestartGap = 5;
+	private const double DependencyRestartTextHeight = 24;
 
 	private static readonly Regex BreakTagRegex = new(@"<br\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -62,6 +64,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	private readonly Dictionary<int, string> OriginalValues = new();
 	private readonly HashSet<int> InvalidInputs = new();
 	private readonly Dictionary<int, GuiElement> ControlElements = new();
+	private readonly HashSet<int> PendingRestartDependencyIds = new();
 
 	private Dictionary<int, string>? ApplyingChanges;
 	private ImmConfigPageResponse? Page;
@@ -111,6 +114,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		ConfigClient.PageReceived += OnPageReceived;
 		ConfigClient.ApplyReceived += OnApplyReceived;
 		ConfigClient.DependencyResolveReceived += OnDependencyResolveReceived;
+		capi.Event.LevelFinalize += OnLevelFinalize;
 	}
 
 	public void SetMod(string modId, string modName)
@@ -180,6 +184,8 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		base.OnMouseWheel(args);
 	}
+
+	private void OnLevelFinalize() { PendingRestartDependencyIds.Clear(); }
 
 	private void ResetState()
 	{
@@ -284,19 +290,19 @@ public sealed class GuiDialogModManager : GuiDialog
 			StatusMessage = ImmLocalization.Get("status-auto-resolution-command-sent");
 
 			capi.ShowChatMessage(ImmLocalization.Get("chat-auto-resolution-command-sent"));
-
-			Compose();
-			return;
 		}
+		else
+		{
+			StatusMessage = ImmLocalization.Get("status-resolution-applied");
 
-		StatusMessage = ImmLocalization.Get("status-resolution-applied");
-
-		capi.ShowChatMessage(ImmLocalization.Get("chat-auto-resolution-applied"));
+			capi.ShowChatMessage(ImmLocalization.Get("chat-auto-resolution-applied"));
+		}
 
 		if (resolvedDependency?.ResolutionType == ImmDependencyResolutionType.SetSetting && Page?.ExternalManagerActive == true) { capi.ShowChatMessage(ImmLocalization.Get("chat-external-manager-patch-risk")); }
 
 		ShowResolutionWarning(packet.Warning);
 
+		PendingRestartDependencyIds.Add(packet.RuntimeId);
 		RefreshingAfterResolution = true;
 
 		ConfigClient.RequestPage(SelectedModId);
@@ -574,13 +580,14 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		foreach (ImmDependencyPacket dependency in dependencies)
 		{
-			bool hasInspect = !string.IsNullOrWhiteSpace(dependency.Description) || dependency.HasResolution;
+			bool pendingRestart = PendingRestartDependencyIds.Contains(dependency.RuntimeId);
+			bool hasInspect = !pendingRestart && (!string.IsNullOrWhiteSpace(dependency.Description) || dependency.HasResolution);
 
 			double labelWidth = Math.Max(60, cardWidth - CardPadding * 2 - (hasInspect ? DependencyInspectWidth + DependencyLabelGap : 0));
 
 			double labelHeight = Math.Max(SettingLabelHeight, MeasureTextHeight(dependency.Label, labelFont, labelWidth));
 
-			double bodyHeight = Math.Max(labelHeight, hasInspect ? DependencyInspectHeight : 0);
+			double bodyHeight = pendingRestart ? labelHeight + DependencyRestartGap + DependencyRestartTextHeight : Math.Max(labelHeight, hasInspect ? DependencyInspectHeight : 0);
 
 			double cardHeight = Math.Max(DependencyCardMinHeight, CardPadding * 2 + bodyHeight);
 
@@ -601,18 +608,32 @@ public sealed class GuiDialogModManager : GuiDialog
 		foreach (DependencyLayout layout in layouts)
 		{
 			ImmDependencyPacket dependency = layout.Dependency;
+			bool pendingRestart = PendingRestartDependencyIds.Contains(dependency.RuntimeId);
 
 			double cardWidth = Math.Max(120, innerWidth - CardX * 2);
 
 			ElementBounds cardBounds = ElementBounds.Fixed(CardX, layout.Y, cardWidth, layout.Height);
 
-			container.Add(new GuiElementDependencyCard(capi, dependency.Severity, cardBounds));
+			container.Add(new GuiElementDependencyCard(capi, dependency.Severity, pendingRestart, cardBounds));
 
 			double contentX = CardX + CardPadding;
 
 			double labelWidth = Math.Max(60, cardWidth - CardPadding * 2 - (layout.HasInspect ? DependencyInspectWidth + DependencyLabelGap : 0));
+			double labelY = pendingRestart ? layout.Y + CardPadding : layout.Y + (layout.Height - layout.LabelHeight) / 2;
 
-			AddText(container, dependency.Label, CairoFont.WhiteDetailText().WithWeight(FontWeight.Bold), ElementBounds.Fixed(contentX, layout.Y + (layout.Height - layout.LabelHeight) / 2, labelWidth, layout.LabelHeight));
+			AddText(container, dependency.Label, CairoFont.WhiteDetailText().WithWeight(FontWeight.Bold), ElementBounds.Fixed(contentX, labelY, labelWidth, layout.LabelHeight));
+
+			if (pendingRestart)
+			{
+				string restartText = ImmLocalization.Get("dependency-restart-required");
+				ElementBounds restartBounds = ElementBounds.Fixed(contentX, labelY + layout.LabelHeight + DependencyRestartGap, cardWidth - CardPadding * 2, DependencyRestartTextHeight);
+				CairoFont restartFont = CairoFont.WhiteSmallishText().WithWeight(FontWeight.Bold).WithColor(GuiStyle.ErrorTextColor).WithOrientation(EnumTextOrientation.Center);
+				GuiElementStaticText restartElement = new(capi, restartText, EnumTextOrientation.Center, restartBounds, restartFont);
+
+				restartElement.AutoFontSize();
+				container.Add(restartElement);
+				continue;
+			}
 
 			if (!layout.HasInspect) { continue; }
 
@@ -1164,6 +1185,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		ConfigClient.PageReceived -= OnPageReceived;
 		ConfigClient.ApplyReceived -= OnApplyReceived;
 		ConfigClient.DependencyResolveReceived -= OnDependencyResolveReceived;
+		capi.Event.LevelFinalize -= OnLevelFinalize;
 
 		DependencyIssueDialog.Dispose();
 		ArrayEditorDialog.Dispose();

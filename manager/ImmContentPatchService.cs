@@ -16,6 +16,7 @@ public sealed class ImmContentPatchService
 {
 	public const string BootstrapWorldConfigKey = "integratedmodmanager:patchsettings-active";
 
+	private const string BootstrapEncodingPrefix = "b64:";
 	private const double BooleanEpsilon = 1e-10;
 
 	private readonly ICoreAPI Api;
@@ -263,16 +264,28 @@ public sealed class ImmContentPatchService
 
 		if (snapshot.Count == 0) { worldConfig.RemoveAttribute(BootstrapWorldConfigKey); return; }
 
-		worldConfig.SetString(BootstrapWorldConfigKey, snapshot.ToString(Formatting.None));
+		string json = snapshot.ToString(Formatting.None);
+		string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+		worldConfig.SetString(BootstrapWorldConfigKey, BootstrapEncodingPrefix + encoded);
 	}
 
 	private JObject ReadBootstrapSnapshot()
 	{
-		string? json = Api.World?.Config?.GetAsString(BootstrapWorldConfigKey, "");
+		string? value = Api.World?.Config?.GetAsString(BootstrapWorldConfigKey, "");
 
-		if (string.IsNullOrWhiteSpace(json)) { return new JObject(); }
+		if (string.IsNullOrWhiteSpace(value)) { return new JObject(); }
 
-		try { return JObject.Parse(json); }
+		try
+		{
+			if (value.StartsWith(BootstrapEncodingPrefix, StringComparison.Ordinal))
+			{
+				string json = Encoding.UTF8.GetString(Convert.FromBase64String(value[BootstrapEncodingPrefix.Length..]));
+				return JObject.Parse(json);
+			}
+
+			// Legacy recovery for worlds written by the original mod release which caused crashes. I should remove this in a few versions. (todo)
+			return JObject.Parse(value);
+		}
 		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Active PatchSettings bootstrap snapshot could not be parsed: {0}", exception.Message); return new JObject(); }
 	}
 
