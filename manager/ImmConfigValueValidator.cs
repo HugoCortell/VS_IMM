@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace IntegratedModManager.Config;
@@ -14,6 +15,15 @@ public static class ImmConfigValueValidator
 		error = "";
 
 		if (entry.Default == null) { error = "PatchSetting has no Default value."; return false; }
+
+		if (entry.Type == "Advanced")
+		{
+			if (entry.Advanced == null) { error = "Advanced PatchSetting has no Advanced schema."; return false; }
+
+			// PatchSettings are whole JToken values.
+			// Use the submitted value as the structural baseline so undeclared members survive round trips, just as they do for ModConfig objects.
+			return ImmAdvancedValueValidator.TryNormalizeValue(entry.Advanced, ImmConfigSource.PatchSettings, submitted, submitted, out normalized, out error);
+		}
 
 		ImmConfigControlPacket control = new() { Type = entry.Type, ConfigSource = ImmConfigSource.PatchSettings, HasMin = entry.Min.HasValue, Min = entry.Min ?? 0, HasMax = entry.Max.HasValue, Max = entry.Max ?? 0, HasStep = entry.Step.HasValue, Step = entry.Step ?? 0, ElementType = entry.ElementType ?? "", Options = entry.Options?.Select(option => new ImmConfigOptionPacket { Label = option.Label, ValueJson = option.Value?.ToString(Newtonsoft.Json.Formatting.None) ?? "null" }).ToArray() ?? Array.Empty<ImmConfigOptionPacket>() };
 		return TryNormalizeValue(control, entry.Default, submitted, out normalized, out error);
@@ -59,6 +69,10 @@ public static class ImmConfigValueValidator
 			return found;
 
 			case "Array": return TryValidateArray(control, target, out _, out error);
+
+			case "Advanced":
+				if (!TryGetAdvancedSchema(control, out ImmAdvancedSchema advancedSchema, out error)) { return false; }
+			return ImmAdvancedValueValidator.TryValidateCurrentValue(advancedSchema, control.ConfigSource, target, out error);
 
 			default:
 				error = $"Unsupported Type '{control.Type}'.";
@@ -142,6 +156,10 @@ public static class ImmConfigValueValidator
 				if (target.Type != JTokenType.Array || submitted.Type != JTokenType.Array) { error = "expected an Array."; return false; }
 
 			return TryValidateArray(control, submitted, out normalized, out error);
+
+			case "Advanced":
+				if (!TryGetAdvancedSchema(control, out ImmAdvancedSchema advancedSchema, out error)) { return false; }
+			return ImmAdvancedValueValidator.TryNormalizeValue(advancedSchema, control.ConfigSource, target, submitted, out normalized, out error);
 
 			default:
 				error = $"unsupported Type '{control.Type}'.";
@@ -231,6 +249,25 @@ public static class ImmConfigValueValidator
 		if (current < min - StepTolerance || current > max + StepTolerance || Math.Abs(currentSteps - Math.Round(currentSteps)) > StepTolerance) { error = "Current value does not fit the Slider range/Step."; return false; }
 
 		return true;
+	}
+
+	private static bool TryGetAdvancedSchema(ImmConfigControlPacket control, out ImmAdvancedSchema schema, out string error)
+	{
+		schema = null!;
+		error = "";
+
+		if (string.IsNullOrWhiteSpace(control.AdvancedSchemaJson)) { error = "Advanced control has no schema metadata."; return false; }
+
+		try
+		{
+			schema = JsonConvert.DeserializeObject<ImmAdvancedSchema>(control.AdvancedSchemaJson) ?? throw new JsonException("schema was empty.");
+			return true;
+		}
+		catch (Exception exception)
+		{
+			error = $"Advanced schema metadata is invalid: {exception.Message}";
+			return false;
+		}
 	}
 
 	private static bool IsWholeNumber(JToken token)

@@ -603,6 +603,7 @@ public sealed class ImmConfigControlPacket
 	[ProtoMember(20)] public string DefaultValueJson = "";
 	[ProtoMember(21)] public ImmConfigSource ConfigSource;
 	[ProtoMember(22)] public bool PendingReload;
+	[ProtoMember(23)] public string AdvancedSchemaJson = "";
 }
 
 [ProtoContract]

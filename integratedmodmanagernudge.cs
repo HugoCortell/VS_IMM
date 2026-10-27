@@ -117,7 +117,11 @@ public sealed class IntegratedModManagerNudge : IRenderer
 
 	private void OnNudgeStateResponse(NudgeStateResponse packet)
 	{
-		if (ClientApi.World?.Player != null && ShouldShowNudge(packet)) { Show(packet.WarningCount, packet.ErrorCount); }
+		if (ClientApi.World?.Player == null) { return; }
+		
+		if (packet.CanManageServer && !DismissedThisSession && !packet.PreviouslyDismissed && IntegratedModManagerConfig.ShouldSuppressFirstTimeNudges && packet.WarningCount <= 0 && packet.ErrorCount <= 0) { Dismiss(); return; }
+
+		if (ShouldShowNudge(packet)) { Show(packet.WarningCount, packet.ErrorCount); }
 	}
 
 	private bool ShouldShowNudge(NudgeStateResponse packet)

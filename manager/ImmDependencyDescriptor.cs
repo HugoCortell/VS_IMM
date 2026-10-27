@@ -22,7 +22,16 @@ public enum ImmDependencyCriterionType
 	GridRecipeCount,
 	HasModID,
 	CollectibleBehavior,
-	CollectibleAttribute
+	CollectibleAttribute,
+	Backend
+}
+
+[JsonConverter(typeof(StringEnumConverter))]
+public enum ImmDependencyBackend
+{
+	Unknown,
+	Optimum,
+	Stratum
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
@@ -68,6 +77,7 @@ public sealed class ImmDependencyCriterion
 {
 	public ImmDependencyCriterionType Type;
 	public ImmDependencyCriterionTarget? Target;
+	public ImmDependencyBackend Backend;
 	public string Output = "";
 	public string Behavior = "";
 	public string Path = "";

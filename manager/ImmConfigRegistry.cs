@@ -42,7 +42,7 @@ public sealed class ImmRegisteredDescriptor
 
 public sealed class ImmConfigRegistry
 {
-	private static readonly HashSet<string> SupportedTypes = new(StringComparer.Ordinal) { "Boolean", "String", "Integer", "Decimal", "Slider", "Dropdown", "Array" };
+	private static readonly HashSet<string> SupportedTypes = new(StringComparer.Ordinal) { "Boolean", "String", "Integer", "Decimal", "Slider", "Dropdown", "Array", "Advanced" };
 	private readonly Dictionary<string, ImmConfigDescriptor> Descriptors = new(StringComparer.OrdinalIgnoreCase);
 	private readonly List<ImmRegisteredDescriptor> RegisteredDescriptorList = new();
 	private readonly List<ImmRegisteredDependency> RegisteredDependencies = new();
@@ -367,6 +367,17 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidateControlMetadata(ImmConfigEntry entry, ImmConfigSource source, string prefix)
 	{
+		if (entry.Type == "Advanced")
+		{
+			if (entry.Advanced == null) { throw new InvalidDataException($"{prefix}.Advanced is required when Type is Advanced."); }
+			if (entry.Min.HasValue || entry.Max.HasValue || entry.Step.HasValue || !string.IsNullOrWhiteSpace(entry.ElementType) || entry.Options.Count > 0) { throw new InvalidDataException($"{prefix} Advanced settings must declare control metadata inside Advanced, not on the top-level setting."); }
+
+			ImmAdvancedSchemaValidator.Validate(entry.Advanced, $"{prefix}.Advanced", source);
+			return;
+		}
+
+		if (entry.Advanced != null) { throw new InvalidDataException($"{prefix}.Advanced is only valid when Type is Advanced."); }
+
 		if (entry.Type == "Slider")
 		{
 			if (!entry.Min.HasValue || !entry.Max.HasValue)
@@ -587,6 +598,20 @@ public sealed class ImmConfigRegistry
 				if (criterion.Operator != ImmDependencyOperator.Equal)
 				{
 					throw new InvalidDataException($"{prefix}.Operator must be Equal for HasModID.");
+				}
+			break;
+
+			case ImmDependencyCriterionType.Backend:
+				ValidatePresenceOperator(criterion.Operator, $"{prefix}.Operator");
+
+				if (criterion.Backend == ImmDependencyBackend.Unknown || !Enum.IsDefined(typeof(ImmDependencyBackend), criterion.Backend))
+				{
+					throw new InvalidDataException($"{prefix}.Backend must be Optimum or Stratum.");
+				}
+
+				if (criterion.Target != null || !string.IsNullOrWhiteSpace(criterion.Output) || !string.IsNullOrWhiteSpace(criterion.Behavior) || !string.IsNullOrWhiteSpace(criterion.Path) || criterion.Value != null)
+				{
+					throw new InvalidDataException($"{prefix} Backend criteria may only declare Backend and Operator.");
 				}
 			break;
 

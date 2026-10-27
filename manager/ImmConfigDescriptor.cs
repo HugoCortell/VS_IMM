@@ -64,6 +64,9 @@ public sealed class ImmConfigEntry
 	public double? Step;
 	public string ElementType = "";
 
+	// Only used when Type == "Advanced". Existing controls ignore this entirely.
+	public ImmAdvancedSchema? Advanced;
+
 	public List<ImmConfigOption> Options = new();
 }
 

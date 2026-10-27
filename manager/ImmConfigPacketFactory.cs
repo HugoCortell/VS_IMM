@@ -9,6 +9,11 @@ namespace IntegratedModManager.Config;
 
 public static class ImmConfigPacketFactory
 {
+	private static readonly JsonSerializerSettings AdvancedSchemaSerializerSettings = new()
+	{
+		NullValueHandling = NullValueHandling.Ignore
+	};
+
 	public static bool HasConfigurationForSide(ImmConfigDescriptor descriptor, ImmConfigSide side)
 	{
 		return descriptor.Configuration.Any(block => block.Settings.Any(entry => (entry.ConfigSide ?? block.ConfigSide) == side));
@@ -50,6 +55,7 @@ public static class ImmConfigPacketFactory
 			HasStep = entry.Step.HasValue,
 			Step = entry.Step ?? 0,
 			ElementType = entry.ElementType ?? "",
+			AdvancedSchemaJson = entry.Type == "Advanced" && entry.Advanced != null ? JsonConvert.SerializeObject(entry.Advanced, Formatting.None, AdvancedSchemaSerializerSettings) : "",
 			Options = entry.Options?.Select(option => new ImmConfigOptionPacket{ Label = option.Label, ValueJson = option.Value?.ToString(Formatting.None) ?? "null"}).ToArray() ?? Array.Empty<ImmConfigOptionPacket>()
 		};
 	}

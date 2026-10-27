@@ -42,16 +42,20 @@ public sealed class IntegratedModManagerConfig
 	private static IntegratedModManagerConfig Current = new();
 
 	public bool ShowNonConfigurableMods = false;
+	public bool ShowFileLocationButtons = false;
 	public int ModSelectorRows = 3;
 	public ImmNudgeBehaviour NudgeBehaviour = ImmNudgeBehaviour.WhenErrorsFound;
+	public bool SuppressFirstTimeNudges = false;
 	public ImmImportantInformationHighlight ImportantInformationHighlight = ImmImportantInformationHighlight.Pulsating;
 	public ImmUpdateManagementMode UpdateManagement = ImmUpdateManagementMode.Manual;
 
 	public static bool ShouldShowNonConfigurableMods => Current.ShowNonConfigurableMods;
+	public static bool ShouldShowFileLocationButtons => Current.ShowFileLocationButtons;
 
 	public static int SelectorRows => Math.Clamp(Current.ModSelectorRows, 1, 6);
 
 	public static ImmNudgeBehaviour ConfiguredNudgeBehaviour => Current.NudgeBehaviour;
+	public static bool ShouldSuppressFirstTimeNudges => Current.SuppressFirstTimeNudges;
 
 	public static ImmImportantInformationHighlight ConfiguredInformationHighlight => Current.ImportantInformationHighlight;
 

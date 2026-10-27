@@ -32,6 +32,8 @@ public sealed class ImmDependencyService
 	private readonly ImmConfigRegistry Registry;
 	private readonly ImmPatchSettingsStore PatchSettings;
 	private readonly ImmExternalManagerOwnership ExternalManagers;
+	private readonly bool OptimumActive;
+	private readonly bool StratumActive;
 
 	private List<ImmActiveDependency> Active = new();
 	private readonly HashSet<int> PendingRestartRuntimeIds = new();
@@ -46,6 +48,10 @@ public sealed class ImmDependencyService
 		Registry = registry;
 		PatchSettings = patchSettings;
 		ExternalManagers = externalManagers;
+
+		var runtimeAssembly = api.GetType().Assembly;
+		OptimumActive = runtimeAssembly.GetType("Optimum.OptimumInfo", throwOnError: false) != null;
+		StratumActive = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false) != null;
 	}
 
 	public ImmActiveDependency[] GetForMod(string sourceModId) { return Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase)).ToArray(); }
@@ -158,6 +164,8 @@ public sealed class ImmDependencyService
 
 			case ImmDependencyCriterionType.HasModID: return TryEvaluateHasModID(criterion, out matched, out error);
 
+			case ImmDependencyCriterionType.Backend: return TryEvaluateBackend(criterion, out matched, out error);
+
 			case ImmDependencyCriterionType.CollectibleBehavior: return TryEvaluateCollectibleBehavior(criterion, collectibles, out matched, out error);
 
 			case ImmDependencyCriterionType.CollectibleAttribute: return TryEvaluateCollectibleAttribute(criterion, collectibles, out matched, out error);
@@ -167,6 +175,20 @@ public sealed class ImmDependencyService
 				error = "Unsupported criterion type.";
 			return false;
 		}
+	}
+
+	private bool TryEvaluateBackend(ImmDependencyCriterion criterion, out bool matched, out string error)
+	{
+		bool exists = criterion.Backend switch
+		{
+			ImmDependencyBackend.Optimum => OptimumActive,
+			ImmDependencyBackend.Stratum => StratumActive,
+			_ => false
+		};
+
+		matched = criterion.Operator == ImmDependencyOperator.Exists ? exists : !exists;
+		error = "";
+		return true;
 	}
 
 	private bool TryEvaluateCollectibleBehavior(ImmDependencyCriterion criterion, Dictionary<string, CollectibleObject?> collectibles, out bool matched, out string error)

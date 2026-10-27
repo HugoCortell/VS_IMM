@@ -178,9 +178,11 @@ public sealed class ImmConfigService
 			if (location.Block.ConfigSource == ImmConfigSource.PatchSettings)
 			{
 				if (location.Entry.Default == null) { return ApplyError(request.ModId, $"{location.Control.Label}: PatchSetting has no Default."); }
-				if (!ImmConfigValueValidator.TryNormalizeValue(location.Control, location.Entry.Default, submitted, out JToken normalized, out string validationError)) { return ApplyError(request.ModId, $"{location.Control.Label}: {validationError}"); }
 
 				JToken current = PatchSettings.GetEffectiveValue(request.ModId, location.Entry, ImmConfigSide.Server, patchSettingsDocument);
+				JToken validationTarget = location.Control.Type == "Advanced" ? current : location.Entry.Default;
+
+				if (!ImmConfigValueValidator.TryNormalizeValue(location.Control, validationTarget, submitted, out JToken normalized, out string validationError)) { return ApplyError(request.ModId, $"{location.Control.Label}: {validationError}"); }
 				if (!JToken.DeepEquals(current, normalized)) { preparedPatchChanges.Add(new PreparedPatchSettingChange(location.Entry, ImmConfigSide.Server, normalized)); }
 
 				continue;

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Cairo;
 using IntegratedModManager.Config;
@@ -13,6 +14,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 
 namespace IntegratedModManager.ModSelector;
 
@@ -28,6 +30,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	private const double ButtonWidth = 150;
 	private const double ButtonHeight = 32;
 	private const double ButtonGap = 16;
+	private const double CompactButtonGap = 8;
 	private const double BottomPadding = 18;
 	private const double TabsHeight = 28;
 
@@ -62,6 +65,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	private readonly GuiDialogNotification Notification;
 	private readonly GuiDialogDependencyIssue DependencyIssueDialog;
 	private readonly GuiDialogArrayEditor ArrayEditorDialog;
+	private readonly GuiDialogAdvancedEditor AdvancedEditorDialog;
 	private readonly Dictionary<int, string> PendingChanges = new();
 	private readonly Dictionary<int, string> OriginalValues = new();
 	private readonly HashSet<int> InvalidInputs = new();
@@ -89,6 +93,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	private ImmReloadRequirement ClientReloadRequirementDuringApply = ImmReloadRequirement.None;
 	private bool RefreshingAfterResolution;
 	private bool RefreshingAfterApply;
+	private bool FileActionsExpanded;
 	private string StatusMessage = "";
 	private int ActiveTab;
 	private int ResolvingDependencyId = -1;
@@ -116,6 +121,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		DependencyIssueDialog = new GuiDialogDependencyIssue(capi);
 
 		ArrayEditorDialog = new GuiDialogArrayEditor(capi);
+		AdvancedEditorDialog = new GuiDialogAdvancedEditor(capi);
 
 		ConfigClient.PageReceived += OnPageReceived;
 		ConfigClient.ApplyReceived += OnApplyReceived;
@@ -224,6 +230,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		ClientReloadRequirementDuringApply = ImmReloadRequirement.None;
 		RefreshingAfterResolution = false;
 		RefreshingAfterApply = false;
+		FileActionsExpanded = false;
 		StatusMessage = "";
 		ActiveTab = 0;
 		ResolvingDependencyId = -1;
@@ -462,26 +469,42 @@ public sealed class GuiDialogModManager : GuiDialog
 		ElementBounds titleBounds = ElementBounds.Fixed(PanelPadding, 14, width - PanelPadding * 2, 28);
 		ElementBounds tabsBounds = ElementBounds.Fixed(PanelPadding, 46, width - PanelPadding * 2, TabsHeight);
 
-		double buttonsY = height - BottomPadding - ButtonHeight;
-
-		double statusY = buttonsY - 28;
-		double contentY = 82;
-		double contentBottom = statusY - 10;
-
 		bool canManageServer = Page?.CanManageServer == true;
 		bool configurationExternallyManaged = Page?.Success == true && Page.ConfigurationExternallyManaged;
 
 		if (!canManageServer) { ActiveTab = 0; }
 
 		bool showingDependencies = canManageServer && ActiveTab == 1;
+		ImmConfigBlockPacket[] blocks = GetBlocks();
+		ImmDependencyPacket[] dependencyIssues = GetDependencies();
+
+		bool showFileActions = IntegratedModManagerConfig.ShouldShowFileLocationButtons
+			&& Page?.Success == true
+			&& !showingDependencies
+			&& !configurationExternallyManaged
+			&& (capi.IsSinglePlayer || canManageServer);
+
+		bool showOpenConfig = showFileActions && blocks.Any(block => block.ConfigSource == ImmConfigSource.ModConfig);
+		bool showOpenPatchSettings = showFileActions && blocks.Any(block => block.ConfigSource == ImmConfigSource.PatchSettings);
+		bool showApplyButton = !showingDependencies && !configurationExternallyManaged;
+
+		bool hasFileActions = showOpenConfig || showOpenPatchSettings;
+		bool hasBothFileActions = showOpenConfig && showOpenPatchSettings;
+		bool showOpenMenu = hasBothFileActions && !FileActionsExpanded;
+		bool showSplitFileActions = hasBothFileActions && FileActionsExpanded;
+		int footerSlotCount = (hasFileActions ? 1 : 0) + (showApplyButton ? 1 : 0) + 1;
+		double availableFooterWidth = width - PanelPadding * 2;
+
+		double buttonsY = height - BottomPadding - ButtonHeight;
+		double statusY = buttonsY - 28;
+		double contentY = 82;
+		double contentBottom = statusY - 10;
+
 		bool showSearch = Page?.Success == true && !showingDependencies && !configurationExternallyManaged;
 		double listY = contentY + (showSearch ? SearchHeight + SearchGap : 0);
 		double contentPanelHeight = Math.Max(100, contentBottom - contentY);
 		double visibleHeight = Math.Max(100, contentBottom - listY);
 		string searchQuery = SearchText.Trim();
-
-		ImmConfigBlockPacket[] blocks = GetBlocks();
-		ImmDependencyPacket[] dependencyIssues = GetDependencies();
 
 		double availableContentWidth = width - PanelPadding * 2;
 
@@ -523,13 +546,52 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		ElementBounds scrollbarBounds = ElementBounds.Fixed(PanelPadding + contentWidth + ScrollbarGap, listY, ScrollbarWidth, visibleHeight).WithFixedPadding(2);
 
-		bool showApplyButton = !showingDependencies && !configurationExternallyManaged;
-		double buttonsWidth = showApplyButton ? ButtonWidth * 2 + ButtonGap : ButtonWidth;
+		ElementBounds? openMenuBounds = null;
+		ElementBounds? openConfigBounds = null;
+		ElementBounds? openPatchSettingsBounds = null;
+		ElementBounds applyBounds;
+		ElementBounds closeBounds;
 
-		double buttonsX = (width - buttonsWidth) / 2;
+		if (!hasFileActions)
+		{
+			double buttonsWidth = showApplyButton ? ButtonWidth * 2 + ButtonGap : ButtonWidth;
+			double buttonsX = (width - buttonsWidth) / 2;
 
-		ElementBounds applyBounds = ElementBounds.Fixed(buttonsX, buttonsY, ButtonWidth, ButtonHeight);
-		ElementBounds closeBounds = ElementBounds.Fixed(showApplyButton ? buttonsX + ButtonWidth + ButtonGap : buttonsX, buttonsY, ButtonWidth, ButtonHeight);
+			applyBounds = ElementBounds.Fixed(buttonsX, buttonsY, ButtonWidth, ButtonHeight);
+			closeBounds = ElementBounds.Fixed(showApplyButton ? buttonsX + ButtonWidth + ButtonGap : buttonsX, buttonsY, ButtonWidth, ButtonHeight);
+		}
+		else
+		{
+			double slotWidth = Math.Min(ButtonWidth, (availableFooterWidth - Math.Max(0, footerSlotCount - 1) * CompactButtonGap) / footerSlotCount);
+			double groupWidth = footerSlotCount * slotWidth + Math.Max(0, footerSlotCount - 1) * CompactButtonGap;
+			double x = (width - groupWidth) / 2;
+
+			if (showOpenMenu)
+			{
+				openMenuBounds = ElementBounds.Fixed(x, buttonsY, slotWidth, ButtonHeight);
+			}
+			else if (showSplitFileActions)
+			{
+				double splitWidth = Math.Max(1, (slotWidth - CompactButtonGap) / 2);
+				openConfigBounds = ElementBounds.Fixed(x, buttonsY, splitWidth, ButtonHeight);
+				openPatchSettingsBounds = ElementBounds.Fixed(x + splitWidth + CompactButtonGap, buttonsY, splitWidth, ButtonHeight);
+			}
+			else if (showOpenConfig)
+			{
+				openConfigBounds = ElementBounds.Fixed(x, buttonsY, slotWidth, ButtonHeight);
+			}
+			else
+			{
+				openPatchSettingsBounds = ElementBounds.Fixed(x, buttonsY, slotWidth, ButtonHeight);
+			}
+
+			x += slotWidth + CompactButtonGap;
+
+			applyBounds = ElementBounds.Fixed(x, buttonsY, slotWidth, ButtonHeight);
+			if (showApplyButton) { x += slotWidth + CompactButtonGap; }
+			closeBounds = ElementBounds.Fixed(x, buttonsY, slotWidth, ButtonHeight);
+		}
+
 		ElementBounds statusBounds = ElementBounds.Fixed(PanelPadding, statusY, width - PanelPadding * 2, 20);
 
 		SingleComposer?.Dispose();
@@ -603,6 +665,9 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		composer.AddStaticText(StatusMessage, CairoFont.WhiteDetailText(), statusBounds);
 
+		if (openMenuBounds != null) { composer.AddSmallButton(ImmLocalization.Get("button-open-file-actions"), OnExpandFileActionsClicked, openMenuBounds, key: "openfileactions"); }
+		if (showOpenConfig && openConfigBounds != null) { composer.AddSmallButton(showSplitFileActions ? ImmLocalization.Get("button-file-settings") : ImmLocalization.Get("button-open-config"), OnOpenConfigClicked, openConfigBounds, key: "openconfig"); }
+		if (showOpenPatchSettings && openPatchSettingsBounds != null) { composer.AddSmallButton(showSplitFileActions ? ImmLocalization.Get("button-file-patch") : ImmLocalization.Get("button-open-patch-settings"), OnOpenPatchSettingsClicked, openPatchSettingsBounds, key: "openpatchsettings"); }
 		if (showApplyButton) { composer.AddSmallButton(Applying ? ImmLocalization.Get("button-saving") : ImmLocalization.Get("button-apply"), OnApplyClicked, applyBounds, key: "apply"); }
 		composer.AddSmallButton(ImmLocalization.Get("button-close"), OnCloseClicked, closeBounds);
 
@@ -902,6 +967,19 @@ public sealed class GuiDialogModManager : GuiDialog
 				element = editListButton;
 			break;
 
+			case "Advanced":
+				CairoFont advancedButtonFont = CairoFont.SmallButtonText();
+				CairoFont advancedPressedFont = CairoFont.SmallButtonText();
+
+				advancedPressedFont.Color = (double[]) GuiStyle.ActiveButtonTextColor.Clone();
+
+				GuiElementTextButton editAdvancedButton = new(capi, ImmLocalization.Get("button-edit"), advancedButtonFont, advancedPressedFont, () => OnEditAdvanced(control), inputBounds, EnumButtonStyle.Normal);
+
+				editAdvancedButton.SetOrientation(advancedButtonFont.Orientation);
+
+				element = editAdvancedButton;
+			break;
+
 			default: return;
 		}
 
@@ -963,6 +1041,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	}
 
 	private bool OnEditArray(ImmConfigControlPacket control) { ArrayEditorDialog.Show(control.Label, control.ElementType, control.ValueJson, valueJson => SetPendingValue(control, valueJson)); return true; }
+	private bool OnEditAdvanced(ImmConfigControlPacket control) { AdvancedEditorDialog.Show(control.Label, control.AdvancedSchemaJson, control.ValueJson, control.ConfigSource, valueJson => SetPendingValue(control, valueJson)); return true; }
 
 	private void SetPendingBoolean(ImmConfigControlPacket control, bool value) { SetPendingValue(control, value ? "true" : "false"); }
 
@@ -1331,10 +1410,107 @@ public sealed class GuiDialogModManager : GuiDialog
 		}
 	}
 
+	private bool OnExpandFileActionsClicked()
+	{
+		if (!CanUseFileActions()) { return true; }
+
+		ImmConfigBlockPacket[] blocks = GetBlocks();
+		if (!blocks.Any(block => block.ConfigSource == ImmConfigSource.ModConfig)
+			|| !blocks.Any(block => block.ConfigSource == ImmConfigSource.PatchSettings))
+		{
+			return true;
+		}
+
+		FileActionsExpanded = true;
+		Compose();
+		return true;
+	}
+
+	private bool OnOpenConfigClicked()
+	{
+		if (!CanUseFileActions() || !GetBlocks().Any(block => block.ConfigSource == ImmConfigSource.ModConfig)) { return true; }
+
+		if (capi.IsSinglePlayer)
+		{
+			string configFolder = System.IO.Path.Combine(capi.DataBasePath, "ModConfig");
+			string[] configPaths = GetBlocks()
+				.Where(block => block.ConfigSource == ImmConfigSource.ModConfig && !string.IsNullOrWhiteSpace(block.ConfigFile))
+				.Select(block => System.IO.Path.Combine(configFolder, block.ConfigFile))
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+				.ToArray();
+
+			if (OpenLocalFolder(configFolder)) { ShowOpenedFileLocations(configPaths); }
+			return true;
+		}
+
+		string[] locations = GetBlocks()
+			.Where(block => block.ConfigSource == ImmConfigSource.ModConfig && !string.IsNullOrWhiteSpace(block.ConfigFile))
+			.Select(block => "ModConfig/" + block.ConfigFile.Replace('\\', '/').TrimStart('/'))
+			.Distinct(StringComparer.OrdinalIgnoreCase)
+			.OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+			.ToArray();
+
+		string locationText = locations.Length > 0 ? string.Join("\n", locations) : "ModConfig/";
+		Notification.Show(ImmLocalization.Get("file-location-title"), ImmLocalization.Get("file-location-remote-config", locationText), ImmLocalization.Get("button-close"));
+		return true;
+	}
+
+	private bool OnOpenPatchSettingsClicked()
+	{
+		if (!CanUseFileActions() || !GetBlocks().Any(block => block.ConfigSource == ImmConfigSource.PatchSettings)) { return true; }
+
+		if (capi.IsSinglePlayer)
+		{
+			string patchSettingsFolder = System.IO.Path.Combine(capi.DataBasePath, "moddata", IntegratedModManager.IntegratedModManagerSystem.ModId, "patchsettings");
+			string patchSettingsPath = System.IO.Path.Combine(patchSettingsFolder, $"{SelectedModId}.json");
+
+			if (OpenLocalFolder(patchSettingsFolder)) { ShowOpenedFileLocations(new[] { patchSettingsPath }); }
+			return true;
+		}
+
+		string relativePath = $"moddata/{IntegratedModManager.IntegratedModManagerSystem.ModId}/patchsettings/{SelectedModId}.json";
+		Notification.Show(ImmLocalization.Get("file-location-title"), ImmLocalization.Get("file-location-remote-patchsettings", relativePath), ImmLocalization.Get("button-close"));
+		return true;
+	}
+
+	private bool CanUseFileActions()
+	{
+		return IntegratedModManagerConfig.ShouldShowFileLocationButtons
+			&& ActiveTab == 0
+			&& Page?.Success == true
+			&& !Page.ConfigurationExternallyManaged
+			&& (capi.IsSinglePlayer || Page.CanManageServer);
+	}
+
+	private bool OpenLocalFolder(string path)
+	{
+		try
+		{
+			Directory.CreateDirectory(path);
+			NetUtil.OpenUrlInBrowser(path);
+			return true;
+		}
+		catch
+		{
+			Notification.Show(ImmLocalization.Get("file-location-title"), ImmLocalization.Get("file-location-open-failed", path), ImmLocalization.Get("button-close"));
+			return false;
+		}
+	}
+
+	private void ShowOpenedFileLocations(string[] paths)
+	{
+		if (paths.Length == 0) { return; }
+
+		string locationText = string.Join("\n", paths);
+		capi.ShowChatMessage(ImmLocalization.Get("chat-opening-file-location", locationText));
+	}
+
 	private bool OnCloseClicked()
 	{
 		DependencyIssueDialog.TryClose();
 		ArrayEditorDialog.TryClose();
+		AdvancedEditorDialog.TryClose();
 		TryClose();
 		return true;
 	}
@@ -1344,6 +1520,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		CancelPendingSearch();
 		DependencyIssueDialog.TryClose();
 		ArrayEditorDialog.TryClose();
+		AdvancedEditorDialog.TryClose();
 		base.OnGuiClosed();
 	}
 
@@ -1357,6 +1534,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		DependencyIssueDialog.Dispose();
 		ArrayEditorDialog.Dispose();
+		AdvancedEditorDialog.Dispose();
 
 		DependencyTabFillTexture?.Dispose();
 		DependencyTabFillTexture = null;
