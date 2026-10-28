@@ -1,4 +1,3 @@
-#nullable enable
 
 using IntegratedModManager.Config;
 using IntegratedModManager.ModSelector;
