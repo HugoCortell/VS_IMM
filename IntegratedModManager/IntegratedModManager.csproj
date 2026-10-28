@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ModID>integratedmodmanager</ModID>
+		<TargetFramework>net10.0</TargetFramework>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<OutputPath>bin\$(Configuration)\Mods\$(ModID)</OutputPath>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<VintageStoryLibs Include="$(VINTAGE_STORY)\**\*.dll" />
+
+		<Reference Include="@(VintageStoryLibs)">
+			<HintPath>%(Identity)</HintPath>
+			<Private>false</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="assets\**">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+
+		<Content Include="modinfo.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="modicon.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	 <!--Package mod after release build-->
+	<Target Name="ZipMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<PropertyGroup>
+			<ModOutputDir>$(OutputPath)</ModOutputDir>
+			<ReleaseDir>$(SolutionDir)Releases</ReleaseDir>
+
+			<ZipFile>$(ReleaseDir)\$(ModID).zip</ZipFile>
+		</PropertyGroup>
+
+		<Error Condition="!Exists('$(ModOutputDir)')" Text="Mod output directory not found: $(ModOutputDir)" />
+		<MakeDir Directories="$(ReleaseDir)" />
+		<Delete Files="$(ZipFile)" Condition="Exists('$(ZipFile)')" />
+
+		<ZipDirectory SourceDirectory="$(ModOutputDir)" DestinationFile="$(ZipFile)" />
+	</Target>
+
+</Project>

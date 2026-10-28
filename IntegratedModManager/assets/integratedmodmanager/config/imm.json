@@ -1,0 +1,93 @@
+{
+	"Configuration": [
+		{
+			"ConfigFile": "integratedmodmanager/integratedmodmanager.json",
+			"ConfigLabel": "integratedmodmanager:title",
+			"ConfigSide": "Client",
+
+			"Settings": [
+				{
+					"Type": "Boolean",
+					"Label": "integratedmodmanager:config-show-nonconfigurable-mods",
+					"Map": "ShowNonConfigurableMods",
+				},
+				{
+					"Type": "Dropdown",
+					"Label": "integratedmodmanager:config-nudge-behaviour",
+					"Map": "NudgeBehaviour",
+					"Options": [
+						{
+							"Label": "integratedmodmanager:config-nudge-first-time",
+							"Value": "FirstTime",
+						},
+						{
+							"Label": "integratedmodmanager:config-nudge-when-errors",
+							"Value": "WhenErrorsFound",
+						},
+						{
+							"Label": "integratedmodmanager:config-nudge-warnings-or-errors",
+							"Value": "WarningsOrErrors",
+						},
+					],
+				},
+				{
+					"Type": "Boolean",
+					"Label": "integratedmodmanager:config-suppress-first-time-nudges",
+					"Map": "SuppressFirstTimeNudges",
+				},
+				{
+					"Type": "Slider",
+					"Label": "integratedmodmanager:config-selector-rows",
+					"Map": "ModSelectorRows",
+					"Min": 1,
+					"Max": 6,
+					"Step": 1,
+				},
+				{
+					"Type": "Dropdown",
+					"Label": "integratedmodmanager:config-important-highlight",
+					"Map": "ImportantInformationHighlight",
+					"Options": [
+						{
+							"Label": "integratedmodmanager:config-highlight-pulsating",
+							"Value": "Pulsating",
+						},
+						{
+							"Label": "integratedmodmanager:config-highlight-flat",
+							"Value": "Flat",
+						},
+						{
+							"Label": "integratedmodmanager:config-highlight-disabled",
+							"Value": "Disabled",
+						},
+					],
+				},
+				{
+					"Type": "Dropdown",
+					"Label": "integratedmodmanager:config-update-management",
+					"Map": "UpdateManagement",
+					"ConfigSide": "Server",
+					"Options": [
+						{
+							"Label": "integratedmodmanager:config-update-manual",
+							"Value": "Manual",
+						},
+						{
+							"Label": "integratedmodmanager:config-update-automatic-check",
+							"Value": "AutomaticCheck",
+						},
+						{
+							"Label": "integratedmodmanager:config-update-automatic-update",
+							"Value": "AutomaticUpdate",
+						},
+					],
+				},
+				{
+					"Type": "Boolean",
+					"Label": "integratedmodmanager:config-show-file-location-buttons",
+					"Map": "ShowFileLocationButtons",
+				},
+			],
+		},
+	],
+}
