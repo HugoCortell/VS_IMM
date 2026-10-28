@@ -282,7 +282,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 		ScrollValue = value;
 		OnScrollbarChanged(ScrollValue);
 		GuiElementScrollbar? scrollbar = SingleComposer?.GetScrollbar("updatescroll");
-		if (scrollbar != null) { scrollbar.CurrentYPosition = ScrollValue; }
+		scrollbar?.CurrentYPosition = ScrollValue;
 	}
 
 	public override void Dispose()
@@ -547,7 +547,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 		ScrollValue = value;
 		OnScrollbarChanged(ScrollValue);
 		GuiElementScrollbar? scrollbar = SingleComposer?.GetScrollbar("changelogscroll");
-		if (scrollbar != null) { scrollbar.CurrentYPosition = ScrollValue; }
+		scrollbar?.CurrentYPosition = ScrollValue;
 	}
 
 	public override void Dispose()

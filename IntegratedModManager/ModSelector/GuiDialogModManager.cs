@@ -1219,7 +1219,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		GuiElementTextButton? applyButton = SingleComposer?.GetButton("apply");
 
-		if (applyButton != null) { applyButton.Enabled = Page?.Success == true && !Applying && InvalidInputs.Count == 0 && PendingChanges.Count > 0; }
+		applyButton?.Enabled = Page?.Success == true && !Applying && InvalidInputs.Count == 0 && PendingChanges.Count > 0;
 	}
 
 	private void OnScrollbarChanged(float value)
