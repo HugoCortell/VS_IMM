@@ -149,7 +149,7 @@ public static class ImmAdvancedValueValidator
 		}
 	}
 
-    public static ImmConfigControlPacket CreateLeafControl(ImmAdvancedSchema schema, ImmConfigSource source) => new ImmConfigControlPacket
+    public static ImmConfigControlPacket CreateLeafControl(ImmAdvancedSchema schema, ImmConfigSource source) => new()
     {
         Type = schema.Type,
         ConfigSource = source,

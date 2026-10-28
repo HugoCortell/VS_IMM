@@ -1181,7 +1181,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		return true;
 	}
 
-    private static ImmConfigChangePacket ToChangePacket(KeyValuePair<int, string> change) => new ImmConfigChangePacket { Index = change.Key, ValueJson = change.Value };
+    private static ImmConfigChangePacket ToChangePacket(KeyValuePair<int, string> change) => new() { Index = change.Key, ValueJson = change.Value };
 
     private void RemovePendingChanges(IReadOnlyDictionary<int, string> changes)
 	{

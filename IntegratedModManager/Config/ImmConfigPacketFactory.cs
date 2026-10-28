@@ -11,7 +11,7 @@ public static class ImmConfigPacketFactory
 
     public static bool HasConfigurationForSide(ImmConfigDescriptor descriptor, ImmConfigSide side) => descriptor.Configuration.Any(block => block.Settings.Any(entry => (entry.ConfigSide ?? block.ConfigSide) == side));
 
-    public static ImmConfigBlockPacket CreateBlockPacket(int blockIndex, ImmConfigBlock block, ImmConfigControlPacket[] controls) => new ImmConfigBlockPacket
+    public static ImmConfigBlockPacket CreateBlockPacket(int blockIndex, ImmConfigBlock block, ImmConfigControlPacket[] controls) => new()
     {
         Index = blockIndex,
         ConfigFile = block.ConfigFile,
@@ -23,7 +23,7 @@ public static class ImmConfigPacketFactory
         Controls = controls
     };
 
-    public static ImmConfigControlPacket CreateControlPacket(int globalIndex, int blockIndex, ImmConfigBlock block, ImmConfigEntry entry, ImmConfigSide effectiveSide) => new ImmConfigControlPacket
+    public static ImmConfigControlPacket CreateControlPacket(int globalIndex, int blockIndex, ImmConfigBlock block, ImmConfigEntry entry, ImmConfigSide effectiveSide) => new()
     {
         Index = globalIndex,
         BlockIndex = blockIndex,

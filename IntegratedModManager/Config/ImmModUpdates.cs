@@ -442,7 +442,7 @@ public sealed class ImmModUpdateService : IDisposable
 		}
 	}
 
-    private ImmModUpdateSummaryResponse CreateSummary() => new ImmModUpdateSummaryResponse
+    private ImmModUpdateSummaryResponse CreateSummary() => new()
     {
         Success = true,
         Error = CheckError,
@@ -453,7 +453,7 @@ public sealed class ImmModUpdateService : IDisposable
         RetractedCount = Entries.Values.Count(entry => entry.Retracted)
     };
 
-    private ImmModUpdateCatalogResponse CreateCatalog() => new ImmModUpdateCatalogResponse
+    private ImmModUpdateCatalogResponse CreateCatalog() => new()
     {
         Success = true,
         Error = CheckError,
@@ -573,7 +573,7 @@ public sealed class ImmModUpdateService : IDisposable
 
     private static string EntryKey(string modId, string targetVersion) => modId + "@" + targetVersion;
 
-    private static ImmModUpdateInstallResponse CreateInstallResponse(ImmModUpdateEntry entry, bool success, string error) => new ImmModUpdateInstallResponse
+    private static ImmModUpdateInstallResponse CreateInstallResponse(ImmModUpdateEntry entry, bool success, string error) => new()
     {
         Success = success,
         Error = error,

@@ -235,9 +235,9 @@ public sealed class GuiElementModGrid : GuiElement
 
 	private LoadedTexture CreateMissingIconTexture(int size)
 	{
-		using ImageSurface surface = new ImageSurface(Format.Argb32, size, size);
+		using ImageSurface surface = new(Format.Argb32, size, size);
 
-		using Context ctx = new Context(surface);
+		using Context ctx = new(surface);
 
 		ctx.SetSourceRGBA(0.13, 0.11, 0.09, 0.95);
 		ctx.Paint();
@@ -247,7 +247,7 @@ public sealed class GuiElementModGrid : GuiElement
 		ctx.Rectangle(1, 1, Math.Max(1, size - 2), Math.Max(1, size - 2));
 		ctx.Stroke();
 
-		LoadedTexture texture = new LoadedTexture(api);
+		LoadedTexture texture = new(api);
 
 		try { api.Gui.LoadOrUpdateCairoTexture(surface, true, ref texture); return texture; }
 		catch

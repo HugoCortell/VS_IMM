@@ -384,8 +384,8 @@ public sealed class ImmConfigService
 		return parent.TryGetValue(descriptionName, StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 	}
 
-    private static ImmConfigPageResponse PageError(string modId, string error) => new ImmConfigPageResponse { ModId = modId, Error = error };
-    private static ImmConfigApplyResponse ApplyError(string modId, string error) => new ImmConfigApplyResponse { ModId = modId, Error = error };
+    private static ImmConfigPageResponse PageError(string modId, string error) => new() { ModId = modId, Error = error };
+    private static ImmConfigApplyResponse ApplyError(string modId, string error) => new() { ModId = modId, Error = error };
     private sealed record ServerControlLocation(ImmConfigBlock Block, ImmConfigEntry Entry, ImmConfigControlPacket Control);
 	private sealed record PreparedServerChange(JToken Target, JToken Value);
 	private sealed record PreparedPatchSettingChange(ImmConfigEntry Entry, ImmConfigSide Side, JToken Value);
