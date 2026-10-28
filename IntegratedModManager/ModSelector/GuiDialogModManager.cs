@@ -597,7 +597,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		string configurationTabText = ImmLocalization.Get("tab-configuration");
 		string dependenciesTabText = ImmLocalization.Get("tab-dependencies");
 
-		GuiTab[] managerTabDefinitions = canManageServer ? new[] { new GuiTab { Name = configurationTabText, DataInt = 0 }, new GuiTab { Name = dependenciesTabText, DataInt = 1 } } : new[] { new GuiTab { Name = configurationTabText, DataInt = 0 } };
+		GuiTab[] managerTabDefinitions = canManageServer ? [new GuiTab { Name = configurationTabText, DataInt = 0 }, new GuiTab { Name = dependenciesTabText, DataInt = 1 }] : [new GuiTab { Name = configurationTabText, DataInt = 0 }];
 
 		GuiComposer composer = capi.Gui.CreateCompo("integratedmodmanager-modmanager", dialogBounds).AddShadedDialogBG(ElementBounds.Fill, withTitleBar: false).AddStaticText(titleText, titleFont, titleBounds).AddHorizontalTabs(managerTabDefinitions, tabsBounds, OnManagerTabClicked, tabFont, selectedTabFont, "managertabs").AddInset(contentPanelBounds, depth: 4, brightness: 0.85f);
 
@@ -697,7 +697,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		if (canManageServer && DependencyTabDiagnosticLevel != ImmDiagnosticLevel.None && ImmDiagnosticPulse.IsHighlightEnabled(HighlightMode) && !DependencyTabPulseVisible)
 		{
-			double[] alarmColor = DependencyTabDiagnosticLevel == ImmDiagnosticLevel.Error ? new double[] { 1.0, 0.45, 0.40, 1.0 } : new double[] { 1.0, 0.78, 0.28, 1.0 };
+			double[] alarmColor = DependencyTabDiagnosticLevel == ImmDiagnosticLevel.Error ? [1.0, 0.45, 0.40, 1.0] : [1.0, 0.78, 0.28, 1.0];
 
 			managerTabs.WithAlarmTabs(CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold).WithColor(alarmColor));
 
@@ -1458,7 +1458,7 @@ public sealed class GuiDialogModManager : GuiDialog
 			string patchSettingsFolder = System.IO.Path.Combine(capi.DataBasePath, "moddata", IntegratedModManager.IntegratedModManagerSystem.ModId, "patchsettings");
 			string patchSettingsPath = System.IO.Path.Combine(patchSettingsFolder, $"{SelectedModId}.json");
 
-			if (OpenLocalFolder(patchSettingsFolder)) { ShowOpenedFileLocations(new[] { patchSettingsPath }); }
+			if (OpenLocalFolder(patchSettingsFolder)) { ShowOpenedFileLocations([patchSettingsPath]); }
 			return true;
 		}
 

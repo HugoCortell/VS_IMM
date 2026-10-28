@@ -21,7 +21,7 @@ public sealed class ImmExternalManagerOwnership
 		Claims.Clear();
 		ActiveManagers.Clear();
 
-		IImmExternalManagerDetector[] detectors = { new ImmConfigLibOwnershipDetector(), new ImmConfigKitOwnershipDetector() };
+		IImmExternalManagerDetector[] detectors = [new ImmConfigLibOwnershipDetector(), new ImmConfigKitOwnershipDetector()];
 
 		foreach (IImmExternalManagerDetector detector in detectors)
 		{

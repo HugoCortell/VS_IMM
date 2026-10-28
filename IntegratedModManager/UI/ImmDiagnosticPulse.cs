@@ -34,7 +34,7 @@ public static class ImmDiagnosticPulse
 
 		const double tint = 0.42;
 
-		return new double[] { baseColor[0] * (1 - tint) + targetRed * tint, baseColor[1] * (1 - tint) + targetGreen * tint, baseColor[2] * (1 - tint) + targetBlue * tint, baseColor[3] };
+		return [baseColor[0] * (1 - tint) + targetRed * tint, baseColor[1] * (1 - tint) + targetGreen * tint, baseColor[2] * (1 - tint) + targetBlue * tint, baseColor[3]];
 	}
 
     public static Vec4f SetNeutralCardColor(bool hovered, Vec4f color) => SetColor(color, 205, 205, 205, hovered ? 52 : 30);

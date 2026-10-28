@@ -415,7 +415,7 @@ public sealed class ImmModUpdateService : IDisposable
 			return;
 		}
 
-		Caller caller = new() { Type = EnumCallerType.Console, CallerPrivileges = new[] { Privilege.controlserver } };
+		Caller caller = new() { Type = EnumCallerType.Console, CallerPrivileges = [Privilege.controlserver] };
 		TextCommandCallingArgs args = new() { Caller = caller, LanguageCode = "en" };
 		string command = $"/moddb install {entry.ModId}@{entry.TargetVersion} {GameVersion.ShortGameVersion}";
 

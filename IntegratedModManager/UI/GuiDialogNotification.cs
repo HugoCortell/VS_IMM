@@ -52,7 +52,7 @@ public sealed class GuiDialogNotification : GuiDialog
 		ElementBounds backgroundBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
 
 		backgroundBounds.BothSizing = ElementSizing.FitToChildren;
-		backgroundBounds.WithChildren(titleHeight > 0 ? new[] { titleBounds, textBounds, buttonBounds } : new[] { textBounds, buttonBounds });
+		backgroundBounds.WithChildren(titleHeight > 0 ? [titleBounds, textBounds, buttonBounds] : [textBounds, buttonBounds]);
 
 		SingleComposer?.Dispose();
 
