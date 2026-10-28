@@ -49,7 +49,7 @@ public sealed class ImmDependencyService
 		StratumActive = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false) != null;
 	}
 
-    public ImmActiveDependency[] GetForMod(string sourceModId) => Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase)).ToArray();
+    public ImmActiveDependency[] GetForMod(string sourceModId) => [.. Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase))];
 
     public void EvaluateAll()
 	{

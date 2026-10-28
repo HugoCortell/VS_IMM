@@ -88,12 +88,11 @@ public sealed class ImmModUpdateService : IDisposable
 	{
 		if (Disposed || Api.Server.IsDedicated || !CanManage(player)) { return; }
 
-		LocalClientSnapshots = (packet.Mods ?? Array.Empty<ImmLocalInstalledModPacket>())
+		LocalClientSnapshots = [.. (packet.Mods ?? [])
 			.Where(mod => mod != null && !string.IsNullOrWhiteSpace(mod.ModId) && !string.IsNullOrWhiteSpace(mod.Version))
 			.GroupBy(mod => mod.ModId, StringComparer.OrdinalIgnoreCase)
 			.Select(group => group.First())
-			.Select(mod => new ImmInstalledModSnapshot(mod.ModId, string.IsNullOrWhiteSpace(mod.Name) ? mod.ModId : mod.Name, mod.Version, mod.SourceType))
-			.ToList();
+			.Select(mod => new ImmInstalledModSnapshot(mod.ModId, string.IsNullOrWhiteSpace(mod.Name) ? mod.ModId : mod.Name, mod.Version, mod.SourceType))];
 
 		if (Mode == ImmUpdateManagementMode.Manual)
 		{
@@ -276,7 +275,7 @@ public sealed class ImmModUpdateService : IDisposable
 		if (full) { mods = mods.Where(mod => !IsBuiltInMod(mod.ModId)); }
 		else { mods = mods.Where(mod => string.Equals(mod.ModId, IntegratedModManagerSystem.ModId, StringComparison.OrdinalIgnoreCase)); }
 
-		return mods.ToList();
+		return [.. mods];
 	}
 
 	private async Task<ImmModUpdateEntry[]> FetchUpdatesAsync(List<ImmInstalledModSnapshot> snapshots, CancellationToken cancellationToken)
@@ -326,7 +325,7 @@ public sealed class ImmModUpdateService : IDisposable
 			await ApplyHostedInstallabilityAsync(updates, cancellationToken).ConfigureAwait(false);
 		}
 
-		return updates.ToArray();
+		return [.. updates];
 	}
 
 	private async Task ApplyHostedInstallabilityAsync(List<ImmModUpdateEntry> updates, CancellationToken cancellationToken)
@@ -460,7 +459,7 @@ public sealed class ImmModUpdateService : IDisposable
         Error = CheckError,
         State = CheckState,
         FullCacheReady = FullCacheReady,
-        Updates = Entries.Values
+        Updates = [.. Entries.Values
                 .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
                 .Select(entry => new ImmModUpdatePacket
                 {
@@ -473,8 +472,7 @@ public sealed class ImmModUpdateService : IDisposable
                     Installable = IsInstallable(entry),
                     UnavailableReason = GetUnavailableReason(entry),
                     Retracted = entry.Retracted
-                })
-                .ToArray()
+                })]
     };
 
     private bool IsInstallable(ImmModUpdateEntry entry) => entry.SourceType == EnumModSourceType.ZIP
@@ -496,7 +494,7 @@ public sealed class ImmModUpdateService : IDisposable
 		if (!response.IsSuccessStatusCode) { throw new HttpRequestException($"ModDB returned HTTP {(int)response.StatusCode}."); }
 
 		JToken root = JToken.Parse(json);
-		JObject[] objects = EnumerateObjects(root).ToArray();
+		JObject[] objects = [.. EnumerateObjects(root)];
 		JObject? versionMatch = objects.FirstOrDefault(obj => string.Equals(GetString(obj, "modidstr", "modid", "identifier"), modId, StringComparison.OrdinalIgnoreCase)
 			&& string.Equals(GetString(obj, "modversion", "version"), targetVersion, StringComparison.OrdinalIgnoreCase));
 
@@ -627,7 +625,7 @@ public sealed class ImmModUpdateClient : IDisposable
 	{
 		if (!Api.IsSinglePlayer) { return; }
 
-		ImmLocalInstalledModPacket[] mods = Api.ModLoader.Mods
+		ImmLocalInstalledModPacket[] mods = [.. Api.ModLoader.Mods
 			.Where(mod => mod.Info != null && !string.IsNullOrWhiteSpace(mod.Info.ModID) && !string.IsNullOrWhiteSpace(mod.Info.Version))
 			.GroupBy(mod => mod.Info.ModID, StringComparer.OrdinalIgnoreCase)
 			.Select(group => group.First())
@@ -637,8 +635,7 @@ public sealed class ImmModUpdateClient : IDisposable
 				Name = string.IsNullOrWhiteSpace(mod.Info.Name) ? mod.Info.ModID : mod.Info.Name,
 				Version = mod.Info.Version,
 				SourceType = mod.SourceType
-			})
-			.ToArray();
+			})];
 
 		Channel.SendPacket(new ImmModUpdateLocalInventoryPacket { Mods = mods });
 	}
@@ -693,7 +690,7 @@ public static class ImmModUpdateNetwork
 [ProtoContract]
 public sealed class ImmModUpdateLocalInventoryPacket
 {
-	[ProtoMember(1)] public ImmLocalInstalledModPacket[] Mods = Array.Empty<ImmLocalInstalledModPacket>();
+	[ProtoMember(1)] public ImmLocalInstalledModPacket[] Mods = [];
 }
 
 [ProtoContract]
@@ -735,7 +732,7 @@ public sealed class ImmModUpdateCatalogResponse
 	[ProtoMember(1)] public bool Success;
 	[ProtoMember(2)] public string Error = "";
 	[ProtoMember(3)] public ImmModUpdateCheckState State;
-	[ProtoMember(4)] public ImmModUpdatePacket[] Updates = Array.Empty<ImmModUpdatePacket>();
+	[ProtoMember(4)] public ImmModUpdatePacket[] Updates = [];
 	[ProtoMember(5)] public bool FullCacheReady;
 }
 

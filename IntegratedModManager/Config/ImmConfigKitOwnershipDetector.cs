@@ -47,7 +47,7 @@ internal sealed class ImmConfigKitOwnershipDetector : IImmExternalManagerDetecto
 			return;
 		}
 
-		string[] claimedMods = claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase).ToArray();
+		string[] claimedMods = [.. claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase)];
 
 		foreach (string modId in claimedMods) { ownership.AddClaim(ManagerId, ManagerName, modId); }
 

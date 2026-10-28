@@ -149,7 +149,7 @@ public sealed class ImmConfigClient : IDisposable
 		CanManageServer = packet.CanManageServer;
 		ServerPageModIds.Clear();
 
-		ImmServerModPacket[] serverMods = packet.Mods ?? Array.Empty<ImmServerModPacket>();
+		ImmServerModPacket[] serverMods = packet.Mods ?? [];
 
 		foreach (ImmServerModPacket mod in serverMods)
 		{
@@ -179,7 +179,7 @@ public sealed class ImmConfigClient : IDisposable
 		IEnumerable<ImmServerModPacket> visibleMods = merged.Values;
 		if (!IntegratedModManagerConfig.ShouldShowNonConfigurableMods) { visibleMods = visibleMods.Where(mod => mod.HasConfiguration || mod.WarningCount > 0 || mod.ErrorCount > 0); }
 
-		packet.Mods = visibleMods.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+		packet.Mods = [.. visibleMods.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)];
 	}
 
 	private bool TryBuildLocalClientPage(string modId, out ImmConfigPageResponse page)
@@ -194,7 +194,7 @@ public sealed class ImmConfigClient : IDisposable
 
 		if (externalManagers?.IsControlled(modId) == true)
 		{
-			page = new ImmConfigPageResponse { Success = true, CanManageServer = CanManageServer, ModId = modId, Configuration = Array.Empty<ImmConfigBlockPacket>(), Dependencies = Array.Empty<ImmDependencyPacket>(), ConfigurationExternallyManaged = true, ExternalManagerActive = externalManagers.AnyManagerActive, ExternalManagerName = externalManagers.GetPrimaryManagerName(ClientApi, modId) };
+			page = new ImmConfigPageResponse { Success = true, CanManageServer = CanManageServer, ModId = modId, Configuration = [], Dependencies = [], ConfigurationExternallyManaged = true, ExternalManagerActive = externalManagers.AnyManagerActive, ExternalManagerName = externalManagers.GetPrimaryManagerName(ClientApi, modId) };
 			return true;
 		}
 
@@ -220,33 +220,33 @@ public sealed class ImmConfigClient : IDisposable
 
 			if (controls.Count == 0) { continue; }
 
-			blocks.Add(ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, controls.ToArray()));
+			blocks.Add(ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, [.. controls]));
 		}
 
 		if (blocks.Count == 0) { return false; }
-		page = new ImmConfigPageResponse { Success = true, CanManageServer = CanManageServer, ModId = modId, Configuration = blocks.ToArray(), Dependencies = Array.Empty<ImmDependencyPacket>(), ExternalManagerActive = PatchCoordinator?.ExternalManagers.AnyManagerActive == true };
+		page = new ImmConfigPageResponse { Success = true, CanManageServer = CanManageServer, ModId = modId, Configuration = [.. blocks], Dependencies = [], ExternalManagerActive = PatchCoordinator?.ExternalManagers.AnyManagerActive == true };
 
 		return true;
 	}
 
 	private void MergeLocalClientConfiguration(ImmConfigPageResponse page)
 	{
-		if (page.ConfigurationExternallyManaged) { page.Configuration = Array.Empty<ImmConfigBlockPacket>(); return; }
+		if (page.ConfigurationExternallyManaged) { page.Configuration = []; return; }
 
 		ImmConfigRegistry? registry = PatchCoordinator?.Registry;
 
 		if (registry == null || !registry.TryGet(page.ModId, out ImmConfigDescriptor descriptor)) { return; }
 
-		List<ImmConfigBlockPacket> blocks = (page.Configuration ?? Array.Empty<ImmConfigBlockPacket>()).Where(block => block != null).ToList();
+		List<ImmConfigBlockPacket> blocks = [.. (page.Configuration ?? []).Where(block => block != null)];
 
-		int nextControlIndex = blocks.SelectMany(block => block.Controls ?? Array.Empty<ImmConfigControlPacket>()).Select(control => control.Index).DefaultIfEmpty(-1).Max() + 1;
+		int nextControlIndex = blocks.SelectMany(block => block.Controls ?? []).Select(control => control.Index).DefaultIfEmpty(-1).Max() + 1;
 		int nextBlockIndex = blocks.Select(block => block.Index).DefaultIfEmpty(-1).Max() + 1;
 
 		for (int blockIndex = 0; blockIndex < descriptor.Configuration.Count; blockIndex++)
 		{
 			ImmConfigBlock localBlock = descriptor.Configuration[blockIndex];
 
-			List<ImmConfigEntry> missingEntries = localBlock.Settings.Where(entry => (entry.ConfigSide ?? localBlock.ConfigSide) == ImmConfigSide.Client && !ContainsClientControl(blocks, localBlock, entry)).ToList();
+			List<ImmConfigEntry> missingEntries = [.. localBlock.Settings.Where(entry => (entry.ConfigSide ?? localBlock.ConfigSide) == ImmConfigSide.Client && !ContainsClientControl(blocks, localBlock, entry))];
 
 			if (missingEntries.Count == 0) { continue; }
 
@@ -254,19 +254,19 @@ public sealed class ImmConfigClient : IDisposable
 
 			if (targetBlock == null)
 			{
-				targetBlock = ImmConfigPacketFactory.CreateBlockPacket(nextBlockIndex++, localBlock, Array.Empty<ImmConfigControlPacket>());
+				targetBlock = ImmConfigPacketFactory.CreateBlockPacket(nextBlockIndex++, localBlock, []);
 
 				blocks.Add(targetBlock);
 			}
 
-			List<ImmConfigControlPacket> controls = (targetBlock.Controls ?? Array.Empty<ImmConfigControlPacket>()).ToList();
+			List<ImmConfigControlPacket> controls = [.. (targetBlock.Controls ?? [])];
 
 			foreach (ImmConfigEntry entry in missingEntries) { controls.Add(ImmConfigPacketFactory.CreateControlPacket(nextControlIndex++, targetBlock.Index, localBlock, entry, ImmConfigSide.Client)); }
 
-			targetBlock.Controls = controls.ToArray();
+			targetBlock.Controls = [.. controls];
 		}
 
-		page.Configuration = blocks.ToArray();
+		page.Configuration = [.. blocks];
 	}
 
 	private static bool ContainsClientControl(IEnumerable<ImmConfigBlockPacket> blocks, ImmConfigBlock localBlock, ImmConfigEntry localEntry)
@@ -275,7 +275,7 @@ public sealed class ImmConfigClient : IDisposable
 		{
 			if (block.ConfigSource != localBlock.ConfigSource) { continue; }
 
-			foreach (ImmConfigControlPacket control in block.Controls ?? Array.Empty<ImmConfigControlPacket>())
+			foreach (ImmConfigControlPacket control in block.Controls ?? [])
 			{
 				if (control.ConfigSide != ImmConfigSide.Client) { continue; }
 
@@ -306,7 +306,7 @@ public sealed class ImmConfigClient : IDisposable
 			packet.ConfigurationExternallyManaged |= locallyControlled;
 			packet.ExternalManagerActive |= externalManagers?.AnyManagerActive == true;
 
-			if (packet.ConfigurationExternallyManaged) { packet.Configuration = Array.Empty<ImmConfigBlockPacket>(); }
+			if (packet.ConfigurationExternallyManaged) { packet.Configuration = []; }
 			else
 			{
 				MergeLocalClientConfiguration(packet);
@@ -323,9 +323,9 @@ public sealed class ImmConfigClient : IDisposable
 	{
 		JObject? patchDocument = null;
 
-		foreach (ImmConfigBlockPacket block in page.Configuration ?? Array.Empty<ImmConfigBlockPacket>())
+		foreach (ImmConfigBlockPacket block in page.Configuration ?? [])
 		{
-			ImmConfigControlPacket[] controls = block.Controls ?? Array.Empty<ImmConfigControlPacket>();
+			ImmConfigControlPacket[] controls = block.Controls ?? [];
 			bool needsClientConfig = block.ConfigSide == ImmConfigSide.Client || controls.Any(control => control.ConfigSide == ImmConfigSide.Client);
 
 			if (!needsClientConfig) { continue; }
@@ -467,9 +467,9 @@ public sealed class ImmConfigClient : IDisposable
 	{
 		Dictionary<int, ControlLocation> result = [];
 
-		foreach (ImmConfigBlockPacket block in page.Configuration ?? Array.Empty<ImmConfigBlockPacket>())
+		foreach (ImmConfigBlockPacket block in page.Configuration ?? [])
 		{
-			foreach (ImmConfigControlPacket control in block.Controls ?? Array.Empty<ImmConfigControlPacket>()) { result[control.Index] = new ControlLocation(block, control); }
+			foreach (ImmConfigControlPacket control in block.Controls ?? []) { result[control.Index] = new ControlLocation(block, control); }
 		}
 
 		return result;
@@ -525,7 +525,7 @@ public sealed class ImmConfigCatalogResponse
 {
 	[ProtoMember(1)] public bool Success;
 	[ProtoMember(2)] public string Error = "";
-	[ProtoMember(3)] public ImmServerModPacket[] Mods = Array.Empty<ImmServerModPacket>();
+	[ProtoMember(3)] public ImmServerModPacket[] Mods = [];
 	[ProtoMember(4)] public bool CanManageServer;
 }
 
@@ -551,8 +551,8 @@ public sealed class ImmConfigPageResponse
 	[ProtoMember(1)] public bool Success;
 	[ProtoMember(2)] public string Error = "";
 	[ProtoMember(3)] public string ModId = "";
-	[ProtoMember(4)] public ImmConfigBlockPacket[] Configuration = Array.Empty<ImmConfigBlockPacket>();
-	[ProtoMember(5)] public ImmDependencyPacket[] Dependencies = Array.Empty<ImmDependencyPacket>();
+	[ProtoMember(4)] public ImmConfigBlockPacket[] Configuration = [];
+	[ProtoMember(5)] public ImmDependencyPacket[] Dependencies = [];
 	[ProtoMember(6)] public bool CanManageServer;
 	[ProtoMember(7)] public bool ConfigurationExternallyManaged;
 	[ProtoMember(8)] public bool ExternalManagerActive;
@@ -568,7 +568,7 @@ public sealed class ImmConfigBlockPacket
 	[ProtoMember(4)] public ImmConfigSide ConfigSide;
 	[ProtoMember(5)] public bool ParseDescriptions;
 	[ProtoMember(6)] public string Description = "";
-	[ProtoMember(7)] public ImmConfigControlPacket[] Controls = Array.Empty<ImmConfigControlPacket>();
+	[ProtoMember(7)] public ImmConfigControlPacket[] Controls = [];
 	[ProtoMember(8)] public ImmConfigSource ConfigSource;
 }
 
@@ -591,7 +591,7 @@ public sealed class ImmConfigControlPacket
 	[ProtoMember(14)] public double Max;
 	[ProtoMember(15)] public bool HasStep;
 	[ProtoMember(16)] public double Step;
-	[ProtoMember(17)] public ImmConfigOptionPacket[] Options = Array.Empty<ImmConfigOptionPacket>();
+	[ProtoMember(17)] public ImmConfigOptionPacket[] Options = [];
 	[ProtoMember(18)] public string ElementType = "";
 	[ProtoMember(19)] public string Code = "";
 	[ProtoMember(20)] public string DefaultValueJson = "";
@@ -612,7 +612,7 @@ public sealed class ImmConfigOptionPacket
 public sealed class ImmConfigApplyRequest
 {
 	[ProtoMember(1)] public string ModId = "";
-	[ProtoMember(2)] public ImmConfigChangePacket[] Changes = Array.Empty<ImmConfigChangePacket>();
+	[ProtoMember(2)] public ImmConfigChangePacket[] Changes = [];
 }
 
 [ProtoContract]
@@ -642,7 +642,7 @@ public sealed class ImmDependencyPacket
 	[ProtoMember(6)] public ImmDependencyResolutionType ResolutionType;
 	[ProtoMember(7)] public string ResolutionDescription = "";
 	[ProtoMember(8)] public string ResolutionDescriptionKey = "";
-	[ProtoMember(9)] public string[] ResolutionDescriptionArgs = Array.Empty<string>();
+	[ProtoMember(9)] public string[] ResolutionDescriptionArgs = [];
 }
 
 [ProtoContract]

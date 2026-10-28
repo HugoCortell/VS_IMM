@@ -143,7 +143,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 		SelectorRows = IntegratedModManagerConfig.SelectorRows;
 		HighlightMode = IntegratedModManagerConfig.ConfiguredInformationHighlight;
 
-		ImmServerModPacket[] serverMods = packet.Mods ?? Array.Empty<ImmServerModPacket>();
+		ImmServerModPacket[] serverMods = packet.Mods ?? [];
 
 		foreach (ImmServerModPacket serverMod in serverMods)
 		{

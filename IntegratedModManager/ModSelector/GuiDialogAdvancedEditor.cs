@@ -717,13 +717,13 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 			case "Dropdown":
 			{
-				ImmConfigOption[] options = schema.Options?.Where(option => option != null).ToArray() ?? Array.Empty<ImmConfigOption>();
+				ImmConfigOption[] options = schema.Options?.Where(option => option != null).ToArray() ?? [];
 				int selectedIndex = GetDropdownIndex(options, current);
 
 				GuiElementImmDropDown dropdown = new(
 					capi,
-					Enumerable.Range(0, options.Length).Select(index => index.ToString(CultureInfo.InvariantCulture)).ToArray(),
-					options.Select(option => ImmLocalization.Resolve(option.Label)).ToArray(),
+                    [.. Enumerable.Range(0, options.Length).Select(index => index.ToString(CultureInfo.InvariantCulture))],
+                    [.. options.Select(option => ImmLocalization.Resolve(option.Label))],
 					selectedIndex,
 					(value, selected) =>
 					{

@@ -36,7 +36,7 @@ internal sealed class ImmConfigLibOwnershipDetector : IImmExternalManagerDetecto
 
 		TryAddRuntimeDomains(api, ownership, claimed);
 
-		string[] claimedMods = claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase).ToArray();
+		string[] claimedMods = [.. claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase)];
 
 		if (claimedMods.Length == 0) { api.Logger.Notification("[integratedmodmanager] ConfigLib detected. No managed mod domains were claimed."); }
 		else { api.Logger.Notification("[integratedmodmanager] ConfigLib detected. IMM will cede ownership for the following domains: {0}.", string.Join(", ", claimedMods)); }

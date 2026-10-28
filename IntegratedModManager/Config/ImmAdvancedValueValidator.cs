@@ -163,7 +163,7 @@ public static class ImmAdvancedValueValidator
         {
             Label = option.Label,
             ValueJson = option.Value?.ToString(Formatting.None) ?? "null"
-        }).ToArray() ?? Array.Empty<ImmConfigOptionPacket>()
+        }).ToArray() ?? []
     };
 
     private static bool TryNormalizeObject(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)

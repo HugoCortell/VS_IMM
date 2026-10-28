@@ -43,6 +43,6 @@ public static class ImmConfigPacketFactory
         Step = entry.Step ?? 0,
         ElementType = entry.ElementType ?? "",
         AdvancedSchemaJson = entry.Type == "Advanced" && entry.Advanced != null ? JsonConvert.SerializeObject(entry.Advanced, Formatting.None, AdvancedSchemaSerializerSettings) : "",
-        Options = entry.Options?.Select(option => new ImmConfigOptionPacket { Label = option.Label, ValueJson = option.Value?.ToString(Formatting.None) ?? "null" }).ToArray() ?? Array.Empty<ImmConfigOptionPacket>()
+        Options = entry.Options?.Select(option => new ImmConfigOptionPacket { Label = option.Label, ValueJson = option.Value?.ToString(Formatting.None) ?? "null" }).ToArray() ?? []
     };
 }

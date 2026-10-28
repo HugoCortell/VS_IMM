@@ -27,14 +27,14 @@ public sealed class ImmConfigService
 	{
 		bool canManageServer = player.HasPrivilege(Privilege.controlserver);
 
-		ImmServerModPacket[] mods = Api.ModLoader.Mods
+		ImmServerModPacket[] mods = [.. Api.ModLoader.Mods
 			.Where(mod => !string.IsNullOrWhiteSpace(mod.Info?.ModID))
 			.Select(mod =>
 			{
 				string modId = mod.Info!.ModID;
 				bool hasDescriptor = Registry.TryGet(modId, out ImmConfigDescriptor descriptor);
 				bool hasConfiguration = hasDescriptor && (canManageServer ? descriptor.Configuration.Count > 0 : ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client));
-				ImmActiveDependency[] active = canManageServer ? Dependencies.GetForMod(modId) : Array.Empty<ImmActiveDependency>();
+				ImmActiveDependency[] active = canManageServer ? Dependencies.GetForMod(modId) : [];
 
 				return new ImmServerModPacket
 				{
@@ -45,8 +45,7 @@ public sealed class ImmConfigService
 					ErrorCount = active.Count(dependency => dependency.Severity == ImmDependencySeverity.Error)
 				};
 			})
-			.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)
-			.ToArray();
+			.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)];
 
 		return new ImmConfigCatalogResponse { Success = true, CanManageServer = canManageServer, Mods = mods };
 	}
@@ -66,8 +65,8 @@ public sealed class ImmConfigService
 				Success = true,
 				CanManageServer = canManageServer,
 				ModId = request.ModId,
-				Configuration = Array.Empty<ImmConfigBlockPacket>(),
-				Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : Array.Empty<ImmDependencyPacket>(),
+				Configuration = [],
+				Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : [],
 				ConfigurationExternallyManaged = true,
 				ExternalManagerActive = ExternalManagers.AnyManagerActive,
 				ExternalManagerName = ExternalManagers.GetPrimaryManagerName(Api, request.ModId)
@@ -134,14 +133,14 @@ public sealed class ImmConfigService
 
 			if (canManageServer || controls.Count > 0)
 			{
-				ImmConfigBlockPacket blockPacket = ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, controls.ToArray());
+				ImmConfigBlockPacket blockPacket = ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, [.. controls]);
 
 				blockPacket.Description = blockDescription;
 				blocks.Add(blockPacket);
 			}
 		}
 
-		return new ImmConfigPageResponse { Success = true, CanManageServer = canManageServer, ModId = request.ModId, Configuration = blocks.ToArray(), Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : Array.Empty<ImmDependencyPacket>(), ExternalManagerActive = ExternalManagers.AnyManagerActive };
+		return new ImmConfigPageResponse { Success = true, CanManageServer = canManageServer, ModId = request.ModId, Configuration = [.. blocks], Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : [], ExternalManagerActive = ExternalManagers.AnyManagerActive };
 	}
 
 	public ImmConfigApplyResponse Apply(IServerPlayer player, ImmConfigApplyRequest request)
@@ -158,7 +157,7 @@ public sealed class ImmConfigService
 		List<PreparedPatchSettingChange> preparedPatchChanges = [];
 		JObject patchSettingsDocument = PatchSettings.ReadDocument(request.ModId);
 
-		foreach (ImmConfigChangePacket change in request.Changes ?? Array.Empty<ImmConfigChangePacket>())
+		foreach (ImmConfigChangePacket change in request.Changes ?? [])
 		{
 			if (!seenIndexes.Add(change.Index) || !controls.TryGetValue(change.Index, out ServerControlLocation location)) { return ApplyError(request.ModId, $"Configuration index {change.Index} is invalid."); }
 			if (location.Control.ConfigSide != ImmConfigSide.Server) { return ApplyError(request.ModId, $"{location.Control.Label}: setting is not server-owned."); }
@@ -246,7 +245,7 @@ public sealed class ImmConfigService
 			packets.Add(new ImmDependencyPacket { RuntimeId = active.RuntimeId, Label = entry.Label, Description = entry.Description ?? "", Severity = active.Severity, HasResolution = resolution != null, ResolutionType = resolution?.Type ?? ImmDependencyResolutionType.Unknown, ResolutionDescription = "", ResolutionDescriptionKey = resolutionKey, ResolutionDescriptionArgs = resolutionArgs });
 		}
 
-		return packets.ToArray();
+		return [.. packets];
 	}
 
 	private static (string Key, string[] Args)

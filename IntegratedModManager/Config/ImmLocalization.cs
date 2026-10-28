@@ -55,26 +55,26 @@ public static class ImmLocalization
 	{
 		page.Error = resolve(page.Error);
 
-		foreach (ImmConfigBlockPacket block in page.Configuration ?? Array.Empty<ImmConfigBlockPacket>())
+		foreach (ImmConfigBlockPacket block in page.Configuration ?? [])
 		{
 			block.ConfigLabel = resolve(block.ConfigLabel);
 			block.Description = resolve(block.Description);
 
-			foreach (ImmConfigControlPacket control in block.Controls ?? Array.Empty<ImmConfigControlPacket>())
+			foreach (ImmConfigControlPacket control in block.Controls ?? [])
 			{
 				control.Label = resolve(control.Label);
 				control.Description = resolve(control.Description);
 				control.UnavailableReason = resolve(control.UnavailableReason);
 
-				foreach (ImmConfigOptionPacket option in control.Options ?? Array.Empty<ImmConfigOptionPacket>()) { option.Label = resolve(option.Label); }
+				foreach (ImmConfigOptionPacket option in control.Options ?? []) { option.Label = resolve(option.Label); }
 			}
 		}
 
-		foreach (ImmDependencyPacket dependency in page.Dependencies ?? Array.Empty<ImmDependencyPacket>())
+		foreach (ImmDependencyPacket dependency in page.Dependencies ?? [])
 		{
 			dependency.Label = resolve(dependency.Label);
 			dependency.Description = resolve(dependency.Description);
-			dependency.ResolutionDescription = !string.IsNullOrWhiteSpace(dependency.ResolutionDescriptionKey) ? get(dependency.ResolutionDescriptionKey, (dependency.ResolutionDescriptionArgs ?? Array.Empty<string>()).Cast<object>().ToArray()) : resolve(dependency.ResolutionDescription);
+			dependency.ResolutionDescription = !string.IsNullOrWhiteSpace(dependency.ResolutionDescriptionKey) ? get(dependency.ResolutionDescriptionKey, [.. (dependency.ResolutionDescriptionArgs ?? []).Cast<object>()]) : resolve(dependency.ResolutionDescription);
 		}
 	}
 }

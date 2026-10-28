@@ -125,7 +125,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 		double visibleHeight = buttonY - 18 - listY;
 		double availableWidth = Width - Padding * 2;
 
-		ImmModUpdatePacket[] updates = Catalog?.Updates ?? Array.Empty<ImmModUpdatePacket>();
+		ImmModUpdatePacket[] updates = Catalog?.Updates ?? [];
 		bool showCards = Catalog?.Success == true && Catalog.State == ImmModUpdateCheckState.Ready && updates.Length > 0;
 
 		double calculatedHeight = showCards ? 8 + updates.Length * (CardHeight + CardGap) : 40;

@@ -298,7 +298,7 @@ public sealed class ImmPatchExpression
 				return !ValuesEqual(Arguments[0].Evaluate(context), Arguments[1].Evaluate(context)) ? Arguments[2].Evaluate(context) : Arguments[3].Evaluate(context);
 			}
 
-			JToken[] values = Arguments.Select(argument => argument.Evaluate(context)).ToArray();
+			JToken[] values = [.. Arguments.Select(argument => argument.Evaluate(context))];
 
 			double Number(int index) => RequireNumber(values[index]);
 
@@ -933,7 +933,7 @@ public sealed class ImmPatchExpression
 
 			ValidateFunctionArity(lower, arguments.Count);
 
-			return new FunctionNode(name, arguments.ToArray());
+			return new FunctionNode(name, [.. arguments]);
 		}
 
 		private static void ValidateFunctionArity(string name, int count)

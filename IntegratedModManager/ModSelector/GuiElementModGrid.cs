@@ -81,7 +81,7 @@ public sealed class GuiElementModGrid : GuiElement
 
 	public GuiElementModGrid(ICoreClientAPI capi, ElementBounds bounds, IEnumerable<ModSelectorEntry> entries, Action<ModSelectorEntry> modClicked, int rows, ImmImportantInformationHighlight highlightMode) : base(capi, bounds)
 	{
-		AllEntries = entries.ToList();
+		AllEntries = [.. entries];
 		VisibleEntries.AddRange(AllEntries);
 		UpdateVisibleDiagnostics();
 		ModClicked = modClicked;

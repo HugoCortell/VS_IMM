@@ -357,7 +357,7 @@ public sealed class ImmContentPatchService
 
 		if (!patternMatches.TryGetValue(pattern, out AssetLocation[]? allMatches))
 		{
-			allMatches = GetPatternCandidates(pattern).Where(location => CategoryExistsOnThisSide(location) && WildcardUtil.Match(pattern, location.ToString())).OrderBy(location => location.ToString(), StringComparer.Ordinal).ToArray();
+			allMatches = [.. GetPatternCandidates(pattern).Where(location => CategoryExistsOnThisSide(location) && WildcardUtil.Match(pattern, location.ToString())).OrderBy(location => location.ToString(), StringComparer.Ordinal)];
 			patternMatches[pattern] = allMatches;
 		}
 
