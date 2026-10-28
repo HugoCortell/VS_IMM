@@ -275,7 +275,7 @@ public sealed class GuiElementModGrid : GuiElement
 
 	public override void RenderInteractiveElements(float deltaTime)
 	{
-		if (ViewportBounds == null || VisibleEntries.Count == 0) { RenderScrollbar(); return; }
+		if (ViewportBounds is null || VisibleEntries.Count == 0) { RenderScrollbar(); return; }
 
 		ModSelectorEntry? hoveredEntry = GetEntryAt(api.Input.MouseX, api.Input.MouseY);
 
@@ -360,7 +360,7 @@ public sealed class GuiElementModGrid : GuiElement
 		UpdateScrollbarHandle();
 		EnsureScrollbarTextures();
 
-		if (ScrollbarTrackTexture == null || ScrollbarHandleTexture == null) { return; }
+		if (ScrollbarTrackTexture is null || ScrollbarHandleTexture is null) { return; }
 
 		api.Render.Render2DTexturePremultipliedAlpha(ScrollbarTrackTexture.TextureId, (int)ScrollbarX, (int)ScrollbarY, (int)Math.Round(ScrollbarWidth), (int)Math.Round(ScrollbarHeight), 53);
 
@@ -377,7 +377,7 @@ public sealed class GuiElementModGrid : GuiElement
 
 		int handleWidth = Math.Max(1, (int)Math.Round(ScrollbarHandleWidth));
 
-		if (ScrollbarTrackTexture == null || ScrollbarTextureWidthPixels != trackWidth || ScrollbarTextureHeightPixels != trackHeight)
+		if (ScrollbarTrackTexture is null || ScrollbarTextureWidthPixels != trackWidth || ScrollbarTextureHeightPixels != trackHeight)
 		{
 			ScrollbarTrackTexture?.Dispose();
 			ScrollbarTrackTexture = CreateScrollbarTrackTexture(trackWidth, trackHeight);
@@ -387,7 +387,7 @@ public sealed class GuiElementModGrid : GuiElement
 			ScrollbarTextureHeightPixels = trackHeight;
 		}
 
-		if (ScrollbarHandleTexture == null || ScrollbarHandleTextureWidthPixels != handleWidth || ScrollbarHandleTextureHeightPixels != trackHeight)
+		if (ScrollbarHandleTexture is null || ScrollbarHandleTextureWidthPixels != handleWidth || ScrollbarHandleTextureHeightPixels != trackHeight)
 		{
 			ScrollbarHandleTexture?.Dispose();
 			ScrollbarHandleTexture = CreateScrollbarHandleTexture(handleWidth, trackHeight);
@@ -511,7 +511,7 @@ public sealed class GuiElementModGrid : GuiElement
 
 	private ModSelectorEntry? GetEntryAt(double mouseX, double mouseY)
 	{
-		if (ViewportBounds == null || !ViewportBounds.PointInside((int)mouseX, (int)mouseY)) { return null; }
+		if (ViewportBounds is null || !ViewportBounds.PointInside((int)mouseX, (int)mouseY)) { return null; }
 
 		double localX = mouseX - Bounds.renderX + ScrollOffset;
 

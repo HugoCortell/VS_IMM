@@ -26,7 +26,7 @@ internal sealed class ImmConfigKitOwnershipDetector : IImmExternalManagerDetecto
 			return;
 		}
 
-		if (system == null)
+		if (system is null)
 		{
 			api.Logger.Warning("[integratedmodmanager] ConfigKit is enabled but its mod system was not found.");
 			return;

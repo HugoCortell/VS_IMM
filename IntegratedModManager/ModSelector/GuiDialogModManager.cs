@@ -160,17 +160,17 @@ public sealed class GuiDialogModManager : GuiDialog
 
 	private void RenderDependencyTabPulse()
 	{
-		if (Page?.CanManageServer != true || !DependencyTabPulseVisible || DependencyTabDiagnosticLevel == ImmDiagnosticLevel.None || SingleComposer == null) { return; }
+		if (Page?.CanManageServer != true || !DependencyTabPulseVisible || DependencyTabDiagnosticLevel == ImmDiagnosticLevel.None || SingleComposer is null) { return; }
 
 		GuiElementHorizontalTabs? tabs = SingleComposer.GetHorizontalTabs("managertabs");
 
-		if (tabs == null) { return; }
+		if (tabs is null) { return; }
 
 		tabs.Bounds.CalcWorldBounds();
 
 		double pulse = ImmDiagnosticPulse.GetHighlightPhase(HighlightMode, capi.ElapsedMilliseconds);
 
-		if (DependencyTabFillTexture == null) { return; }
+		if (DependencyTabFillTexture is null) { return; }
 
 		ImmDiagnosticPulse.SetTabOverlayColor(DependencyTabDiagnosticLevel, pulse, DependencyTabPulseColor);
 
@@ -352,7 +352,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		PendingRestartDependencies[runtimeId] = new PendingRestartDependency(sourceModId, resolvedDependency);
 
-		if (resolvedDependency == null) { return; }
+		if (resolvedDependency is null) { return; }
 
 		foreach (ImmDependencyPacket dependency in Page?.Dependencies ?? Array.Empty<ImmDependencyPacket>())
 		{
@@ -372,7 +372,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		{
 			PendingRestartDependency pending = pair.Value;
 
-			if (!string.Equals(pending.ModId, packet.ModId, StringComparison.OrdinalIgnoreCase) || pending.Snapshot == null || !runtimeIds.Add(pair.Key)) { continue; }
+			if (!string.Equals(pending.ModId, packet.ModId, StringComparison.OrdinalIgnoreCase) || pending.Snapshot is null || !runtimeIds.Add(pair.Key)) { continue; }
 			dependencies.Add(pending.Snapshot);
 		}
 
@@ -659,7 +659,7 @@ public sealed class GuiDialogModManager : GuiDialog
 		}
 		else
 		{
-			string message = Page == null ? ImmLocalization.Get("status-loading") : Page.Error ?? ImmLocalization.Get("error-load-manager-data");
+			string message = Page is null ? ImmLocalization.Get("status-loading") : Page.Error ?? ImmLocalization.Get("error-load-manager-data");
 			composer.AddStaticText(message, CairoFont.WhiteSmallText(), ElementBounds.Fixed(PanelPadding + 4, contentY + 4, contentWidth - 8, visibleHeight - 8));
 		}
 
@@ -695,7 +695,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		DependencyTabPulseVisible = canManageServer && DependencyTabDiagnosticLevel != ImmDiagnosticLevel.None && ImmDiagnosticPulse.IsHighlightEnabled(HighlightMode) && totalTabWidth <= managerTabs.Bounds.InnerWidth;
 
-		if (DependencyTabPulseVisible && DependencyTabFillTexture == null) { DependencyTabFillTexture = ImmDiagnosticPulse.CreateSolidTexture(capi); }
+		if (DependencyTabPulseVisible && DependencyTabFillTexture is null) { DependencyTabFillTexture = ImmDiagnosticPulse.CreateSolidTexture(capi); }
 		else if (!DependencyTabPulseVisible && DependencyTabFillTexture != null)
 		{
 			DependencyTabFillTexture.Dispose();
@@ -1204,7 +1204,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 	private void CaptureOriginalValues()
 	{
-		if (Page?.Configuration == null) { return; }
+		if (Page?.Configuration is null) { return; }
 
 		foreach (ImmConfigBlockPacket block in Page.Configuration)
 		{
@@ -1233,7 +1233,7 @@ public sealed class GuiDialogModManager : GuiDialog
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (float)(ContentClipBounds?.fixedHeight ?? 0)));
 
-		if (ConfigContainer == null) { return; }
+		if (ConfigContainer is null) { return; }
 
 		ConfigContainer.Bounds.fixedY = -ScrollValue;
 

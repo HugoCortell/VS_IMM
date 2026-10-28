@@ -90,7 +90,7 @@ public sealed class IntegratedModManagerConfig
 
 	public static void Stop()
 	{
-		if (Api == null) { return; }
+		if (Api is null) { return; }
 
 		Api.Event.UnregisterEventBusListener(OnConfigChanged);
 
@@ -102,7 +102,7 @@ public sealed class IntegratedModManagerConfig
 
 	private static void Reload()
 	{
-		if (Api == null) { return; }
+		if (Api is null) { return; }
 
 		try { Current = Api.LoadModConfig<IntegratedModManagerConfig>(FileName) ?? new IntegratedModManagerConfig(); }
 		catch (Exception exception) { Api.Logger.Error("[integratedmodmanager] Failed to reload client config: {0}", exception.Message); }

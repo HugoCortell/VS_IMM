@@ -72,7 +72,7 @@ public sealed class IntegratedModManagerSystem : ModSystem
 	{
 		ImmContentPatchCoordinatorSystem? coordinator = api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>();
 
-		if (coordinator == null || ConfigRegistry == null) 
+		if (coordinator is null || ConfigRegistry is null) 
         { 
             api.Logger.Error("[integratedmodmanager] Managed content patch coordinator was not initialized.");
             return;
@@ -102,7 +102,7 @@ public sealed class IntegratedModManagerSystem : ModSystem
             Notification?.Show(ImmLocalization.Get("notification-no-configuration"), ImmLocalization.Get("button-alright")); 
             return; 
         }
-        if (ModManager == null) return;
+        if (ModManager is null) return;
 
 		ModManager.SetMod(entry.ModId, entry.Name);
 		ModManager.TryOpen();

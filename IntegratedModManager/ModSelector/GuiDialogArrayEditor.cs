@@ -283,7 +283,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 
 	private void RestoreFocus(int index, int caretPosition)
 	{
-		if (!IsOpened() || ListContainer == null || index < 0 || index >= Rows.Count || !Inputs.TryGetValue(index, out GuiElementImmTextInput? input)) { return; }
+		if (!IsOpened() || ListContainer is null || index < 0 || index >= Rows.Count || !Inputs.TryGetValue(index, out GuiElementImmTextInput? input)) { return; }
 
 		// Focus through the container so it can clear any stale child focus left by the old composition before restoring the caret.
 		ListContainer.FocusElement(input.TabIndex);
@@ -360,7 +360,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (float)(ClipBounds?.fixedHeight ?? 0)));
 
-		if (ListContainer == null) { return; }
+		if (ListContainer is null) { return; }
 
 		ListContainer.Bounds.fixedY = -ScrollValue;
 

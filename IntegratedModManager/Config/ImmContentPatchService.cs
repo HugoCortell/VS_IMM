@@ -152,7 +152,7 @@ public sealed class ImmContentPatchService
 				continue;
 			}
 
-			if (asset == null)
+			if (asset is null)
 			{
 				if (item.Value.Any(binding => !binding.Target.Optional)) { Api.Logger.Warning("[integratedmodmanager] Content patch asset '{0}' was not found on {1}.", item.Key, Api.Side); }
 
@@ -246,7 +246,7 @@ public sealed class ImmContentPatchService
 				if (side == ImmConfigSide.Client) { values[entry.Code] = SettingsStore.GetEffectiveValue(registered.ModId, entry, side, document); continue; }
 
 				JToken? snapshotValue = bootstrap[registered.ModId]?[entry.Code];
-				if (snapshotValue == null) { Api.Logger.Warning("[integratedmodmanager] Server PatchSetting '{0}:{1}' was not present in the active bootstrap snapshot; client content targets using it will be skipped.", registered.ModId, entry.Code); continue; }
+				if (snapshotValue is null) { Api.Logger.Warning("[integratedmodmanager] Server PatchSetting '{0}:{1}' was not present in the active bootstrap snapshot; client content targets using it will be skipped.", registered.ModId, entry.Code); continue; }
 
 				if (!ImmConfigValueValidator.TryNormalizePatchSetting(entry, snapshotValue, out JToken normalized, out string error)) { Api.Logger.Warning("[integratedmodmanager] Server PatchSetting '{0}:{1}' in the active bootstrap snapshot is invalid: {2}", registered.ModId, entry.Code, error); continue; }
 				values[entry.Code] = normalized;
@@ -258,7 +258,7 @@ public sealed class ImmContentPatchService
 	{
 		ITreeAttribute? worldConfig = Api.World?.Config;
 
-		if (worldConfig == null) { Api.Logger.Warning("[integratedmodmanager] World.Config was unavailable while publishing active PatchSettings."); return; }
+		if (worldConfig is null) { Api.Logger.Warning("[integratedmodmanager] World.Config was unavailable while publishing active PatchSettings."); return; }
 
 		string previousValue = worldConfig.GetAsString(BootstrapWorldConfigKey, "");
 		bool migratingLegacy = !string.IsNullOrWhiteSpace(previousValue) && !previousValue.StartsWith(BootstrapEncodingPrefix, StringComparison.Ordinal);
@@ -434,7 +434,7 @@ public sealed class ImmContentPatchService
 
 	private bool EvaluateCondition(CompiledBinding binding)
 	{
-		if (binding.Condition == null) { return true; }
+		if (binding.Condition is null) { return true; }
 
 		Dictionary<string, JToken> settings = ActiveValues.TryGetValue(binding.SourceModId, out Dictionary<string, JToken>? values) ? values : new Dictionary<string, JToken>(StringComparer.Ordinal);
 		JToken? owningSetting = null;
@@ -548,7 +548,7 @@ public sealed class ImmContentPatchService
 
 	private bool ReferencesAvailable(CompiledBinding binding, ImmPatchExpression? expression)
 	{
-		if (expression == null) { return true; }
+		if (expression is null) { return true; }
 
 		ActiveValues.TryGetValue(binding.SourceModId, out Dictionary<string, JToken>? active);
 
@@ -572,13 +572,13 @@ public sealed class ImmContentPatchService
 	{
 		AssetCategory? category = location.Category;
 
-		if (category == null) { return true; }
+		if (category is null) { return true; }
 		return (category.SideType & Api.Side) != (EnumAppSide)0;
 	}
 
 	private void RegisterSettingDependencies(string sourceModId, ImmContentPatchTarget target, ImmPatchExpression? expression, ImmPatchExpression? condition, string? owningSettingCode, ImmConfigSide? owningSettingSide)
 	{
-		bool usesOwningSetting = owningSettingCode != null && owningSettingSide.HasValue && (expression?.UsesOwningSetting == true || condition?.UsesOwningSetting == true || (expression == null && target.Value == null));
+		bool usesOwningSetting = owningSettingCode != null && owningSettingSide.HasValue && (expression?.UsesOwningSetting == true || condition?.UsesOwningSetting == true || (expression is null && target.Value is null));
 
 		if (usesOwningSetting) { PatchSettingsAffectingContent.Add(new PatchSettingKey(sourceModId, owningSettingCode!, owningSettingSide!.Value)); }
 

@@ -12,7 +12,7 @@ internal static class ImmClipRender
 	{
 		clipPushed = false;
 
-		if (clipBounds == null) { return true; }
+		if (clipBounds is null) { return true; }
 
 		bounds.CalcWorldBounds();
 		clipBounds.CalcWorldBounds();

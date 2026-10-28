@@ -43,7 +43,7 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 
 	private void Compose()
 	{
-		if (Issue == null) { return; }
+		if (Issue is null) { return; }
 
 		string title = string.IsNullOrWhiteSpace(Issue.Label) ? ImmLocalization.Get("dependency-issue-title") : Issue.Label;
 
@@ -143,7 +143,7 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 
 	private bool OnAutoResolveClicked()
 	{
-		if (Issue == null || !CanAutoResolve) { return true; }
+		if (Issue is null || !CanAutoResolve) { return true; }
 
 		int runtimeId = Issue.RuntimeId;
 

@@ -236,7 +236,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 
 	private string GetStatusText()
 	{
-		if (Catalog == null) { return ImmLocalization.Get("updates-loading"); }
+		if (Catalog is null) { return ImmLocalization.Get("updates-loading"); }
 		if (!Catalog.Success) { return string.IsNullOrWhiteSpace(Catalog.Error) ? ImmLocalization.Get("updates-error") : Catalog.Error; }
 
 		return Catalog.State switch
@@ -266,7 +266,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 
 	private void OnScrollbarChanged(float value)
 	{
-		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds == null ? 0 : (float)ContentClipBounds.fixedHeight)));
+		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds is null ? 0 : (float)ContentClipBounds.fixedHeight)));
 
 		if (UpdateContainer != null)
 		{
@@ -365,7 +365,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private void OnChangelogReceived(ImmModUpdateChangelogResponse packet)
 	{
-		if (!IsOpened() || Update == null || !Matches(packet.ModId, packet.TargetVersion)) { return; }
+		if (!IsOpened() || Update is null || !Matches(packet.ModId, packet.TargetVersion)) { return; }
 
 		LoadingChangelog = false;
 		Error = packet.Success ? "" : ImmLocalization.Resolve(packet.Error);
@@ -375,7 +375,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private void OnInstallReceived(ImmModUpdateInstallResponse packet)
 	{
-		if (!IsOpened() || Update == null || !Matches(packet.ModId, packet.TargetVersion)) { return; }
+		if (!IsOpened() || Update is null || !Matches(packet.ModId, packet.TargetVersion)) { return; }
 
 		RequestingUpdate = false;
 
@@ -391,7 +391,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private void Compose()
 	{
-		if (Update == null) { return; }
+		if (Update is null) { return; }
 
 		double titleHeight = 42;
 		double titleY = Padding;
@@ -517,7 +517,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private bool OnUpdateClicked()
 	{
-		if (Update == null || RequestingUpdate || !Update.Installable || Update.State != ImmModUpdateEntryState.Available) { return true; }
+		if (Update is null || RequestingUpdate || !Update.Installable || Update.State != ImmModUpdateEntryState.Available) { return true; }
 
 		RequestingUpdate = true;
 		Error = "";
@@ -537,7 +537,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private void OnScrollbarChanged(float value)
 	{
-		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds == null ? 0 : (float)ContentClipBounds.fixedHeight)));
+		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds is null ? 0 : (float)ContentClipBounds.fixedHeight)));
 
 		if (TextContainer != null)
 		{

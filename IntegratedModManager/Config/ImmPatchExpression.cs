@@ -104,7 +104,7 @@ public sealed class ImmPatchExpression
 			switch (Kind)
 			{
 				case ReferenceKind.Setting:
-					if (context.Setting == null)
+					if (context.Setting is null)
 					{
 						throw new InvalidOperationException("Expression uses Setting outside a setting-owned target.");
 					}

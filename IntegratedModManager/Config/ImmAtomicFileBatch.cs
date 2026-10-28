@@ -32,7 +32,7 @@ public sealed class ImmAtomicFileBatch
 		{
 			foreach (FileChange change in Changes)
 			{
-				if (change.Contents == null)
+				if (change.Contents is null)
 				{
 					if (File.Exists(change.Path)) { File.Delete(change.Path); }
 				}

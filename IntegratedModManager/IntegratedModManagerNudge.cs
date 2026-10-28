@@ -109,7 +109,7 @@ public sealed class IntegratedModManagerNudge : IRenderer
 	{
 		IClientPlayer? localPlayer = ClientApi.World?.Player;
 
-		if (localPlayer == null || spawnedPlayer.PlayerUID != localPlayer.PlayerUID || StateRequested) { return; }
+		if (localPlayer is null || spawnedPlayer.PlayerUID != localPlayer.PlayerUID || StateRequested) { return; }
 
 		StateRequested = true;
 		ClientChannel?.SendPacket(new NudgeStateRequest());
@@ -117,7 +117,7 @@ public sealed class IntegratedModManagerNudge : IRenderer
 
 	private void OnNudgeStateResponse(NudgeStateResponse packet)
 	{
-		if (ClientApi.World?.Player == null) { return; }
+		if (ClientApi.World?.Player is null) { return; }
 		
 		if (packet.CanManageServer && !DismissedThisSession && !packet.PreviouslyDismissed && IntegratedModManagerConfig.ShouldSuppressFirstTimeNudges && packet.WarningCount <= 0 && packet.ErrorCount <= 0) { Dismiss(); return; }
 
@@ -230,7 +230,7 @@ public sealed class IntegratedModManagerNudge : IRenderer
 
 	public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
 	{
-		if (TitleTexture == null || BodyTexture == null || BackgroundTexture == null) { return; }
+		if (TitleTexture is null || BodyTexture is null || BackgroundTexture is null) { return; }
 
 		SlideAccum += deltaTime;
 
