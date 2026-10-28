@@ -102,7 +102,7 @@ public sealed class GuiElementModGrid : GuiElement
 		RecalculateGeometry();
 		BuildTextures();
 
-		if (DiagnosticFillTexture == null) { DiagnosticFillTexture = ImmDiagnosticPulse.CreateSolidTexture(api); }
+		DiagnosticFillTexture ??= ImmDiagnosticPulse.CreateSolidTexture(api);
 
 		EnsureScrollbarTextures();
 	}
