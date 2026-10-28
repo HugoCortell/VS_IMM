@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Cairo;
 using IntegratedModManager.Config;
 using IntegratedModManager.UI;
@@ -13,28 +8,17 @@ using Vintagestory.API.MathTools;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class ModSelectorEntry
+public sealed class ModSelectorEntry(ImmServerModPacket serverMod, Mod? localMod)
 {
-	public Mod? LocalMod { get; }
-	public string Name { get; }
-	public string ModId { get; }
-	public bool HasConfiguration { get; }
-	public int WarningCount { get; }
-	public int ErrorCount { get; }
+    public Mod? LocalMod { get; } = localMod;
+    public string Name { get; } = string.IsNullOrWhiteSpace(serverMod.Name) ? serverMod.ModId : serverMod.Name;
+    public string ModId { get; } = serverMod.ModId;
+    public bool HasConfiguration { get; } = serverMod.HasConfiguration;
+    public int WarningCount { get; } = Math.Max(0, serverMod.WarningCount);
+    public int ErrorCount { get; } = Math.Max(0, serverMod.ErrorCount);
 
-	public bool HasWarnings => WarningCount > 0;
+    public bool HasWarnings => WarningCount > 0;
 	public bool HasErrors => ErrorCount > 0;
-
-	public ModSelectorEntry(ImmServerModPacket serverMod, Mod? localMod)
-	{
-		LocalMod = localMod;
-		ModId = serverMod.ModId;
-		Name = string.IsNullOrWhiteSpace(serverMod.Name) ? serverMod.ModId : serverMod.Name;
-
-		HasConfiguration = serverMod.HasConfiguration;
-		WarningCount = Math.Max(0, serverMod.WarningCount);
-		ErrorCount = Math.Max(0, serverMod.ErrorCount);
-	}
 }
 
 public sealed class GuiElementModGrid : GuiElement
@@ -52,8 +36,8 @@ public sealed class GuiElementModGrid : GuiElement
 	private static readonly int HoverCardBackgroundColor = ColorUtil.ColorFromRgba(70, 62, 53, 175);
 
 	private readonly List<ModSelectorEntry> AllEntries;
-	private readonly Dictionary<ModSelectorEntry, CardTexture> Textures = new();
-	private readonly List<ModSelectorEntry> VisibleEntries = new();
+	private readonly Dictionary<ModSelectorEntry, CardTexture> Textures = [];
+	private readonly List<ModSelectorEntry> VisibleEntries = [];
 	private readonly Action<ModSelectorEntry> ModClicked;
 	private readonly int Rows;
 	private readonly ImmImportantInformationHighlight HighlightMode;
@@ -97,7 +81,7 @@ public sealed class GuiElementModGrid : GuiElement
 
 	public GuiElementModGrid(ICoreClientAPI capi, ElementBounds bounds, IEnumerable<ModSelectorEntry> entries, Action<ModSelectorEntry> modClicked, int rows, ImmImportantInformationHighlight highlightMode) : base(capi, bounds)
 	{
-		AllEntries = entries.ToList();
+		AllEntries = [.. entries];
 		VisibleEntries.AddRange(AllEntries);
 		UpdateVisibleDiagnostics();
 		ModClicked = modClicked;
@@ -118,7 +102,7 @@ public sealed class GuiElementModGrid : GuiElement
 		RecalculateGeometry();
 		BuildTextures();
 
-		if (DiagnosticFillTexture == null) { DiagnosticFillTexture = ImmDiagnosticPulse.CreateSolidTexture(api); }
+		DiagnosticFillTexture ??= ImmDiagnosticPulse.CreateSolidTexture(api);
 
 		EnsureScrollbarTextures();
 	}
@@ -251,9 +235,9 @@ public sealed class GuiElementModGrid : GuiElement
 
 	private LoadedTexture CreateMissingIconTexture(int size)
 	{
-		using ImageSurface surface = new ImageSurface(Format.Argb32, size, size);
+		using ImageSurface surface = new(Format.Argb32, size, size);
 
-		using Context ctx = new Context(surface);
+		using Context ctx = new(surface);
 
 		ctx.SetSourceRGBA(0.13, 0.11, 0.09, 0.95);
 		ctx.Paint();
@@ -263,7 +247,7 @@ public sealed class GuiElementModGrid : GuiElement
 		ctx.Rectangle(1, 1, Math.Max(1, size - 2), Math.Max(1, size - 2));
 		ctx.Stroke();
 
-		LoadedTexture texture = new LoadedTexture(api);
+		LoadedTexture texture = new(api);
 
 		try { api.Gui.LoadOrUpdateCairoTexture(surface, true, ref texture); return texture; }
 		catch
@@ -507,9 +491,9 @@ public sealed class GuiElementModGrid : GuiElement
 		args.Handled = true;
 	}
 
-	public override void OnMouseUp(ICoreClientAPI api, MouseEvent args) { DraggingScrollbar = false; }
+    public override void OnMouseUp(ICoreClientAPI api, MouseEvent args) => DraggingScrollbar = false;
 
-	private ModSelectorEntry? GetEntryAt(double mouseX, double mouseY)
+    private ModSelectorEntry? GetEntryAt(double mouseX, double mouseY)
 	{
 		if (ViewportBounds == null || !ViewportBounds.PointInside((int)mouseX, (int)mouseY)) { return null; }
 
@@ -587,18 +571,12 @@ public sealed class GuiElementModGrid : GuiElement
 		base.Dispose();
 	}
 
-	private sealed class CardTexture : IDisposable
+	private sealed class CardTexture(LoadedTexture? iconTexture, LoadedTexture nameTexture) : IDisposable
 	{
-		public LoadedTexture? IconTexture { get; }
-		public LoadedTexture NameTexture { get; }
+        public LoadedTexture? IconTexture { get; } = iconTexture;
+        public LoadedTexture NameTexture { get; } = nameTexture;
 
-		public CardTexture(LoadedTexture? iconTexture, LoadedTexture nameTexture)
-		{
-			IconTexture = iconTexture;
-			NameTexture = nameTexture;
-		}
-
-		public void Dispose()
+        public void Dispose()
 		{
 			IconTexture?.Dispose();
 			NameTexture.Dispose();
@@ -615,5 +593,5 @@ public static class GuiComposerModSelectorExtensions
 		return composer;
 	}
 
-	public static GuiElementModGrid GetModSelectorGrid(this GuiComposer composer, string key) { return (GuiElementModGrid)composer.GetElement(key); }
+    public static GuiElementModGrid GetModSelectorGrid(this GuiComposer composer, string key) => (GuiElementModGrid)composer.GetElement(key);
 }

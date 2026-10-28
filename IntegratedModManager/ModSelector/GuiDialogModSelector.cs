@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Cairo;
 using IntegratedModManager.Config;
 using IntegratedModManager.UI;
@@ -22,7 +17,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 	private const double HeaderHeight = 42;
 	private const double HeaderGap = 18;
 
-	private readonly List<ModSelectorEntry> Entries = new();
+	private readonly List<ModSelectorEntry> Entries = [];
 	private readonly ImmConfigClient ConfigClient;
 	private readonly ImmModUpdateClient UpdateClient;
 	private readonly Action<ModSelectorEntry> ModSelected;
@@ -148,7 +143,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 		SelectorRows = IntegratedModManagerConfig.SelectorRows;
 		HighlightMode = IntegratedModManagerConfig.ConfiguredInformationHighlight;
 
-		ImmServerModPacket[] serverMods = packet.Mods ?? Array.Empty<ImmServerModPacket>();
+		ImmServerModPacket[] serverMods = packet.Mods ?? [];
 
 		foreach (ImmServerModPacket serverMod in serverMods)
 		{
@@ -358,13 +353,11 @@ public sealed class GuiDialogModSelector : GuiDialog
 	}
 }
 
-public sealed class GuiElementImmDiagnosticToggleButton : GuiElementToggleButton
+public sealed class GuiElementImmDiagnosticToggleButton(ICoreClientAPI capi, string text, CairoFont font, Action<bool> onToggled, ElementBounds bounds, ImmDiagnosticLevel level) : GuiElementToggleButton(capi, "", text, font, onToggled, bounds, toggleable: true)
 {
-	private readonly double[] BackgroundColor;
+	private readonly double[] BackgroundColor = ImmDiagnosticPulse.CreateFlatGuiColor(level);
 
-	public GuiElementImmDiagnosticToggleButton(ICoreClientAPI capi, string text, CairoFont font, Action<bool> onToggled, ElementBounds bounds, ImmDiagnosticLevel level) : base(capi, "", text, font, onToggled, bounds, toggleable: true) { BackgroundColor = ImmDiagnosticPulse.CreateFlatGuiColor(level); }
-
-	public override void ComposeElements(Cairo.Context ctx, Cairo.ImageSurface surface)
+    public override void ComposeElements(Cairo.Context ctx, Cairo.ImageSurface surface)
 	{
 		double[] originalColor = GuiStyle.DialogDefaultBgColor;
 
@@ -387,11 +380,9 @@ public static class GuiComposerImmDiagnosticToggleExtensions
 
 
 
-internal sealed class GuiElementImmSearchInput : GuiElementTextInput
+internal sealed class GuiElementImmSearchInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : GuiElementTextInput(capi, bounds, onTextChanged, font)
 {
-	public GuiElementImmSearchInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : base(capi, bounds, onTextChanged, font) { }
-
-	public override void ComposeTextElements(Context ctx, ImageSurface surface)
+    public override void ComposeTextElements(Context ctx, ImageSurface surface)
 	{
 		base.ComposeTextElements(ctx, surface);
 

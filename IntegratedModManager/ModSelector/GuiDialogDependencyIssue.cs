@@ -1,15 +1,11 @@
-#nullable enable
-
-using System;
 using Cairo;
 using IntegratedModManager.Config;
 using IntegratedModManager.UI;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogDependencyIssue : GuiDialog
+public sealed class GuiDialogDependencyIssue(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double Width = 620;
 	private const double Padding = 28;
@@ -29,9 +25,7 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogDependencyIssue(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(ImmDependencyPacket issue, bool canAutoResolve, Action<int> autoResolve)
+    public bool Show(ImmDependencyPacket issue, bool canAutoResolve, Action<int> autoResolve)
 	{
 		Issue = issue;
 		CanAutoResolve = canAutoResolve && issue.HasResolution;
@@ -155,11 +149,11 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 
 	private bool OnCloseClicked() { TryClose(); return true; }
 
-	private static string NormalizeText(string? text) { return string.IsNullOrWhiteSpace(text) ? "" : text.Replace("\r\n", "\n").Replace('\r', '\n'); }
+    private static string NormalizeText(string? text) => string.IsNullOrWhiteSpace(text) ? "" : text.Replace("\r\n", "\n").Replace('\r', '\n');
 
-	private static double Measure(string text, CairoFont font, double width) { return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width))); }
+    private static double Measure(string text, CairoFont font, double width) => Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width)));
 
-	public override void Dispose()
+    public override void Dispose()
 	{
 		Issue = null;
 		AutoResolve = null;

@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
@@ -30,9 +25,9 @@ public static class ImmAdvancedSchemaValidator
 		if (depth > MaximumDepth) { throw new InvalidDataException($"{prefix} exceeds the maximum Advanced nesting depth of {MaximumDepth}."); }
 		if (!SupportedTypes.Contains(schema.Type)) { throw new InvalidDataException($"{prefix}.Type '{schema.Type}' is not supported."); }
 
-		schema.Fields ??= new List<ImmAdvancedSchema>();
-		schema.Items ??= new List<ImmAdvancedSchema>();
-		schema.Options ??= new List<ImmConfigOption>();
+		schema.Fields ??= [];
+		schema.Items ??= [];
+		schema.Options ??= [];
 
 		if (objectField)
 		{
@@ -198,7 +193,7 @@ public static class ImmAdvancedSchemaValidator
 	{
 		if (schema.Options.Count == 0) { throw new InvalidDataException($"{prefix} Dropdown requires at least one Option."); }
 
-		List<JToken> values = new();
+		List<JToken> values = [];
 
 		for (int index = 0; index < schema.Options.Count; index++)
 		{
@@ -221,8 +216,5 @@ public static class ImmAdvancedSchemaValidator
 		if (schema.MaxItems.HasValue && schema.MaxItems.Value < schema.MinItems) { throw new InvalidDataException($"{prefix}.MaxItems cannot be less than MinItems."); }
 	}
 
-	private static bool HasPrimitiveMetadata(ImmAdvancedSchema schema)
-	{
-		return schema.Min.HasValue || schema.Max.HasValue || schema.Step.HasValue || schema.Options.Count > 0;
-	}
+    private static bool HasPrimitiveMetadata(ImmAdvancedSchema schema) => schema.Min.HasValue || schema.Max.HasValue || schema.Step.HasValue || schema.Options.Count > 0;
 }

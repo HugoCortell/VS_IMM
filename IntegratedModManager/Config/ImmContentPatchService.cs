@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -26,9 +21,9 @@ public sealed class ImmContentPatchService
 
 	private readonly Dictionary<string, Dictionary<string, JToken>> ActiveValues = new(StringComparer.OrdinalIgnoreCase);
 
-	private readonly List<CompiledBinding> Bindings = new();
+	private readonly List<CompiledBinding> Bindings = [];
 
-	private readonly HashSet<PatchSettingKey> PatchSettingsAffectingContent = new();
+	private readonly HashSet<PatchSettingKey> PatchSettingsAffectingContent = [];
 
 	public ImmContentPatchService(ICoreAPI api, ImmConfigRegistry registry, ImmPatchSettingsStore settingsStore, ImmExternalManagerOwnership externalManagers)
 	{
@@ -99,7 +94,7 @@ public sealed class ImmContentPatchService
 
 	public void Apply(ImmPatchTiming stage)
 	{
-		List<ResolvedBinding> resolved = new();
+		List<ResolvedBinding> resolved = [];
 
 		Dictionary<string, AssetLocation[]> patternMatches = new(StringComparer.Ordinal);
 
@@ -122,13 +117,13 @@ public sealed class ImmContentPatchService
 
 		if (resolved.Count == 0) { return; }
 
-		Dictionary<AssetLocation, List<CompiledBinding>> grouped = new();
+		Dictionary<AssetLocation, List<CompiledBinding>> grouped = [];
 
 		foreach (ResolvedBinding entry in resolved.OrderBy(item => item.Binding.Sequence).ThenBy(item => item.Location.ToString(), StringComparer.Ordinal))
 		{
 			if (!grouped.TryGetValue(entry.Location, out List<CompiledBinding>? list))
 			{
-				list = new List<CompiledBinding>();
+				list = [];
 				grouped[entry.Location] = list;
 			}
 
@@ -262,13 +257,13 @@ public sealed class ImmContentPatchService
 
 		string previousValue = worldConfig.GetAsString(BootstrapWorldConfigKey, "");
 		bool migratingLegacy = !string.IsNullOrWhiteSpace(previousValue) && !previousValue.StartsWith(BootstrapEncodingPrefix, StringComparison.Ordinal);
-		JObject snapshot = new();
+		JObject snapshot = [];
 
 		foreach (KeyValuePair<string, Dictionary<string, JToken>> mod in ActiveValues)
 		{
 			if (mod.Value.Count == 0) { continue; }
 
-			JObject values = new();
+			JObject values = [];
 			foreach (KeyValuePair<string, JToken> setting in mod.Value) { values[setting.Key] = setting.Value.DeepClone(); }
 
 			if (values.Count > 0) { snapshot[mod.Key] = values; }
@@ -289,7 +284,7 @@ public sealed class ImmContentPatchService
 	{
 		string? value = Api.World?.Config?.GetAsString(BootstrapWorldConfigKey, "");
 
-		if (string.IsNullOrWhiteSpace(value)) { return new JObject(); }
+		if (string.IsNullOrWhiteSpace(value)) { return []; }
 
 		try
 		{
@@ -302,7 +297,7 @@ public sealed class ImmContentPatchService
 			// Keep legacy raw JSON readable so old worlds and backups can load once and be rewritten server-side using the safe encoding.
 			return JObject.Parse(value);
 		}
-		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Active PatchSettings bootstrap snapshot could not be parsed: {0}", exception.Message); return new JObject(); }
+		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Active PatchSettings bootstrap snapshot could not be parsed: {0}", exception.Message); return []; }
 	}
 
 	private void CompileBindings()
@@ -362,7 +357,7 @@ public sealed class ImmContentPatchService
 
 		if (!patternMatches.TryGetValue(pattern, out AssetLocation[]? allMatches))
 		{
-			allMatches = GetPatternCandidates(pattern).Where(location => CategoryExistsOnThisSide(location) && WildcardUtil.Match(pattern, location.ToString())).OrderBy(location => location.ToString(), StringComparer.Ordinal).ToArray();
+			allMatches = [.. GetPatternCandidates(pattern).Where(location => CategoryExistsOnThisSide(location) && WildcardUtil.Match(pattern, location.ToString())).OrderBy(location => location.ToString(), StringComparer.Ordinal)];
 			patternMatches[pattern] = allMatches;
 		}
 

@@ -1,4 +1,3 @@
-#nullable enable
 
 using Vintagestory.API.Common;
 
@@ -11,11 +10,11 @@ public sealed class ImmContentPatchCoordinatorSystem : ModSystem
 	public ImmPatchSettingsStore PatchSettings { get; private set; } = null!;
 	public ImmContentPatchService ContentPatches { get; private set; } = null!;
 
-	public override bool ShouldLoad(EnumAppSide forSide) { return true; }
+    public override bool ShouldLoad(EnumAppSide forSide) => true;
 
-	public override double ExecuteOrder() { return -0.001; }
+    public override double ExecuteOrder() => -0.001;
 
-	public override void AssetsLoaded(ICoreAPI api)
+    public override void AssetsLoaded(ICoreAPI api)
 	{
 		ExternalManagers = new ImmExternalManagerOwnership();
 		ExternalManagers.Discover(api);
@@ -34,18 +33,18 @@ public sealed class ImmContentPatchCoordinatorSystem : ModSystem
 
 public sealed class ImmContentPatchBeforeSystem : ModSystem
 {
-	public override bool ShouldLoad(EnumAppSide forSide) { return true; }
+    public override bool ShouldLoad(EnumAppSide forSide) => true;
 
-	public override double ExecuteOrder() { return 0.049; }
+    public override double ExecuteOrder() => 0.049;
 
-	public override void AssetsLoaded(ICoreAPI api) { api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>() ?.ContentPatches.Apply(ImmPatchTiming.BeforePatches); }
+    public override void AssetsLoaded(ICoreAPI api) => api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>()?.ContentPatches.Apply(ImmPatchTiming.BeforePatches);
 }
 
 public sealed class ImmContentPatchAfterSystem : ModSystem
 {
-	public override bool ShouldLoad(EnumAppSide forSide) { return true; }
+    public override bool ShouldLoad(EnumAppSide forSide) => true;
 
-	public override double ExecuteOrder() { return 0.051; }
+    public override double ExecuteOrder() => 0.051;
 
-	public override void AssetsLoaded(ICoreAPI api) { api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>() ?.ContentPatches.Apply(ImmPatchTiming.AfterPatches); }
+    public override void AssetsLoaded(ICoreAPI api) => api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>()?.ContentPatches.Apply(ImmPatchTiming.AfterPatches);
 }

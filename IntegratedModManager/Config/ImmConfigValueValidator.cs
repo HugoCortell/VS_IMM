@@ -1,7 +1,3 @@
-#nullable enable
-
-using System;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -25,7 +21,7 @@ public static class ImmConfigValueValidator
 			return ImmAdvancedValueValidator.TryNormalizeValue(entry.Advanced, ImmConfigSource.PatchSettings, submitted, submitted, out normalized, out error);
 		}
 
-		ImmConfigControlPacket control = new() { Type = entry.Type, ConfigSource = ImmConfigSource.PatchSettings, HasMin = entry.Min.HasValue, Min = entry.Min ?? 0, HasMax = entry.Max.HasValue, Max = entry.Max ?? 0, HasStep = entry.Step.HasValue, Step = entry.Step ?? 0, ElementType = entry.ElementType ?? "", Options = entry.Options?.Select(option => new ImmConfigOptionPacket { Label = option.Label, ValueJson = option.Value?.ToString(Newtonsoft.Json.Formatting.None) ?? "null" }).ToArray() ?? Array.Empty<ImmConfigOptionPacket>() };
+		ImmConfigControlPacket control = new() { Type = entry.Type, ConfigSource = ImmConfigSource.PatchSettings, HasMin = entry.Min.HasValue, Min = entry.Min ?? 0, HasMax = entry.Max.HasValue, Max = entry.Max ?? 0, HasStep = entry.Step.HasValue, Step = entry.Step ?? 0, ElementType = entry.ElementType ?? "", Options = entry.Options?.Select(option => new ImmConfigOptionPacket { Label = option.Label, ValueJson = option.Value?.ToString(Newtonsoft.Json.Formatting.None) ?? "null" }).ToArray() ?? [] };
 		return TryNormalizeValue(control, entry.Default, submitted, out normalized, out error);
 	}
 
@@ -174,7 +170,7 @@ public static class ImmConfigValueValidator
 
 		if (value is not JArray array) { error = "Map must target an Array."; return false; }
 
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < array.Count; index++)
 		{
@@ -277,9 +273,9 @@ public static class ImmConfigValueValidator
 		return IsWholeNumber(token.Value<double>());
 	}
 
-	private static bool IsWholeNumber(double value) { return double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= StepTolerance; }
+    private static bool IsWholeNumber(double value) => double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= StepTolerance;
 
-	private static bool RequireTokenType(JToken token, JTokenType expected, string expectedName, out string error)
+    private static bool RequireTokenType(JToken token, JTokenType expected, string expectedName, out string error)
 	{
 		if (token.Type == expected) { error = ""; return true; }
 

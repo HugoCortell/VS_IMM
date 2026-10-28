@@ -1,13 +1,5 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ProtoBuf;
@@ -96,12 +88,11 @@ public sealed class ImmModUpdateService : IDisposable
 	{
 		if (Disposed || Api.Server.IsDedicated || !CanManage(player)) { return; }
 
-		LocalClientSnapshots = (packet.Mods ?? Array.Empty<ImmLocalInstalledModPacket>())
+		LocalClientSnapshots = [.. (packet.Mods ?? [])
 			.Where(mod => mod != null && !string.IsNullOrWhiteSpace(mod.ModId) && !string.IsNullOrWhiteSpace(mod.Version))
 			.GroupBy(mod => mod.ModId, StringComparer.OrdinalIgnoreCase)
 			.Select(group => group.First())
-			.Select(mod => new ImmInstalledModSnapshot(mod.ModId, string.IsNullOrWhiteSpace(mod.Name) ? mod.ModId : mod.Name, mod.Version, mod.SourceType))
-			.ToList();
+			.Select(mod => new ImmInstalledModSnapshot(mod.ModId, string.IsNullOrWhiteSpace(mod.Name) ? mod.ModId : mod.Name, mod.Version, mod.SourceType))];
 
 		if (Mode == ImmUpdateManagementMode.Manual)
 		{
@@ -284,12 +275,12 @@ public sealed class ImmModUpdateService : IDisposable
 		if (full) { mods = mods.Where(mod => !IsBuiltInMod(mod.ModId)); }
 		else { mods = mods.Where(mod => string.Equals(mod.ModId, IntegratedModManagerSystem.ModId, StringComparison.OrdinalIgnoreCase)); }
 
-		return mods.ToList();
+		return [.. mods];
 	}
 
 	private async Task<ImmModUpdateEntry[]> FetchUpdatesAsync(List<ImmInstalledModSnapshot> snapshots, CancellationToken cancellationToken)
 	{
-		List<ImmModUpdateEntry> updates = new();
+		List<ImmModUpdateEntry> updates = [];
 
 		foreach (ImmInstalledModSnapshot[] batch in snapshots.Chunk(CheckBatchSize))
 		{
@@ -334,7 +325,7 @@ public sealed class ImmModUpdateService : IDisposable
 			await ApplyHostedInstallabilityAsync(updates, cancellationToken).ConfigureAwait(false);
 		}
 
-		return updates.ToArray();
+		return [.. updates];
 	}
 
 	private async Task ApplyHostedInstallabilityAsync(List<ImmModUpdateEntry> updates, CancellationToken cancellationToken)
@@ -423,7 +414,7 @@ public sealed class ImmModUpdateService : IDisposable
 			return;
 		}
 
-		Caller caller = new() { Type = EnumCallerType.Console, CallerPrivileges = new[] { Privilege.controlserver } };
+		Caller caller = new() { Type = EnumCallerType.Console, CallerPrivileges = [Privilege.controlserver] };
 		TextCommandCallingArgs args = new() { Caller = caller, LanguageCode = "en" };
 		string command = $"/moddb install {entry.ModId}@{entry.TargetVersion} {GameVersion.ShortGameVersion}";
 
@@ -451,53 +442,43 @@ public sealed class ImmModUpdateService : IDisposable
 		}
 	}
 
-	private ImmModUpdateSummaryResponse CreateSummary()
-	{
-		return new ImmModUpdateSummaryResponse
-		{
-			Success = true,
-			Error = CheckError,
-			State = CheckState,
-			AvailableCount = Entries.Values.Count(entry => entry.State == ImmModUpdateEntryState.Available),
-			PendingRestartCount = Entries.Values.Count(entry => entry.State == ImmModUpdateEntryState.PendingRestart),
-			FullCacheReady = FullCacheReady,
-			RetractedCount = Entries.Values.Count(entry => entry.Retracted)
-		};
-	}
+    private ImmModUpdateSummaryResponse CreateSummary() => new()
+    {
+        Success = true,
+        Error = CheckError,
+        State = CheckState,
+        AvailableCount = Entries.Values.Count(entry => entry.State == ImmModUpdateEntryState.Available),
+        PendingRestartCount = Entries.Values.Count(entry => entry.State == ImmModUpdateEntryState.PendingRestart),
+        FullCacheReady = FullCacheReady,
+        RetractedCount = Entries.Values.Count(entry => entry.Retracted)
+    };
 
-	private ImmModUpdateCatalogResponse CreateCatalog()
-	{
-		return new ImmModUpdateCatalogResponse
-		{
-			Success = true,
-			Error = CheckError,
-			State = CheckState,
-			FullCacheReady = FullCacheReady,
-			Updates = Entries.Values
-				.OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-				.Select(entry => new ImmModUpdatePacket
-				{
-					ModId = entry.ModId,
-					Name = entry.Name,
-					InstalledVersion = entry.InstalledVersion,
-					TargetVersion = entry.TargetVersion,
-					SourceType = entry.SourceType,
-					State = entry.State,
-					Installable = IsInstallable(entry),
-					UnavailableReason = GetUnavailableReason(entry),
-					Retracted = entry.Retracted
-				})
-				.ToArray()
-		};
-	}
+    private ImmModUpdateCatalogResponse CreateCatalog() => new()
+    {
+        Success = true,
+        Error = CheckError,
+        State = CheckState,
+        FullCacheReady = FullCacheReady,
+        Updates = [.. Entries.Values
+                .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                .Select(entry => new ImmModUpdatePacket
+                {
+                    ModId = entry.ModId,
+                    Name = entry.Name,
+                    InstalledVersion = entry.InstalledVersion,
+                    TargetVersion = entry.TargetVersion,
+                    SourceType = entry.SourceType,
+                    State = entry.State,
+                    Installable = IsInstallable(entry),
+                    UnavailableReason = GetUnavailableReason(entry),
+                    Retracted = entry.Retracted
+                })]
+    };
 
-	private bool IsInstallable(ImmModUpdateEntry entry)
-	{
-		return entry.SourceType == EnumModSourceType.ZIP
-			&& (!Api.Server.Config.HostedMode || (Api.Server.Config.HostedModeAllowMods && entry.HostedInstallAllowed));
-	}
+    private bool IsInstallable(ImmModUpdateEntry entry) => entry.SourceType == EnumModSourceType.ZIP
+            && (!Api.Server.Config.HostedMode || (Api.Server.Config.HostedModeAllowMods && entry.HostedInstallAllowed));
 
-	private string GetUnavailableReason(ImmModUpdateEntry entry)
+    private string GetUnavailableReason(ImmModUpdateEntry entry)
 	{
 		if (Api.Server.Config.HostedMode && (!Api.Server.Config.HostedModeAllowMods || !entry.HostedInstallAllowed)) { return "integratedmodmanager:updates-unavailable-hosted"; }
 		if (entry.SourceType != EnumModSourceType.ZIP) { return "integratedmodmanager:updates-unavailable-development"; }
@@ -513,7 +494,7 @@ public sealed class ImmModUpdateService : IDisposable
 		if (!response.IsSuccessStatusCode) { throw new HttpRequestException($"ModDB returned HTTP {(int)response.StatusCode}."); }
 
 		JToken root = JToken.Parse(json);
-		JObject[] objects = EnumerateObjects(root).ToArray();
+		JObject[] objects = [.. EnumerateObjects(root)];
 		JObject? versionMatch = objects.FirstOrDefault(obj => string.Equals(GetString(obj, "modidstr", "modid", "identifier"), modId, StringComparison.OrdinalIgnoreCase)
 			&& string.Equals(GetString(obj, "modversion", "version"), targetVersion, StringComparison.OrdinalIgnoreCase));
 
@@ -580,37 +561,28 @@ public sealed class ImmModUpdateService : IDisposable
 		return information != null;
 	}
 
-	private static bool IsRetracted(ModInstallInformation information)
-	{
-		return information.ErrorCode == RetractedErrorCode
-			|| information.ErrorCode == ForcedRetractedErrorCode
-			|| !string.IsNullOrWhiteSpace(information.RetractionReason);
-	}
+    private static bool IsRetracted(ModInstallInformation information) => information.ErrorCode == RetractedErrorCode
+            || information.ErrorCode == ForcedRetractedErrorCode
+            || !string.IsNullOrWhiteSpace(information.RetractionReason);
 
-	private static bool IsBuiltInMod(string modId)
-	{
-		return string.Equals(modId, "game", StringComparison.OrdinalIgnoreCase)
-			|| string.Equals(modId, "creative", StringComparison.OrdinalIgnoreCase)
-			|| string.Equals(modId, "survival", StringComparison.OrdinalIgnoreCase);
-	}
+    private static bool IsBuiltInMod(string modId) => string.Equals(modId, "game", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(modId, "creative", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(modId, "survival", StringComparison.OrdinalIgnoreCase);
 
-	private static bool CanManage(IServerPlayer player) { return player.HasPrivilege(Privilege.controlserver); }
+    private static bool CanManage(IServerPlayer player) => player.HasPrivilege(Privilege.controlserver);
 
-	private static string EntryKey(string modId, string targetVersion) { return modId + "@" + targetVersion; }
+    private static string EntryKey(string modId, string targetVersion) => modId + "@" + targetVersion;
 
-	private static ImmModUpdateInstallResponse CreateInstallResponse(ImmModUpdateEntry entry, bool success, string error)
-	{
-		return new ImmModUpdateInstallResponse
-		{
-			Success = success,
-			Error = error,
-			ModId = entry.ModId,
-			TargetVersion = entry.TargetVersion,
-			State = entry.State
-		};
-	}
+    private static ImmModUpdateInstallResponse CreateInstallResponse(ImmModUpdateEntry entry, bool success, string error) => new()
+    {
+        Success = success,
+        Error = error,
+        ModId = entry.ModId,
+        TargetVersion = entry.TargetVersion,
+        State = entry.State
+    };
 
-	public void Dispose()
+    public void Dispose()
 	{
 		if (Disposed) { return; }
 		Disposed = true;
@@ -653,7 +625,7 @@ public sealed class ImmModUpdateClient : IDisposable
 	{
 		if (!Api.IsSinglePlayer) { return; }
 
-		ImmLocalInstalledModPacket[] mods = Api.ModLoader.Mods
+		ImmLocalInstalledModPacket[] mods = [.. Api.ModLoader.Mods
 			.Where(mod => mod.Info != null && !string.IsNullOrWhiteSpace(mod.Info.ModID) && !string.IsNullOrWhiteSpace(mod.Info.Version))
 			.GroupBy(mod => mod.Info.ModID, StringComparer.OrdinalIgnoreCase)
 			.Select(group => group.First())
@@ -663,20 +635,19 @@ public sealed class ImmModUpdateClient : IDisposable
 				Name = string.IsNullOrWhiteSpace(mod.Info.Name) ? mod.Info.ModID : mod.Info.Name,
 				Version = mod.Info.Version,
 				SourceType = mod.SourceType
-			})
-			.ToArray();
+			})];
 
 		Channel.SendPacket(new ImmModUpdateLocalInventoryPacket { Mods = mods });
 	}
 
-	public void RequestSummary() { Channel.SendPacket(new ImmModUpdateSummaryRequest()); }
-	public void RequestCatalog(bool requestFullCheck) { Channel.SendPacket(new ImmModUpdateCatalogRequest { RequestFullCheck = requestFullCheck }); }
-	public void RequestInstall(string modId, string targetVersion) { Channel.SendPacket(new ImmModUpdateInstallRequest { ModId = modId, TargetVersion = targetVersion }); }
-	public void RequestChangelog(string modId, string targetVersion) { Channel.SendPacket(new ImmModUpdateChangelogRequest { ModId = modId, TargetVersion = targetVersion }); }
+    public void RequestSummary() => Channel.SendPacket(new ImmModUpdateSummaryRequest());
+    public void RequestCatalog(bool requestFullCheck) => Channel.SendPacket(new ImmModUpdateCatalogRequest { RequestFullCheck = requestFullCheck });
+    public void RequestInstall(string modId, string targetVersion) => Channel.SendPacket(new ImmModUpdateInstallRequest { ModId = modId, TargetVersion = targetVersion });
+    public void RequestChangelog(string modId, string targetVersion) => Channel.SendPacket(new ImmModUpdateChangelogRequest { ModId = modId, TargetVersion = targetVersion });
 
-	private void Dispatch(Action action, string suffix) { Api.Event.EnqueueMainThreadTask(action, "integratedmodmanager-update-" + suffix); }
+    private void Dispatch(Action action, string suffix) => Api.Event.EnqueueMainThreadTask(action, "integratedmodmanager-update-" + suffix);
 
-	public void Dispose()
+    public void Dispose()
 	{
 		Api.Event.LevelFinalize -= OnLevelFinalize;
 
@@ -691,23 +662,20 @@ public static class ImmModUpdateNetwork
 {
 	public const string NetworkChannelCode = "integratedmodmanager-updates";
 
-	public static void RegisterNetwork(ICoreAPI api)
-	{
-		api.Network.RegisterChannel(NetworkChannelCode)
-			.RegisterMessageType<ImmModUpdateLocalInventoryPacket>()
-			.RegisterMessageType<ImmLocalInstalledModPacket>()
-			.RegisterMessageType<ImmModUpdateSummaryRequest>()
-			.RegisterMessageType<ImmModUpdateSummaryResponse>()
-			.RegisterMessageType<ImmModUpdateCatalogRequest>()
-			.RegisterMessageType<ImmModUpdateCatalogResponse>()
-			.RegisterMessageType<ImmModUpdatePacket>()
-			.RegisterMessageType<ImmModUpdateInstallRequest>()
-			.RegisterMessageType<ImmModUpdateInstallResponse>()
-			.RegisterMessageType<ImmModUpdateChangelogRequest>()
-			.RegisterMessageType<ImmModUpdateChangelogResponse>();
-	}
+    public static void RegisterNetwork(ICoreAPI api) => api.Network.RegisterChannel(NetworkChannelCode)
+            .RegisterMessageType<ImmModUpdateLocalInventoryPacket>()
+            .RegisterMessageType<ImmLocalInstalledModPacket>()
+            .RegisterMessageType<ImmModUpdateSummaryRequest>()
+            .RegisterMessageType<ImmModUpdateSummaryResponse>()
+            .RegisterMessageType<ImmModUpdateCatalogRequest>()
+            .RegisterMessageType<ImmModUpdateCatalogResponse>()
+            .RegisterMessageType<ImmModUpdatePacket>()
+            .RegisterMessageType<ImmModUpdateInstallRequest>()
+            .RegisterMessageType<ImmModUpdateInstallResponse>()
+            .RegisterMessageType<ImmModUpdateChangelogRequest>()
+            .RegisterMessageType<ImmModUpdateChangelogResponse>();
 
-	public static void StartServer(ICoreServerAPI api, ImmModUpdateService service)
+    public static void StartServer(ICoreServerAPI api, ImmModUpdateService service)
 	{
 		IServerNetworkChannel channel = api.Network.GetChannel(NetworkChannelCode);
 
@@ -722,7 +690,7 @@ public static class ImmModUpdateNetwork
 [ProtoContract]
 public sealed class ImmModUpdateLocalInventoryPacket
 {
-	[ProtoMember(1)] public ImmLocalInstalledModPacket[] Mods = Array.Empty<ImmLocalInstalledModPacket>();
+	[ProtoMember(1)] public ImmLocalInstalledModPacket[] Mods = [];
 }
 
 [ProtoContract]
@@ -764,7 +732,7 @@ public sealed class ImmModUpdateCatalogResponse
 	[ProtoMember(1)] public bool Success;
 	[ProtoMember(2)] public string Error = "";
 	[ProtoMember(3)] public ImmModUpdateCheckState State;
-	[ProtoMember(4)] public ImmModUpdatePacket[] Updates = Array.Empty<ImmModUpdatePacket>();
+	[ProtoMember(4)] public ImmModUpdatePacket[] Updates = [];
 	[ProtoMember(5)] public bool FullCacheReady;
 }
 

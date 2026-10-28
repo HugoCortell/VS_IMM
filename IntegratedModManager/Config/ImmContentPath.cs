@@ -1,10 +1,4 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Util;
 
@@ -190,9 +184,9 @@ public sealed class ImmContentPath
 		return new JValue(text);
 	}
 
-	private static string UnescapeProperty(string value) { return value.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal); }
+    private static string UnescapeProperty(string value) => value.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal);
 
-	private interface IPathStep
+    private interface IPathStep
 	{
 		IEnumerable<JToken> Apply(IEnumerable<JToken> input);
 	}

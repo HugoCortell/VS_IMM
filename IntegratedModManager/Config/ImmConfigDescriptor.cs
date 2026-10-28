@@ -1,6 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -23,11 +20,11 @@ public enum ImmConfigSource
 
 public sealed class ImmConfigDescriptor
 {
-	public List<ImmConfigBlock> Configuration = new();
-	public List<ImmDependencyEntry> Dependencies = new();
+	public List<ImmConfigBlock> Configuration = [];
+	public List<ImmDependencyEntry> Dependencies = [];
 
-	public Dictionary<string, JToken> Constants = new();
-	public List<ImmContentPatchTarget> ContentPatches = new();
+	public Dictionary<string, JToken> Constants = [];
+	public List<ImmContentPatchTarget> ContentPatches = [];
 }
 
 public sealed class ImmConfigBlock
@@ -40,7 +37,7 @@ public sealed class ImmConfigBlock
 	public ImmConfigSide ConfigSide = ImmConfigSide.Server;
 	public bool ParseDescriptions;
 
-	public List<ImmConfigEntry> Settings = new();
+	public List<ImmConfigEntry> Settings = [];
 }
 
 public sealed class ImmConfigEntry
@@ -55,7 +52,7 @@ public sealed class ImmConfigEntry
 	// PatchSettings are IMM-owned values referenced by stable codes.
 	public string Code = "";
 	public JToken? Default;
-	public List<ImmContentPatchTarget> Targets = new();
+	public List<ImmContentPatchTarget> Targets = [];
 
 	public ImmConfigSide? ConfigSide;
 
@@ -67,7 +64,7 @@ public sealed class ImmConfigEntry
 	// Only used when Type == "Advanced". Existing controls ignore this entirely.
 	public ImmAdvancedSchema? Advanced;
 
-	public List<ImmConfigOption> Options = new();
+	public List<ImmConfigOption> Options = [];
 }
 
 public sealed class ImmConfigOption

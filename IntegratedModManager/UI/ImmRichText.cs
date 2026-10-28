@@ -1,6 +1,3 @@
-#nullable enable
-
-using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
@@ -29,7 +26,7 @@ public static class ImmRichText
 		catch (Exception exception)
 		{
 			capi.Logger.Warning("[integratedmodmanager] Failed to parse VTML description: {0}", exception.Message);
-			components = new RichTextComponentBase[] { new RichTextComponent(capi, text, font) };
+			components = [new RichTextComponent(capi, text, font)];
 		}
 
 		return new GuiElementRichtext(capi, components, bounds);

@@ -1,11 +1,6 @@
-#nullable enable
-
-using System;
-using System.Linq;
 using Cairo;
 using IntegratedModManager.Config;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
@@ -130,7 +125,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 		double visibleHeight = buttonY - 18 - listY;
 		double availableWidth = Width - Padding * 2;
 
-		ImmModUpdatePacket[] updates = Catalog?.Updates ?? Array.Empty<ImmModUpdatePacket>();
+		ImmModUpdatePacket[] updates = Catalog?.Updates ?? [];
 		bool showCards = Catalog?.Success == true && Catalog.State == ImmModUpdateCheckState.Ready && updates.Length > 0;
 
 		double calculatedHeight = showCards ? 8 + updates.Length * (CardHeight + CardGap) : 40;
@@ -287,7 +282,7 @@ public sealed class GuiDialogModUpdates : GuiDialog
 		ScrollValue = value;
 		OnScrollbarChanged(ScrollValue);
 		GuiElementScrollbar? scrollbar = SingleComposer?.GetScrollbar("updatescroll");
-		if (scrollbar != null) { scrollbar.CurrentYPosition = ScrollValue; }
+		scrollbar?.CurrentYPosition = ScrollValue;
 	}
 
 	public override void Dispose()
@@ -510,12 +505,9 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 		}
 	}
 
-	private static double MeasureText(string text, CairoFont font, double width)
-	{
-		return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(100, width)));
-	}
+    private static double MeasureText(string text, CairoFont font, double width) => Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(100, width)));
 
-	private bool OnUpdateClicked()
+    private bool OnUpdateClicked()
 	{
 		if (Update == null || RequestingUpdate || !Update.Installable || Update.State != ImmModUpdateEntryState.Available) { return true; }
 
@@ -528,14 +520,11 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private bool OnCloseClicked() { TryClose(); return true; }
 
-	private bool Matches(string modId, string targetVersion)
-	{
-		return Update != null
-			&& string.Equals(Update.ModId, modId, StringComparison.OrdinalIgnoreCase)
-			&& string.Equals(Update.TargetVersion, targetVersion, StringComparison.OrdinalIgnoreCase);
-	}
+    private bool Matches(string modId, string targetVersion) => Update != null
+            && string.Equals(Update.ModId, modId, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(Update.TargetVersion, targetVersion, StringComparison.OrdinalIgnoreCase);
 
-	private void OnScrollbarChanged(float value)
+    private void OnScrollbarChanged(float value)
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds == null ? 0 : (float)ContentClipBounds.fixedHeight)));
 
@@ -558,7 +547,7 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 		ScrollValue = value;
 		OnScrollbarChanged(ScrollValue);
 		GuiElementScrollbar? scrollbar = SingleComposer?.GetScrollbar("changelogscroll");
-		if (scrollbar != null) { scrollbar.CurrentYPosition = ScrollValue; }
+		scrollbar?.CurrentYPosition = ScrollValue;
 	}
 
 	public override void Dispose()
@@ -569,18 +558,12 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 	}
 }
 
-internal sealed class GuiElementModUpdateCard : GuiElement
+internal sealed class GuiElementModUpdateCard(ICoreClientAPI capi, bool pendingRestart, bool retracted, ElementBounds bounds) : GuiElement(capi, bounds)
 {
-	private readonly bool PendingRestart;
-	private readonly bool Retracted;
+	private readonly bool PendingRestart = pendingRestart;
+	private readonly bool Retracted = retracted;
 
-	public GuiElementModUpdateCard(ICoreClientAPI capi, bool pendingRestart, bool retracted, ElementBounds bounds) : base(capi, bounds)
-	{
-		PendingRestart = pendingRestart;
-		Retracted = retracted;
-	}
-
-	public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
+    public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
 	{
 		// Visual chrome only. Controls layered over the card receive clicks.
 	}

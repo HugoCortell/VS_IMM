@@ -1,7 +1,3 @@
-#nullable enable
-
-using System;
-using System.Linq;
 using Vintagestory.API.Config;
 
 namespace IntegratedModManager.Config;
@@ -10,11 +6,11 @@ public static class ImmLocalization
 {
 	private const string Domain = IntegratedModManagerSystem.ModId;
 
-	public static string Get(string key, params object[] args) { return Lang.Get($"{Domain}:{key}", args); }
+    public static string Get(string key, params object[] args) => Lang.Get($"{Domain}:{key}", args);
 
-	public static string GetForLanguage(string languageCode, string key, params object[] args) { return Lang.GetL(languageCode, $"{Domain}:{key}", args); }
+    public static string GetForLanguage(string languageCode, string key, params object[] args) => Lang.GetL(languageCode, $"{Domain}:{key}", args);
 
-	public static string Resolve(string? text)
+    public static string Resolve(string? text)
 	{
 		if (string.IsNullOrEmpty(text)) { return ""; }
 		if (!LooksLikeLocalizationKey(text)) { return text; }
@@ -51,40 +47,34 @@ public static class ImmLocalization
 		return true;
 	}
 
-	public static void LocalizePage(ImmConfigPageResponse page)
-	{
-		LocalizePage(page, Resolve, (key, args) => Get(key, args));
-	}
+    public static void LocalizePage(ImmConfigPageResponse page) => LocalizePage(page, Resolve, (key, args) => Get(key, args));
 
-	public static void LocalizePage(ImmConfigPageResponse page, string languageCode)
-	{
-		LocalizePage(page, text => ResolveForLanguage(text, languageCode), (key, args) => GetForLanguage(languageCode, key, args));
-	}
+    public static void LocalizePage(ImmConfigPageResponse page, string languageCode) => LocalizePage(page, text => ResolveForLanguage(text, languageCode), (key, args) => GetForLanguage(languageCode, key, args));
 
-	private static void LocalizePage(ImmConfigPageResponse page, Func<string?, string> resolve, Func<string, object[], string> get)
+    private static void LocalizePage(ImmConfigPageResponse page, Func<string?, string> resolve, Func<string, object[], string> get)
 	{
 		page.Error = resolve(page.Error);
 
-		foreach (ImmConfigBlockPacket block in page.Configuration ?? Array.Empty<ImmConfigBlockPacket>())
+		foreach (ImmConfigBlockPacket block in page.Configuration ?? [])
 		{
 			block.ConfigLabel = resolve(block.ConfigLabel);
 			block.Description = resolve(block.Description);
 
-			foreach (ImmConfigControlPacket control in block.Controls ?? Array.Empty<ImmConfigControlPacket>())
+			foreach (ImmConfigControlPacket control in block.Controls ?? [])
 			{
 				control.Label = resolve(control.Label);
 				control.Description = resolve(control.Description);
 				control.UnavailableReason = resolve(control.UnavailableReason);
 
-				foreach (ImmConfigOptionPacket option in control.Options ?? Array.Empty<ImmConfigOptionPacket>()) { option.Label = resolve(option.Label); }
+				foreach (ImmConfigOptionPacket option in control.Options ?? []) { option.Label = resolve(option.Label); }
 			}
 		}
 
-		foreach (ImmDependencyPacket dependency in page.Dependencies ?? Array.Empty<ImmDependencyPacket>())
+		foreach (ImmDependencyPacket dependency in page.Dependencies ?? [])
 		{
 			dependency.Label = resolve(dependency.Label);
 			dependency.Description = resolve(dependency.Description);
-			dependency.ResolutionDescription = !string.IsNullOrWhiteSpace(dependency.ResolutionDescriptionKey) ? get(dependency.ResolutionDescriptionKey, (dependency.ResolutionDescriptionArgs ?? Array.Empty<string>()).Cast<object>().ToArray()) : resolve(dependency.ResolutionDescription);
+			dependency.ResolutionDescription = !string.IsNullOrWhiteSpace(dependency.ResolutionDescriptionKey) ? get(dependency.ResolutionDescriptionKey, [.. (dependency.ResolutionDescriptionArgs ?? []).Cast<object>()]) : resolve(dependency.ResolutionDescription);
 		}
 	}
 }

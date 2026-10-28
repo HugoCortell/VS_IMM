@@ -1,9 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Common;
@@ -115,7 +109,7 @@ public sealed class ImmPatchSettingsStore
 
 			if (section == null)
 			{
-				section = new JObject();
+				section = [];
 
 				preparedDocument[sectionName] = section;
 			}
@@ -164,16 +158,16 @@ public sealed class ImmPatchSettingsStore
 	{
 		string path = GetPath(modId);
 
-		if (!File.Exists(path)) { return new JObject(); }
+		if (!File.Exists(path)) { return []; }
 
 		try
 		{
 			string text = File.ReadAllText(path);
-			if (string.IsNullOrWhiteSpace(text)) { return new JObject(); }
+			if (string.IsNullOrWhiteSpace(text)) { return []; }
 
 			return JObject.Parse(text);
 		}
-		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Failed to read PatchSettings '{0}': {1}", path, exception.Message); return new JObject(); }
+		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Failed to read PatchSettings '{0}': {1}", path, exception.Message); return []; }
 	}
 
 	private void PruneDocument(string modId, JObject document)
@@ -211,11 +205,11 @@ public sealed class ImmPatchSettingsStore
 		return entry.Default?.DeepClone() ?? JValue.CreateNull();
 	}
 
-	private static bool IsDefaultValue(ImmConfigEntry entry, JToken value) { return JToken.DeepEquals(value, GetNormalizedDefault(entry)); }
+    private static bool IsDefaultValue(ImmConfigEntry entry, JToken value) => JToken.DeepEquals(value, GetNormalizedDefault(entry));
 
-	private static string GetSectionName(ImmConfigSide side) { return side == ImmConfigSide.Server ? "Server" : "Client"; }
+    private static string GetSectionName(ImmConfigSide side) => side == ImmConfigSide.Server ? "Server" : "Client";
 
-	private static void ValidateModIdForPath(string modId)
+    private static void ValidateModIdForPath(string modId)
 	{
 		if (string.IsNullOrWhiteSpace(modId) || modId.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || modId.Contains('/') || modId.Contains('\\') || modId is "." or "..")
 		{

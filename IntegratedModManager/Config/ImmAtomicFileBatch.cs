@@ -1,22 +1,15 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 namespace IntegratedModManager.Config;
 
 public sealed class ImmAtomicFileBatch
 {
-	private readonly List<FileChange> Changes = new();
+	private readonly List<FileChange> Changes = [];
 	private readonly HashSet<string> Paths = new(StringComparer.OrdinalIgnoreCase);
 
-	public void Write(string path, string contents) { Add(path, contents); }
+    public void Write(string path, string contents) => Add(path, contents);
 
-	public void Delete(string path) { Add(path, contents: null); }
+    public void Delete(string path) => Add(path, contents: null);
 
-	public bool TryCommit(out string error)
+    public bool TryCommit(out string error)
 	{
 		if (Changes.Count == 0) { error = ""; return true; }
 
@@ -106,7 +99,7 @@ public sealed class ImmAtomicFileBatch
 
 	private string Rollback()
 	{
-		List<string> errors = new();
+		List<string> errors = [];
 
 		foreach (FileChange change in Changes.Where(change => change.Committed).Reverse())
 		{

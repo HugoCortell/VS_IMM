@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Vintagestory.API.Common;
 
 namespace IntegratedModManager.Config;
@@ -52,7 +47,7 @@ internal sealed class ImmConfigKitOwnershipDetector : IImmExternalManagerDetecto
 			return;
 		}
 
-		string[] claimedMods = claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase).ToArray();
+		string[] claimedMods = [.. claimed.OrderBy(modId => modId, StringComparer.OrdinalIgnoreCase)];
 
 		foreach (string modId in claimedMods) { ownership.AddClaim(ManagerId, ManagerName, modId); }
 

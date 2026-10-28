@@ -1,9 +1,4 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 
 namespace IntegratedModManager.Config;
@@ -57,10 +52,10 @@ public sealed class ImmPatchExpression
 		return new ImmPatchExpression(root, parser.SettingReferences, parser.ConstantReferences, parser.BareReferences);
 	}
 
-	public JToken Evaluate(ImmPatchExpressionContext context) { return Root.Evaluate(context); }
-	public bool EvaluateBoolean(ImmPatchExpressionContext context) { return AsBoolean(Root.Evaluate(context)); }
+    public JToken Evaluate(ImmPatchExpressionContext context) => Root.Evaluate(context);
+    public bool EvaluateBoolean(ImmPatchExpressionContext context) => AsBoolean(Root.Evaluate(context));
 
-	private abstract class ExpressionNode
+    private abstract class ExpressionNode
 	{
 		public virtual bool UsesOwningSetting => false;
 		public virtual bool UsesCurrentValue => false;
@@ -73,8 +68,8 @@ public sealed class ImmPatchExpression
 		private readonly JToken Value;
 		public LiteralNode(JToken value) { Value = value; }
 
-		public override JToken Evaluate(ImmPatchExpressionContext context) { return Value.DeepClone(); }
-	}
+        public override JToken Evaluate(ImmPatchExpressionContext context) => Value.DeepClone();
+    }
 
 	private enum ReferenceKind
 	{
@@ -231,8 +226,8 @@ public sealed class ImmPatchExpression
 		public override bool UsesOwningSetting => Condition.UsesOwningSetting || WhenTrue.UsesOwningSetting || WhenFalse.UsesOwningSetting;
 		public override bool UsesCurrentValue => Condition.UsesCurrentValue || WhenTrue.UsesCurrentValue || WhenFalse.UsesCurrentValue;
 
-		public override JToken Evaluate(ImmPatchExpressionContext context) { return AsBoolean(Condition.Evaluate(context)) ? WhenTrue.Evaluate(context) : WhenFalse.Evaluate(context); }
-	}
+        public override JToken Evaluate(ImmPatchExpressionContext context) => AsBoolean(Condition.Evaluate(context)) ? WhenTrue.Evaluate(context) : WhenFalse.Evaluate(context);
+    }
 
 	private sealed class FunctionNode : ExpressionNode
 	{
@@ -303,7 +298,7 @@ public sealed class ImmPatchExpression
 				return !ValuesEqual(Arguments[0].Evaluate(context), Arguments[1].Evaluate(context)) ? Arguments[2].Evaluate(context) : Arguments[3].Evaluate(context);
 			}
 
-			JToken[] values = Arguments.Select(argument => argument.Evaluate(context)).ToArray();
+			JToken[] values = [.. Arguments.Select(argument => argument.Evaluate(context))];
 
 			double Number(int index) => RequireNumber(values[index]);
 
@@ -919,7 +914,7 @@ public sealed class ImmPatchExpression
 		{
 			Expect(TokenKind.LeftParen);
 
-			List<ExpressionNode> arguments = new();
+			List<ExpressionNode> arguments = [];
 
 			if (!Take(TokenKind.RightParen))
 			{
@@ -938,7 +933,7 @@ public sealed class ImmPatchExpression
 
 			ValidateFunctionArity(lower, arguments.Count);
 
-			return new FunctionNode(name, arguments.ToArray());
+			return new FunctionNode(name, [.. arguments]);
 		}
 
 		private static void ValidateFunctionArity(string name, int count)
@@ -1028,6 +1023,6 @@ public sealed class ImmPatchExpression
 			Advance();
 		}
 
-		private void Advance() { Current = Lexer.Next(); }
-	}
+        private void Advance() => Current = Lexer.Next();
+    }
 }

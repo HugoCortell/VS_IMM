@@ -1,12 +1,5 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 namespace IntegratedModManager.Config;
@@ -34,14 +27,14 @@ public sealed class ImmConfigService
 	{
 		bool canManageServer = player.HasPrivilege(Privilege.controlserver);
 
-		ImmServerModPacket[] mods = Api.ModLoader.Mods
+		ImmServerModPacket[] mods = [.. Api.ModLoader.Mods
 			.Where(mod => !string.IsNullOrWhiteSpace(mod.Info?.ModID))
 			.Select(mod =>
 			{
 				string modId = mod.Info!.ModID;
 				bool hasDescriptor = Registry.TryGet(modId, out ImmConfigDescriptor descriptor);
 				bool hasConfiguration = hasDescriptor && (canManageServer ? descriptor.Configuration.Count > 0 : ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client));
-				ImmActiveDependency[] active = canManageServer ? Dependencies.GetForMod(modId) : Array.Empty<ImmActiveDependency>();
+				ImmActiveDependency[] active = canManageServer ? Dependencies.GetForMod(modId) : [];
 
 				return new ImmServerModPacket
 				{
@@ -52,8 +45,7 @@ public sealed class ImmConfigService
 					ErrorCount = active.Count(dependency => dependency.Severity == ImmDependencySeverity.Error)
 				};
 			})
-			.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)
-			.ToArray();
+			.OrderBy(mod => mod.Name, StringComparer.OrdinalIgnoreCase)];
 
 		return new ImmConfigCatalogResponse { Success = true, CanManageServer = canManageServer, Mods = mods };
 	}
@@ -73,8 +65,8 @@ public sealed class ImmConfigService
 				Success = true,
 				CanManageServer = canManageServer,
 				ModId = request.ModId,
-				Configuration = Array.Empty<ImmConfigBlockPacket>(),
-				Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : Array.Empty<ImmDependencyPacket>(),
+				Configuration = [],
+				Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : [],
 				ConfigurationExternallyManaged = true,
 				ExternalManagerActive = ExternalManagers.AnyManagerActive,
 				ExternalManagerName = ExternalManagers.GetPrimaryManagerName(Api, request.ModId)
@@ -84,10 +76,10 @@ public sealed class ImmConfigService
 		if (!canManageServer && !ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client)) { return PageError(request.ModId, "integratedmodmanager:error-no-client-configuration"); }
 
 		Dictionary<string, JObject?> serverConfigs = new(StringComparer.OrdinalIgnoreCase);
-		JObject patchSettingsDocument = canManageServer ? PatchSettings.ReadDocument(request.ModId) : new JObject();
+		JObject patchSettingsDocument = canManageServer ? PatchSettings.ReadDocument(request.ModId) : [];
 
 		int globalIndex = 0;
-		List<ImmConfigBlockPacket> blocks = new();
+		List<ImmConfigBlockPacket> blocks = [];
 
 		for (int blockIndex = 0; blockIndex < descriptor.Configuration.Count; blockIndex++)
 		{
@@ -107,7 +99,7 @@ public sealed class ImmConfigService
 
 			if (canManageServer && block.ConfigSource == ImmConfigSource.ModConfig && block.ParseDescriptions && block.ConfigSide == ImmConfigSide.Server && config != null) { blockDescription = ReadRootDescription(config); }
 
-			List<ImmConfigControlPacket> controls = new();
+			List<ImmConfigControlPacket> controls = [];
 
 			for (int entryIndex = 0; entryIndex < block.Settings.Count; entryIndex++)
 			{
@@ -141,14 +133,14 @@ public sealed class ImmConfigService
 
 			if (canManageServer || controls.Count > 0)
 			{
-				ImmConfigBlockPacket blockPacket = ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, controls.ToArray());
+				ImmConfigBlockPacket blockPacket = ImmConfigPacketFactory.CreateBlockPacket(blockIndex, block, [.. controls]);
 
 				blockPacket.Description = blockDescription;
 				blocks.Add(blockPacket);
 			}
 		}
 
-		return new ImmConfigPageResponse { Success = true, CanManageServer = canManageServer, ModId = request.ModId, Configuration = blocks.ToArray(), Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : Array.Empty<ImmDependencyPacket>(), ExternalManagerActive = ExternalManagers.AnyManagerActive };
+		return new ImmConfigPageResponse { Success = true, CanManageServer = canManageServer, ModId = request.ModId, Configuration = [.. blocks], Dependencies = canManageServer ? BuildDependencyPackets(request.ModId) : [], ExternalManagerActive = ExternalManagers.AnyManagerActive };
 	}
 
 	public ImmConfigApplyResponse Apply(IServerPlayer player, ImmConfigApplyRequest request)
@@ -160,12 +152,12 @@ public sealed class ImmConfigService
 		Dictionary<int, ServerControlLocation> controls = BuildServerControlIndex(descriptor);
 		Dictionary<string, JObject?> configs = new(StringComparer.OrdinalIgnoreCase);
 		HashSet<string> changedFiles = new(StringComparer.OrdinalIgnoreCase);
-		HashSet<int> seenIndexes = new();
-		List<PreparedServerChange> preparedConfigChanges = new();
-		List<PreparedPatchSettingChange> preparedPatchChanges = new();
+		HashSet<int> seenIndexes = [];
+		List<PreparedServerChange> preparedConfigChanges = [];
+		List<PreparedPatchSettingChange> preparedPatchChanges = [];
 		JObject patchSettingsDocument = PatchSettings.ReadDocument(request.ModId);
 
-		foreach (ImmConfigChangePacket change in request.Changes ?? Array.Empty<ImmConfigChangePacket>())
+		foreach (ImmConfigChangePacket change in request.Changes ?? [])
 		{
 			if (!seenIndexes.Add(change.Index) || !controls.TryGetValue(change.Index, out ServerControlLocation location)) { return ApplyError(request.ModId, $"Configuration index {change.Index} is invalid."); }
 			if (location.Control.ConfigSide != ImmConfigSide.Server) { return ApplyError(request.ModId, $"{location.Control.Label}: setting is not server-owned."); }
@@ -240,7 +232,7 @@ public sealed class ImmConfigService
 
 	private ImmDependencyPacket[] BuildDependencyPackets(string sourceModId)
 	{
-		List<ImmDependencyPacket> packets = new();
+		List<ImmDependencyPacket> packets = [];
 
 		foreach (ImmActiveDependency active in Dependencies.GetForMod(sourceModId))
 		{
@@ -253,7 +245,7 @@ public sealed class ImmConfigService
 			packets.Add(new ImmDependencyPacket { RuntimeId = active.RuntimeId, Label = entry.Label, Description = entry.Description ?? "", Severity = active.Severity, HasResolution = resolution != null, ResolutionType = resolution?.Type ?? ImmDependencyResolutionType.Unknown, ResolutionDescription = "", ResolutionDescriptionKey = resolutionKey, ResolutionDescriptionArgs = resolutionArgs });
 		}
 
-		return packets.ToArray();
+		return [.. packets];
 	}
 
 	private static (string Key, string[] Args)
@@ -358,7 +350,7 @@ public sealed class ImmConfigService
 	private static Dictionary<int, ServerControlLocation>
 		BuildServerControlIndex(ImmConfigDescriptor descriptor)
 	{
-		Dictionary<int, ServerControlLocation> result = new();
+		Dictionary<int, ServerControlLocation> result = [];
 
 		int globalIndex = 0;
 
@@ -381,9 +373,9 @@ public sealed class ImmConfigService
 		return result;
 	}
 
-	private static string ReadRootDescription(JObject config) { return config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : ""; }
+    private static string ReadRootDescription(JObject config) => config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 
-	private static string ReadSettingDescription(JToken target)
+    private static string ReadSettingDescription(JToken target)
 	{
 		if (target.Parent is not JProperty property || property.Parent is not JObject parent) { return ""; }
 
@@ -392,9 +384,9 @@ public sealed class ImmConfigService
 		return parent.TryGetValue(descriptionName, StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 	}
 
-	private static ImmConfigPageResponse PageError(string modId, string error) { return new ImmConfigPageResponse { ModId = modId, Error = error }; }
-	private static ImmConfigApplyResponse ApplyError(string modId, string error) { return new ImmConfigApplyResponse { ModId = modId, Error = error }; }
-	private sealed record ServerControlLocation(ImmConfigBlock Block, ImmConfigEntry Entry, ImmConfigControlPacket Control);
+    private static ImmConfigPageResponse PageError(string modId, string error) => new() { ModId = modId, Error = error };
+    private static ImmConfigApplyResponse ApplyError(string modId, string error) => new() { ModId = modId, Error = error };
+    private sealed record ServerControlLocation(ImmConfigBlock Block, ImmConfigEntry Entry, ImmConfigControlPacket Control);
 	private sealed record PreparedServerChange(JToken Target, JToken Value);
 	private sealed record PreparedPatchSettingChange(ImmConfigEntry Entry, ImmConfigSide Side, JToken Value);
 }

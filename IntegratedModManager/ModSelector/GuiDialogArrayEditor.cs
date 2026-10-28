@@ -1,7 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Cairo;
 using IntegratedModManager.Config;
@@ -12,7 +8,7 @@ using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogArrayEditor : GuiDialog
+public sealed class GuiDialogArrayEditor(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double PreferredWidth = 620;
 	private const double PreferredHeight = 560;
@@ -31,8 +27,8 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 	private const double BottomPadding = 18;
 	private const double MouseWheelStep = 64;
 
-	private readonly List<string> Rows = new();
-	private readonly Dictionary<int, GuiElementImmTextInput> Inputs = new();
+	private readonly List<string> Rows = [];
+	private readonly Dictionary<int, GuiElementImmTextInput> Inputs = [];
 
 	private Action<string>? ValueChanged;
 	private string Label = "";
@@ -57,9 +53,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogArrayEditor(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(string label, string elementType, string valueJson, Action<string> valueChanged)
+    public bool Show(string label, string elementType, string valueJson, Action<string> valueChanged)
 	{
 		TryClose();
 
@@ -293,7 +287,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 
 	private void TryCommit()
 	{
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < Rows.Count; index++)
 		{
@@ -354,9 +348,9 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 		}
 	}
 
-	private string FormatValue(JToken value) { return ElementType switch { "Boolean" => value.Value<bool>() ? "true" : "false", "Integer" => value.Value<int>().ToString(CultureInfo.InvariantCulture), "Decimal" => value.Value<double>().ToString("G", GlobalConstants.DefaultCultureInfo), "String" => value.Value<string>() ?? "", _ => value.ToString(Formatting.None) }; }
+    private string FormatValue(JToken value) => ElementType switch { "Boolean" => value.Value<bool>() ? "true" : "false", "Integer" => value.Value<int>().ToString(CultureInfo.InvariantCulture), "Decimal" => value.Value<double>().ToString("G", GlobalConstants.DefaultCultureInfo), "String" => value.Value<string>() ?? "", _ => value.ToString(Formatting.None) };
 
-	private void OnScrollbarChanged(float value)
+    private void OnScrollbarChanged(float value)
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (float)(ClipBounds?.fixedHeight ?? 0)));
 

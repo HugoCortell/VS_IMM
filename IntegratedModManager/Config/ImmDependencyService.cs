@@ -1,8 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -35,8 +30,8 @@ public sealed class ImmDependencyService
 	private readonly bool OptimumActive;
 	private readonly bool StratumActive;
 
-	private List<ImmActiveDependency> Active = new();
-	private readonly HashSet<int> PendingRestartRuntimeIds = new();
+	private List<ImmActiveDependency> Active = [];
+	private readonly HashSet<int> PendingRestartRuntimeIds = [];
 	public IReadOnlyList<ImmActiveDependency> ActiveDependencies => Active;
 
 	public int WarningCount => Active.Count(dependency => dependency.Severity == ImmDependencySeverity.Warning);
@@ -54,14 +49,14 @@ public sealed class ImmDependencyService
 		StratumActive = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false) != null;
 	}
 
-	public ImmActiveDependency[] GetForMod(string sourceModId) { return Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase)).ToArray(); }
+    public ImmActiveDependency[] GetForMod(string sourceModId) => [.. Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase))];
 
-	public void EvaluateAll()
+    public void EvaluateAll()
 	{
 		Dictionary<string, JObject?> configs = new(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, int> recipeCounts = new(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, CollectibleObject?> collectibles = new(StringComparer.OrdinalIgnoreCase);
-		List<ImmActiveDependency> active = new();
+		List<ImmActiveDependency> active = [];
 
 		foreach (ImmRegisteredDependency registered in Registry.Dependencies)
 		{

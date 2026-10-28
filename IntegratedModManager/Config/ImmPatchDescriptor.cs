@@ -1,6 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -57,7 +54,7 @@ public sealed class ImmContentPatchTarget
 	public string AssetPattern = "";
 
 	public string Path = "";
-	public List<string> Paths = new();
+	public List<string> Paths = [];
 
 	public ImmPatchOperation Operation = ImmPatchOperation.Replace;
 	public ImmPatchTiming Timing = ImmPatchTiming.Auto;

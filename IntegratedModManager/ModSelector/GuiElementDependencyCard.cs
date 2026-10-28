@@ -1,4 +1,3 @@
-#nullable enable
 
 using Cairo;
 using IntegratedModManager.Config;
@@ -6,18 +5,12 @@ using Vintagestory.API.Client;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiElementDependencyCard : GuiElement
+public sealed class GuiElementDependencyCard(ICoreClientAPI capi, ImmDependencySeverity severity, bool pendingRestart, ElementBounds bounds) : GuiElement(capi, bounds)
 {
-	private readonly ImmDependencySeverity Severity;
-	private readonly bool PendingRestart;
+	private readonly ImmDependencySeverity Severity = severity;
+	private readonly bool PendingRestart = pendingRestart;
 
-	public GuiElementDependencyCard(ICoreClientAPI capi, ImmDependencySeverity severity, bool pendingRestart, ElementBounds bounds) : base(capi, bounds)
-	{
-		Severity = severity;
-		PendingRestart = pendingRestart;
-	}
-
-	public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
+    public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
 	{
 		// Visual chrome only. Do not consume clicks intended for controls layered inside the card.
 	}

@@ -1,6 +1,3 @@
-#nullable enable
-
-using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
@@ -46,11 +43,9 @@ internal static class ImmClipRender
 	}
 }
 
-public sealed class GuiElementImmTextInput : GuiElementTextInput
+public sealed class GuiElementImmTextInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : GuiElementTextInput(capi, bounds, onTextChanged, font)
 {
-	public GuiElementImmTextInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : base(capi, bounds, onTextChanged, font) { }
-
-	public override void RenderInteractiveElements(float deltaTime)
+    public override void RenderInteractiveElements(float deltaTime)
 	{
 		if (!ImmClipRender.TryBegin(api, Bounds, InsideClipBounds, requireFullyInside: true, out bool clipPushed)) { return; }
 
@@ -59,11 +54,9 @@ public sealed class GuiElementImmTextInput : GuiElementTextInput
 	}
 }
 
-public sealed class GuiElementImmNumberInput : GuiElementNumberInput
+public sealed class GuiElementImmNumberInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : GuiElementNumberInput(capi, bounds, onTextChanged, font)
 {
-	public GuiElementImmNumberInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : base(capi, bounds, onTextChanged, font) { }
-
-	public override void RenderInteractiveElements(float deltaTime)
+    public override void RenderInteractiveElements(float deltaTime)
 	{
 		if (!ImmClipRender.TryBegin(api, Bounds, InsideClipBounds, requireFullyInside: true, out bool clipPushed)) { return; }
 
@@ -72,11 +65,9 @@ public sealed class GuiElementImmNumberInput : GuiElementNumberInput
 	}
 }
 
-public sealed class GuiElementImmSlider : GuiElementSlider
+public sealed class GuiElementImmSlider(ICoreClientAPI capi, ActionConsumable<int> onNewSliderValue, ElementBounds bounds) : GuiElementSlider(capi, onNewSliderValue, bounds)
 {
-	public GuiElementImmSlider(ICoreClientAPI capi, ActionConsumable<int> onNewSliderValue, ElementBounds bounds) : base(capi, onNewSliderValue, bounds) { }
-
-	public override void RenderInteractiveElements(float deltaTime)
+    public override void RenderInteractiveElements(float deltaTime)
 	{
 		if (!ImmClipRender.TryBegin(api, Bounds, InsideClipBounds, requireFullyInside: false, out bool clipPushed)) { return; }
 
@@ -85,11 +76,9 @@ public sealed class GuiElementImmSlider : GuiElementSlider
 	}
 }
 
-public sealed class GuiElementImmSwitch : GuiElementSwitch
+public sealed class GuiElementImmSwitch(ICoreClientAPI capi, Action<bool> onToggled, ElementBounds bounds, double size = 30, double padding = 4) : GuiElementSwitch(capi, onToggled, bounds, size, padding)
 {
-	public GuiElementImmSwitch(ICoreClientAPI capi, Action<bool> onToggled, ElementBounds bounds, double size = 30, double padding = 4) : base(capi, onToggled, bounds, size, padding) { }
-
-	public override void RenderInteractiveElements(float deltaTime)
+    public override void RenderInteractiveElements(float deltaTime)
 	{
 		if (!ImmClipRender.TryBegin(api, Bounds, InsideClipBounds, requireFullyInside: false, out bool clipPushed)) { return; }
 
@@ -98,11 +87,9 @@ public sealed class GuiElementImmSwitch : GuiElementSwitch
 	}
 }
 
-public sealed class GuiElementImmDropDown : GuiElementDropDown
+public sealed class GuiElementImmDropDown(ICoreClientAPI capi, string[] values, string[] names, int selectedIndex, SelectionChangedDelegate onSelectionChanged, ElementBounds bounds, CairoFont font, bool multiSelect) : GuiElementDropDown(capi, values, names, selectedIndex, onSelectionChanged, bounds, font, multiSelect)
 {
-	public GuiElementImmDropDown(ICoreClientAPI capi, string[] values, string[] names, int selectedIndex, SelectionChangedDelegate onSelectionChanged, ElementBounds bounds, CairoFont font, bool multiSelect) : base(capi, values, names, selectedIndex, onSelectionChanged, bounds, font, multiSelect) { }
-
-	public override void RenderInteractiveElements(float deltaTime)
+    public override void RenderInteractiveElements(float deltaTime)
 	{
 		if (!ImmClipRender.TryBegin(api, Bounds, InsideClipBounds, requireFullyInside: false, out bool clipPushed)) { return; }
 

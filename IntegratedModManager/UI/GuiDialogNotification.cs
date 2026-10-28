@@ -1,13 +1,9 @@
-#nullable enable
-
-using System;
 using IntegratedModManager.Config;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace IntegratedModManager.UI;
 
-public sealed class GuiDialogNotification : GuiDialog
+public sealed class GuiDialogNotification(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double Width = 420;
 	private const double TextPadding = 20;
@@ -25,11 +21,9 @@ public sealed class GuiDialogNotification : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogNotification(ICoreClientAPI capi) : base(capi) { }
+    public bool Show(string description, string buttonLabel) => Show("", description, buttonLabel);
 
-	public bool Show(string description, string buttonLabel) { return Show("", description, buttonLabel); }
-
-	public bool Show(string title, string description, string buttonLabel)
+    public bool Show(string title, string description, string buttonLabel)
 	{
 		Title = title ?? "";
 		Description = description ?? "";
@@ -56,7 +50,7 @@ public sealed class GuiDialogNotification : GuiDialog
 		ElementBounds backgroundBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
 
 		backgroundBounds.BothSizing = ElementSizing.FitToChildren;
-		backgroundBounds.WithChildren(titleHeight > 0 ? new[] { titleBounds, textBounds, buttonBounds } : new[] { textBounds, buttonBounds });
+		backgroundBounds.WithChildren(titleHeight > 0 ? [titleBounds, textBounds, buttonBounds] : [textBounds, buttonBounds]);
 
 		SingleComposer?.Dispose();
 

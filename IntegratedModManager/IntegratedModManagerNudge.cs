@@ -1,6 +1,3 @@
-#nullable enable
-
-using System;
 using Cairo;
 using IntegratedModManager.Config;
 using IntegratedModManager.UI;
@@ -13,7 +10,7 @@ using Vintagestory.API.Server;
 
 namespace IntegratedModManager;
 
-public sealed class IntegratedModManagerNudge : IRenderer
+public sealed class IntegratedModManagerNudge(ICoreClientAPI clientApi) : IRenderer
 {
 	public const string NetworkChannelCode = "integratedmodmanager-nudge";
 	public const string DismissedModDataKey = "integratedmodmanager-nudge-dismissed";
@@ -28,7 +25,7 @@ public sealed class IntegratedModManagerNudge : IRenderer
 	private const float NudgeGap = 12f;
 	private const float MinimumScreenFraction = 0.14f;
 
-	private readonly ICoreClientAPI ClientApi;
+	private readonly ICoreClientAPI ClientApi = clientApi;
 
 	private IClientNetworkChannel? ClientChannel;
 	private LoadedTexture? TitleTexture;
@@ -75,11 +72,9 @@ public sealed class IntegratedModManagerNudge : IRenderer
 		[ProtoMember(1)] public byte Request = 1;
 	}
 
-	public IntegratedModManagerNudge(ICoreClientAPI clientApi) { ClientApi = clientApi; }
+    public static void RegisterNetwork(ICoreAPI api) => api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<NudgeStateRequest>().RegisterMessageType<NudgeStateResponse>().RegisterMessageType<NudgeDismissRequest>();
 
-	public static void RegisterNetwork(ICoreAPI api) { api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<NudgeStateRequest>().RegisterMessageType<NudgeStateResponse>().RegisterMessageType<NudgeDismissRequest>(); }
-
-	public static void StartServer(ICoreServerAPI api, ImmDependencyService dependencyService)
+    public static void StartServer(ICoreServerAPI api, ImmDependencyService dependencyService)
 	{
 		IServerNetworkChannel channel = api.Network.GetChannel(NetworkChannelCode);
 

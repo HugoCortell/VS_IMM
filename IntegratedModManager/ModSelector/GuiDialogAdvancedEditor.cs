@@ -1,9 +1,4 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Cairo;
 using IntegratedModManager.Config;
@@ -15,7 +10,7 @@ using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogAdvancedEditor : GuiDialog
+public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double PreferredWidth = 620;
 	private const double PreferredHeight = 720;
@@ -42,9 +37,9 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 	private const double StateButtonWidth = 78;
 	private const double SmallGap = 6;
 
-	private readonly List<NavigationFrame> Navigation = new();
-	private readonly List<Action> Initializers = new();
-	private readonly Dictionary<JProperty, string> PendingDictionaryKeys = new();
+	private readonly List<NavigationFrame> Navigation = [];
+	private readonly List<Action> Initializers = [];
+	private readonly Dictionary<JProperty, string> PendingDictionaryKeys = [];
 
 	private ImmAdvancedSchema? RootSchema;
 	private ImmConfigSource ConfigSource;
@@ -70,9 +65,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogAdvancedEditor(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(string label, string schemaJson, string valueJson, ImmConfigSource configSource, Action<string> valueChanged)
+    public bool Show(string label, string schemaJson, string valueJson, ImmConfigSource configSource, Action<string> valueChanged)
 	{
 		TryClose();
 
@@ -264,12 +257,9 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		return y + (CanAdd(schema, count) ? 42 + CardGap : 0) + 4;
 	}
 
-	private double MeasureTuple(ImmAdvancedSchema schema, JArray? tuple, double contentWidth)
-	{
-		return Math.Max(48, 4 + schema.Items.Count * (76 + CardGap));
-	}
+    private double MeasureTuple(ImmAdvancedSchema schema, JArray? tuple, double contentWidth) => Math.Max(48, 4 + schema.Items.Count * (76 + CardGap));
 
-	private double MeasureRootPrimitive(ImmAdvancedSchema schema, double contentWidth)
+    private double MeasureRootPrimitive(ImmAdvancedSchema schema, double contentWidth)
 	{
 		double descriptionHeight = MeasureTextHeight(ImmLocalization.Resolve(schema.Description), CairoFont.WhiteDetailText(), Math.Max(80, contentWidth - 24));
 		return 4 + 76 + (descriptionHeight > 0 ? descriptionHeight + DescriptionGap : 0) + 4;
@@ -360,7 +350,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 
 	private List<EditorRow> BuildObjectRows(ImmAdvancedSchema schema, double contentWidth)
 	{
-		List<EditorRow> result = new();
+		List<EditorRow> result = [];
 		double outerWidth = Math.Max(120, contentWidth - 8);
 		double columnGap = 8;
 		const double minimumCellWidth = 116;
@@ -370,7 +360,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		double cellWidth = (outerWidth - columnGap * (columns - 1)) / columns;
 		double rowY = 4;
 		int column = 0;
-		List<EditorRow> pendingRow = new();
+		List<EditorRow> pendingRow = [];
 
 		void FlushRow()
 		{
@@ -727,13 +717,13 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 
 			case "Dropdown":
 			{
-				ImmConfigOption[] options = schema.Options?.Where(option => option != null).ToArray() ?? Array.Empty<ImmConfigOption>();
+				ImmConfigOption[] options = schema.Options?.Where(option => option != null).ToArray() ?? [];
 				int selectedIndex = GetDropdownIndex(options, current);
 
 				GuiElementImmDropDown dropdown = new(
 					capi,
-					Enumerable.Range(0, options.Length).Select(index => index.ToString(CultureInfo.InvariantCulture)).ToArray(),
-					options.Select(option => ImmLocalization.Resolve(option.Label)).ToArray(),
+                    [.. Enumerable.Range(0, options.Length).Select(index => index.ToString(CultureInfo.InvariantCulture))],
+                    [.. options.Select(option => ImmLocalization.Resolve(option.Label))],
 					selectedIndex,
 					(value, selected) =>
 					{
@@ -1036,10 +1026,10 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		container.Add(button);
 	}
 
-	private static bool IsContainer(string type) { return type is "Object" or "Dictionary" or "Array" or "Tuple"; }
-	private static bool CanAdd(ImmAdvancedSchema schema, int count) { return !schema.MaxItems.HasValue || count < schema.MaxItems.Value; }
+    private static bool IsContainer(string type) => type is "Object" or "Dictionary" or "Array" or "Tuple";
+    private static bool CanAdd(ImmAdvancedSchema schema, int count) => !schema.MaxItems.HasValue || count < schema.MaxItems.Value;
 
-	private static string ResolveLabel(ImmAdvancedSchema schema, string fallback)
+    private static string ResolveLabel(ImmAdvancedSchema schema, string fallback)
 	{
 		string label = ImmLocalization.Resolve(schema.Label);
 		return string.IsNullOrWhiteSpace(label) ? fallback : label;
@@ -1061,22 +1051,13 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		return 0;
 	}
 
-	private static string FormatSliderValue(double value, bool integer)
-	{
-		return integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture);
-	}
+    private static string FormatSliderValue(double value, bool integer) => integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture);
 
-	private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds)
-	{
-		container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font));
-	}
+    private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font));
 
-	private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds)
-	{
-		container.Add(IntegratedModManager.UI.ImmRichText.Create(capi, text, font, bounds));
-	}
+    private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(IntegratedModManager.UI.ImmRichText.Create(capi, text, font, bounds));
 
-	private static double MeasureTextHeight(string? text, CairoFont font, double width)
+    private static double MeasureTextHeight(string? text, CairoFont font, double width)
 	{
 		if (string.IsNullOrWhiteSpace(text)) { return 0; }
 		return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width)));
@@ -1140,38 +1121,21 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		base.Dispose();
 	}
 
-	private sealed class NavigationFrame
-	{
-		public ImmAdvancedSchema Schema { get; }
-		public string Label { get; }
-		public Func<JToken> GetValue { get; }
-		public Action<JToken> SetValue { get; }
-		public string PendingNewKey = "";
+	private sealed class NavigationFrame(ImmAdvancedSchema schema, string label, Func<JToken> getValue, Action<JToken> setValue)
+    {
+        public ImmAdvancedSchema Schema { get; } = schema;
+        public string Label { get; } = label;
+        public Func<JToken> GetValue { get; } = getValue;
+        public Action<JToken> SetValue { get; } = setValue;
+        public string PendingNewKey = "";
+    }
 
-		public NavigationFrame(ImmAdvancedSchema schema, string label, Func<JToken> getValue, Action<JToken> setValue)
-		{
-			Schema = schema;
-			Label = label;
-			GetValue = getValue;
-			SetValue = setValue;
-		}
-	}
-
-	private sealed class EditorRow
-	{
-		public ImmAdvancedSchema Schema { get; }
-		public double X { get; }
-		public double Y { get; set; }
-		public double Width { get; }
-		public double Height { get; set; }
-
-		public EditorRow(ImmAdvancedSchema schema, double x, double y, double width, double height)
-		{
-			Schema = schema;
-			X = x;
-			Y = y;
-			Width = width;
-			Height = height;
-		}
-	}
+    private sealed class EditorRow(ImmAdvancedSchema schema, double x, double y, double width, double height)
+    {
+        public ImmAdvancedSchema Schema { get; } = schema;
+        public double X { get; } = x;
+        public double Y { get; set; } = y;
+        public double Width { get; } = width;
+        public double Height { get; set; } = height;
+    }
 }

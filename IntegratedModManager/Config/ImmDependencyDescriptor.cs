@@ -1,6 +1,3 @@
-#nullable enable
-
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -69,7 +66,7 @@ public sealed class ImmDependencyEntry
 	public string Label = "";
 	public string Description = "";
 	public ImmDependencySeverity Severity = ImmDependencySeverity.Warning;
-	public List<ImmDependencyCriterion> Criteria = new();
+	public List<ImmDependencyCriterion> Criteria = [];
 	public ImmDependencyResolution? Resolution;
 }
 

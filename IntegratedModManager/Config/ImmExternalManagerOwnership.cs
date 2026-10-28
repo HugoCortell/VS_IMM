@@ -1,7 +1,3 @@
-#nullable enable
-
-using System;
-using System.Collections.Generic;
 using Vintagestory.API.Common;
 
 namespace IntegratedModManager.Config;
@@ -25,7 +21,7 @@ public sealed class ImmExternalManagerOwnership
 		Claims.Clear();
 		ActiveManagers.Clear();
 
-		IImmExternalManagerDetector[] detectors = { new ImmConfigLibOwnershipDetector(), new ImmConfigKitOwnershipDetector() };
+		IImmExternalManagerDetector[] detectors = [new ImmConfigLibOwnershipDetector(), new ImmConfigKitOwnershipDetector()];
 
 		foreach (IImmExternalManagerDetector detector in detectors)
 		{
@@ -34,9 +30,9 @@ public sealed class ImmExternalManagerOwnership
 		}
 	}
 
-	public bool IsControlled(string modId) { return !string.IsNullOrWhiteSpace(modId) && Claims.ContainsKey(modId); }
+    public bool IsControlled(string modId) => !string.IsNullOrWhiteSpace(modId) && Claims.ContainsKey(modId);
 
-	public IReadOnlyList<ImmExternalManagerClaim> GetClaims(string modId)
+    public IReadOnlyList<ImmExternalManagerClaim> GetClaims(string modId)
 	{
 		if (string.IsNullOrWhiteSpace(modId) || !Claims.TryGetValue(modId, out List<ImmExternalManagerClaim>? claims)) { return Array.Empty<ImmExternalManagerClaim>(); }
 		return claims;
@@ -63,7 +59,7 @@ public sealed class ImmExternalManagerOwnership
 
 		if (!Claims.TryGetValue(modId, out List<ImmExternalManagerClaim>? claims))
 		{
-			claims = new List<ImmExternalManagerClaim>();
+			claims = [];
 			Claims[modId] = claims;
 		}
 

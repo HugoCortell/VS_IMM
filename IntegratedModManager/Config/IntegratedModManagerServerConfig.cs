@@ -1,6 +1,3 @@
-#nullable enable
-
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Vintagestory.API.Client;
@@ -98,9 +95,9 @@ public sealed class IntegratedModManagerConfig
 		Current = new IntegratedModManagerConfig();
 	}
 
-	private static void OnConfigChanged(string eventName, ref EnumHandling handling, IAttribute data) { Reload(); }
+    private static void OnConfigChanged(string eventName, ref EnumHandling handling, IAttribute data) => Reload();
 
-	private static void Reload()
+    private static void Reload()
 	{
 		if (Api == null) { return; }
 
@@ -108,5 +105,5 @@ public sealed class IntegratedModManagerConfig
 		catch (Exception exception) { Api.Logger.Error("[integratedmodmanager] Failed to reload client config: {0}", exception.Message); }
 	}
 
-	private static void EnsureExists(ICoreClientAPI api) { LoadOrCreate(api); }
+    private static void EnsureExists(ICoreClientAPI api) => LoadOrCreate(api);
 }
