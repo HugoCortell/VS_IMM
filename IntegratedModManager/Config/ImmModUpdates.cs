@@ -205,7 +205,7 @@ public sealed class ImmModUpdateService : IDisposable
 	private void EnsureFullCheck()
 	{
 		if (Disposed || FullCacheReady) { return; }
-		if (!Api.Server.IsDedicated && LocalClientSnapshots == null) { return; }
+		if (!Api.Server.IsDedicated && LocalClientSnapshots is null) { return; }
 		if (CheckState == ImmModUpdateCheckState.Checking && ActiveCheckIsFull) { return; }
 		if (CheckState == ImmModUpdateCheckState.Failed && DateTime.UtcNow - LastFullCheckAttemptUtc < TimeSpan.FromSeconds(10)) { return; }
 
@@ -214,7 +214,7 @@ public sealed class ImmModUpdateService : IDisposable
 
 	private void BeginCheck(bool full)
 	{
-		if (Disposed || (full && !Api.Server.IsDedicated && LocalClientSnapshots == null)) { return; }
+		if (Disposed || (full && !Api.Server.IsDedicated && LocalClientSnapshots is null)) { return; }
 
 		List<ImmInstalledModSnapshot> snapshots = SnapshotMods(full);
 		int generation = ++CheckGeneration;
@@ -293,7 +293,7 @@ public sealed class ImmModUpdateService : IDisposable
 			if (!response.IsSuccessStatusCode) { throw new HttpRequestException($"ModDB returned HTTP {(int)response.StatusCode}."); }
 
 			ModInstallInformationResponse? result = JsonConvert.DeserializeObject<ModInstallInformationResponse>(json);
-			if (result == null) { throw new InvalidOperationException("ModDB returned an empty update response."); }
+			if (result is null) { throw new InvalidOperationException("ModDB returned an empty update response."); }
 			if (!string.IsNullOrWhiteSpace(result.Error)) { throw new InvalidOperationException(result.Error); }
 
 			Dictionary<string, ModInstallInformation> data = result.Data ?? new Dictionary<string, ModInstallInformation>(StringComparer.OrdinalIgnoreCase);
@@ -342,7 +342,7 @@ public sealed class ImmModUpdateService : IDisposable
 
 				string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 				ModInstallInformationResponse? result = JsonConvert.DeserializeObject<ModInstallInformationResponse>(json);
-				if (result?.Data == null) { continue; }
+				if (result?.Data is null) { continue; }
 
 				foreach (ImmModUpdateEntry entry in batch)
 				{
@@ -533,7 +533,7 @@ public sealed class ImmModUpdateService : IDisposable
 
 	private static string GetString(JObject? obj, params string[] names)
 	{
-		if (obj == null) { return ""; }
+		if (obj is null) { return ""; }
 
 		foreach (string name in names)
 		{

@@ -147,7 +147,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 
 		foreach (ImmServerModPacket serverMod in serverMods)
 		{
-			if (serverMod == null) { continue; }
+			if (serverMod is null) { continue; }
 			localMods.TryGetValue(serverMod.ModId, out Mod? localMod);
 
 			Entries.Add(new ModSelectorEntry(serverMod, localMod));
@@ -265,7 +265,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 
 	private void RenderUpdateHighlight()
 	{
-		if (!CanManageServer || UpdateButtonBounds == null || UpdateAvailableCount + UpdatePendingRestartCount <= 0 || !ImmDiagnosticPulse.IsHighlightEnabled(HighlightMode)) { return; }
+		if (!CanManageServer || UpdateButtonBounds is null || UpdateAvailableCount + UpdatePendingRestartCount <= 0 || !ImmDiagnosticPulse.IsHighlightEnabled(HighlightMode)) { return; }
 
 		UpdateFillTexture ??= ImmDiagnosticPulse.CreateSolidTexture(capi);
 		UpdateButtonBounds.CalcWorldBounds();
@@ -322,7 +322,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 
 	private void ApplyFilters()
 	{
-		if (ModGrid == null) { return; }
+		if (ModGrid is null) { return; }
 
 		string query = SearchText.Trim();
 		bool useHealthFilter = CanManageServer && (FilterWarnings || FilterErrors);

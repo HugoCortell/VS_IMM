@@ -82,7 +82,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 			return false;
 		}
 
-		if (schema == null || !ImmAdvancedValueValidator.TryValidateCurrentValue(schema, configSource, value, out _)) { return false; }
+		if (schema is null || !ImmAdvancedValueValidator.TryValidateCurrentValue(schema, configSource, value, out _)) { return false; }
 
 		RootLabel = string.IsNullOrWhiteSpace(label) ? ImmLocalization.Get("advanced-editor-title") : label;
 		RootSchema = schema;
@@ -123,7 +123,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private void Compose()
 	{
-		if (RootSchema == null || WorkingRoot == null || Navigation.Count == 0) { return; }
+		if (RootSchema is null || WorkingRoot is null || Navigation.Count == 0) { return; }
 
 		Initializers.Clear();
 		ContentContainer = null;
@@ -403,7 +403,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private void PopulateDictionary(GuiElementContainer container, ImmAdvancedSchema schema, JObject dictionary, double contentWidth)
 	{
-		if (schema.Value == null) { return; }
+		if (schema.Value is null) { return; }
 
 		double width = Math.Max(120, contentWidth - 8);
 		double y = 4;
@@ -474,7 +474,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private void PopulateArray(GuiElementContainer container, ImmAdvancedSchema schema, JArray array, double contentWidth)
 	{
-		if (schema.Element == null) { return; }
+		if (schema.Element is null) { return; }
 
 		double width = Math.Max(120, contentWidth - 8);
 		double y = 4;
@@ -727,7 +727,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 					selectedIndex,
 					(value, selected) =>
 					{
-						if (Initializing || !selected || !int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int index) || index < 0 || index >= options.Length || options[index].Value == null) { return; }
+						if (Initializing || !selected || !int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int index) || index < 0 || index >= options.Length || options[index].Value is null) { return; }
 
 						CommitNodeChange(schema, current, options[index].Value!.DeepClone(), setter);
 					},
@@ -856,7 +856,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private bool OnAddDictionaryEntry(JObject dictionary, ImmAdvancedSchema schema)
 	{
-		if (schema.Value == null) { return true; }
+		if (schema.Value is null) { return true; }
 		if (!CanAdd(schema, dictionary.Count)) { SetValidationMessage(ImmLocalization.Get("advanced-error-max-items", schema.MaxItems ?? dictionary.Count)); return true; }
 
 		NavigationFrame frame = Navigation[^1];
@@ -897,7 +897,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private bool OnAddArrayItem(JArray array, ImmAdvancedSchema schema)
 	{
-		if (schema.Element == null) { return true; }
+		if (schema.Element is null) { return true; }
 		if (!CanAdd(schema, array.Count)) { SetValidationMessage(ImmLocalization.Get("advanced-error-max-items", schema.MaxItems ?? array.Count)); return true; }
 		if (!ImmAdvancedValueValidator.TryCreateValue(schema.Element, ConfigSource, forceNonNull: false, out JToken value, out string error)) { SetValidationMessage(error); return true; }
 
@@ -980,7 +980,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 
 	private void EmitWorkingValue()
 	{
-		if (RootSchema == null || WorkingRoot == null || OriginalRoot == null) { return; }
+		if (RootSchema is null || WorkingRoot is null || OriginalRoot is null) { return; }
 
 		if (!ImmAdvancedValueValidator.TryNormalizeValue(RootSchema, ConfigSource, OriginalRoot, WorkingRoot, out JToken normalized, out string error))
 		{
@@ -1081,7 +1081,7 @@ public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(cap
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (float)(ClipBounds?.fixedHeight ?? 0)));
 
-		if (ContentContainer == null) { return; }
+		if (ContentContainer is null) { return; }
 
 		ContentContainer.Bounds.fixedY = -ScrollValue;
 		ContentContainer.Bounds.MarkDirtyRecursive();

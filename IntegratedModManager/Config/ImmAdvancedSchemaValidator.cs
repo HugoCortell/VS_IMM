@@ -15,7 +15,7 @@ public static class ImmAdvancedSchemaValidator
 
 	public static void Validate(ImmAdvancedSchema? schema, string prefix, ImmConfigSource source)
 	{
-		if (schema == null) { throw new InvalidDataException($"{prefix} is required."); }
+		if (schema is null) { throw new InvalidDataException($"{prefix} is required."); }
 
 		ValidateNode(schema, prefix, source, depth: 0, objectField: false);
 	}
@@ -99,7 +99,7 @@ public static class ImmAdvancedSchemaValidator
 		for (int index = 0; index < schema.Fields.Count; index++)
 		{
 			ImmAdvancedSchema? field = schema.Fields[index];
-			if (field == null) { throw new InvalidDataException($"{prefix}.Fields[{index}] cannot be null."); }
+			if (field is null) { throw new InvalidDataException($"{prefix}.Fields[{index}] cannot be null."); }
 
 			string fieldPrefix = $"{prefix}.Fields[{index}]";
 			ValidateNode(field, fieldPrefix, source, depth + 1, objectField: true);
@@ -111,13 +111,13 @@ public static class ImmAdvancedSchemaValidator
 
 	private static void ValidateDictionary(ImmAdvancedSchema schema, string prefix, ImmConfigSource source, int depth)
 	{
-		if (schema.Value == null) { throw new InvalidDataException($"{prefix}.Value is required for Dictionary."); }
+		if (schema.Value is null) { throw new InvalidDataException($"{prefix}.Value is required for Dictionary."); }
 		if (schema.Fields.Count > 0 || schema.Element != null || schema.Items.Count > 0) { throw new InvalidDataException($"{prefix} Dictionary cannot declare Fields, Element, or Items."); }
 		if (schema.Columns != 1) { throw new InvalidDataException($"{prefix}.Columns is only valid for Object."); }
 		if (HasPrimitiveMetadata(schema)) { throw new InvalidDataException($"{prefix} Dictionary cannot declare Min, Max, Step, or Options."); }
 
 		ValidateCollectionBounds(schema, prefix);
-		if (schema.MinItems > 0 && (schema.InitialValue == null || schema.InitialValue.Type == JTokenType.Null)) { throw new InvalidDataException($"{prefix} Dictionary with MinItems greater than zero requires a non-null InitialValue because IMM cannot invent dictionary keys."); }
+		if (schema.MinItems > 0 && (schema.InitialValue is null || schema.InitialValue.Type == JTokenType.Null)) { throw new InvalidDataException($"{prefix} Dictionary with MinItems greater than zero requires a non-null InitialValue because IMM cannot invent dictionary keys."); }
 
 		if (!string.IsNullOrWhiteSpace(schema.KeyPattern))
 		{
@@ -130,7 +130,7 @@ public static class ImmAdvancedSchemaValidator
 
 	private static void ValidateArray(ImmAdvancedSchema schema, string prefix, ImmConfigSource source, int depth)
 	{
-		if (schema.Element == null) { throw new InvalidDataException($"{prefix}.Element is required for Array."); }
+		if (schema.Element is null) { throw new InvalidDataException($"{prefix}.Element is required for Array."); }
 		if (schema.Fields.Count > 0 || schema.Value != null || schema.Items.Count > 0) { throw new InvalidDataException($"{prefix} Array cannot declare Fields, Value, or Items."); }
 		if (schema.Columns != 1) { throw new InvalidDataException($"{prefix}.Columns is only valid for Object."); }
 		if (HasPrimitiveMetadata(schema)) { throw new InvalidDataException($"{prefix} Array cannot declare Min, Max, Step, or Options."); }
@@ -152,7 +152,7 @@ public static class ImmAdvancedSchemaValidator
 		for (int index = 0; index < schema.Items.Count; index++)
 		{
 			ImmAdvancedSchema? item = schema.Items[index];
-			if (item == null) { throw new InvalidDataException($"{prefix}.Items[{index}] cannot be null."); }
+			if (item is null) { throw new InvalidDataException($"{prefix}.Items[{index}] cannot be null."); }
 
 			ValidateNode(item, $"{prefix}.Items[{index}]", source, depth + 1, objectField: false);
 		}
@@ -198,8 +198,8 @@ public static class ImmAdvancedSchemaValidator
 		for (int index = 0; index < schema.Options.Count; index++)
 		{
 			ImmConfigOption? option = schema.Options[index];
-			if (option == null || string.IsNullOrWhiteSpace(option.Label)) { throw new InvalidDataException($"{prefix}.Options[{index}] requires Label."); }
-			if (option.Value == null || option.Value is JContainer || option.Value.Type is JTokenType.Null or JTokenType.Undefined) { throw new InvalidDataException($"{prefix}.Options[{index}].Value must be a non-null primitive."); }
+			if (option is null || string.IsNullOrWhiteSpace(option.Label)) { throw new InvalidDataException($"{prefix}.Options[{index}] requires Label."); }
+			if (option.Value is null || option.Value is JContainer || option.Value.Type is JTokenType.Null or JTokenType.Undefined) { throw new InvalidDataException($"{prefix}.Options[{index}].Value must be a non-null primitive."); }
 
 			foreach (JToken existing in values)
 			{

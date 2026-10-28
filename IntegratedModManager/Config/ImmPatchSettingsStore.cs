@@ -34,7 +34,7 @@ public sealed class ImmPatchSettingsStore
 		JObject? section = document[GetSectionName(side)] as JObject;
 		JToken? saved = section?[entry.Code];
 
-		if (saved == null) { return fallback; }
+		if (saved is null) { return fallback; }
 		if (ImmConfigValueValidator.TryNormalizePatchSetting(entry, saved, out JToken normalized, out string error)) { return normalized; }
 
 		Api.Logger.Warning("[integratedmodmanager] Ignoring invalid PatchSettings override {0}:{1} ({2}): {3}", modId, entry.Code, side, error);
@@ -107,7 +107,7 @@ public sealed class ImmPatchSettingsStore
 
 			JObject? section = preparedDocument[sectionName] as JObject;
 
-			if (section == null)
+			if (section is null)
 			{
 				section = [];
 

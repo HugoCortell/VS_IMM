@@ -53,7 +53,7 @@ internal sealed class ImmConfigLibOwnershipDetector : IImmExternalManagerDetecto
 			return;
 		}
 
-		if (system == null)
+		if (system is null)
 		{
 			api.Logger.Warning("[integratedmodmanager] ConfigLib is active but its mod system was not found? Declarative ownership detection will still be used.");
 			return;
@@ -61,7 +61,7 @@ internal sealed class ImmConfigLibOwnershipDetector : IImmExternalManagerDetecto
 
 		PropertyInfo? domainsProperty = system.GetType().GetProperty("Domains", BindingFlags.Instance | BindingFlags.Public);
 
-		if (domainsProperty == null)
+		if (domainsProperty is null)
 		{
 			api.Logger.Warning("[integratedmodmanager] ConfigLib is active but its managed Domains could not be inspected. Declarative ownership detection will still be used.");
 			return;

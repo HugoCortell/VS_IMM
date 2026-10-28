@@ -93,7 +93,7 @@ public static class ImmAdvancedValueValidator
 
 			case "Dropdown":
 				ImmConfigOption? option = schema.Options?.FirstOrDefault();
-				if (option?.Value == null) { value = JValue.CreateNull(); error = "Dropdown has no Option value."; return false; }
+				if (option?.Value is null) { value = JValue.CreateNull(); error = "Dropdown has no Option value."; return false; }
 
 				value = option.Value.DeepClone();
 			return true;
@@ -123,7 +123,7 @@ public static class ImmAdvancedValueValidator
 
 				for (int index = 0; index < schema.MinItems; index++)
 				{
-					if (schema.Element == null || !TryCreateValue(schema.Element, source, forceNonNull: false, out JToken itemValue, out error)) { value = JValue.CreateNull(); return false; }
+					if (schema.Element is null || !TryCreateValue(schema.Element, source, forceNonNull: false, out JToken itemValue, out error)) { value = JValue.CreateNull(); return false; }
 					resultArray.Add(itemValue);
 				}
 
@@ -182,7 +182,7 @@ public static class ImmAdvancedValueValidator
 			JProperty? submittedProperty = submittedObject.Property(field.Key, StringComparison.Ordinal);
 			JProperty? targetProperty = targetObject?.Property(field.Key, StringComparison.Ordinal);
 
-			if (submittedProperty == null)
+			if (submittedProperty is null)
 			{
 				if (!field.Optional) { error = $"field '{field.Key}' is required."; return false; }
 
@@ -211,7 +211,7 @@ public static class ImmAdvancedValueValidator
 
 		if (submitted is not JObject submittedObject) { error = "expected a Dictionary object."; return false; }
 		if (target != null && target.Type != JTokenType.Null && target is not JObject) { error = "mapped value is not a Dictionary object."; return false; }
-		if (schema.Value == null) { error = "Dictionary schema has no Value definition."; return false; }
+		if (schema.Value is null) { error = "Dictionary schema has no Value definition."; return false; }
 		if (!ValidateCollectionCount(schema, submittedObject.Count, out error)) { return false; }
 
 		Regex? keyRegex = null;
@@ -256,7 +256,7 @@ public static class ImmAdvancedValueValidator
 
 		if (submitted is not JArray submittedArray) { error = "expected an Array."; return false; }
 		if (target != null && target.Type != JTokenType.Null && target is not JArray) { error = "mapped value is not an Array."; return false; }
-		if (schema.Element == null) { error = "Array schema has no Element definition."; return false; }
+		if (schema.Element is null) { error = "Array schema has no Element definition."; return false; }
 		if (!ValidateCollectionCount(schema, submittedArray.Count, out error)) { return false; }
 
 		JArray result = [];
@@ -313,7 +313,7 @@ public static class ImmAdvancedValueValidator
 	private static bool TryNormalizeLeaf(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)
 	{
 		ImmConfigControlPacket control = CreateLeafControl(schema, source);
-		JToken baseline = target == null || (target.Type == JTokenType.Null && schema.Nullable) ? submitted : target;
+		JToken baseline = target is null || (target.Type == JTokenType.Null && schema.Nullable) ? submitted : target;
 
 		return ImmConfigValueValidator.TryNormalizeValue(control, baseline, submitted, out normalized, out error);
 	}

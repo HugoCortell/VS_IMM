@@ -78,7 +78,7 @@ public sealed class ImmConfigClient : IDisposable
 
 			if (location.Block.ConfigSource == ImmConfigSource.PatchSettings)
 			{
-				if (PatchCoordinator?.PatchSettings == null || PatchCoordinator.Registry == null) { error = "IMM PatchSettings runtime is not available on the client."; return false; }
+				if (PatchCoordinator?.PatchSettings is null || PatchCoordinator.Registry is null) { error = "IMM PatchSettings runtime is not available on the client."; return false; }
 				if (!PatchCoordinator.Registry.TryGetPatchSetting(page.ModId, location.Control.Code, out _, out ImmConfigEntry entry, out ImmConfigSide side) || side != ImmConfigSide.Client) { error = $"{location.Control.Label}: PatchSetting metadata is not available."; return false; }
 				if (!ImmConfigValueValidator.TryNormalizePatchSetting(entry, submitted, out JToken normalized, out string validationError)) { error = $"{location.Control.Label}: {validationError}"; return false; }
 
@@ -97,7 +97,7 @@ public sealed class ImmConfigClient : IDisposable
 			try { target = config.SelectToken(location.Control.Map); }
 			catch (Exception exception) { error = $"{location.Control.Label}: invalid Map ({exception.Message})."; return false; }
 
-			if (target == null) { error = $"{location.Control.Label}: mapped config value was not found."; return false; }
+			if (target is null) { error = $"{location.Control.Label}: mapped config value was not found."; return false; }
 			if (!ImmConfigValueValidator.TryNormalizeValue(location.Control, target, submitted, out JToken normalizedConfig, out string configValidationError)) { error = $"{location.Control.Label}: {configValidationError}"; return false; }
 
 			if (!JToken.DeepEquals(target, normalizedConfig))
@@ -121,7 +121,7 @@ public sealed class ImmConfigClient : IDisposable
 
 			if (preparedPatchChanges.Count > 0)
 			{
-				if (PatchCoordinator?.PatchSettings == null) { error = "IMM PatchSettings runtime is not available on the client."; return false; }
+				if (PatchCoordinator?.PatchSettings is null) { error = "IMM PatchSettings runtime is not available on the client."; return false; }
 
 				committed = PatchCoordinator.PatchSettings.TryCommitWithOverrides(page.ModId, ImmConfigSide.Client, preparedPatchChanges.Select(change => (change.Entry, change.Value)).ToArray(), batch, out error);
 			}
@@ -188,7 +188,7 @@ public sealed class ImmConfigClient : IDisposable
 
 		ImmConfigRegistry? registry = PatchCoordinator?.Registry;
 
-		if (registry == null || !registry.TryGet(modId, out ImmConfigDescriptor descriptor) || !ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client)) { return false; }
+		if (registry is null || !registry.TryGet(modId, out ImmConfigDescriptor descriptor) || !ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client)) { return false; }
 
 		ImmExternalManagerOwnership? externalManagers = PatchCoordinator?.ExternalManagers;
 
@@ -235,7 +235,7 @@ public sealed class ImmConfigClient : IDisposable
 
 		ImmConfigRegistry? registry = PatchCoordinator?.Registry;
 
-		if (registry == null || !registry.TryGet(page.ModId, out ImmConfigDescriptor descriptor)) { return; }
+		if (registry is null || !registry.TryGet(page.ModId, out ImmConfigDescriptor descriptor)) { return; }
 
 		List<ImmConfigBlockPacket> blocks = [.. (page.Configuration ?? []).Where(block => block != null)];
 
@@ -252,7 +252,7 @@ public sealed class ImmConfigClient : IDisposable
 
 			ImmConfigBlockPacket? targetBlock = blocks.FirstOrDefault(block => block.Index == blockIndex && block.ConfigSource == localBlock.ConfigSource && string.Equals(block.ConfigFile, localBlock.ConfigFile, StringComparison.OrdinalIgnoreCase));
 
-			if (targetBlock == null)
+			if (targetBlock is null)
 			{
 				targetBlock = ImmConfigPacketFactory.CreateBlockPacket(nextBlockIndex++, localBlock, []);
 
@@ -332,7 +332,7 @@ public sealed class ImmConfigClient : IDisposable
 
 			if (block.ConfigSource == ImmConfigSource.PatchSettings)
 			{
-				if (PatchCoordinator?.PatchSettings == null || PatchCoordinator.Registry == null) { MarkClientControlsUnavailable(controls, "IMM PatchSettings runtime is not available."); continue; }
+				if (PatchCoordinator?.PatchSettings is null || PatchCoordinator.Registry is null) { MarkClientControlsUnavailable(controls, "IMM PatchSettings runtime is not available."); continue; }
 
 				patchDocument ??= PatchCoordinator.PatchSettings.ReadDocument(page.ModId);
 
@@ -371,7 +371,7 @@ public sealed class ImmConfigClient : IDisposable
 			try { config = ClientApi.LoadModConfig<JObject>(block.ConfigFile); }
 			catch (Exception exception) { MarkClientControlsUnavailable(controls, $"Failed to read client config: {exception.Message}"); continue; }
 
-			if (config == null) { MarkClientControlsUnavailable(controls, $"Config file '{block.ConfigFile}' was not found."); continue; }
+			if (config is null) { MarkClientControlsUnavailable(controls, $"Config file '{block.ConfigFile}' was not found."); continue; }
 
 			if (block.ParseDescriptions && block.ConfigSide == ImmConfigSide.Client) { block.Description = ReadRootDescription(config); }
 
@@ -396,7 +396,7 @@ public sealed class ImmConfigClient : IDisposable
 			return;
 		}
 
-		if (target == null)
+		if (target is null)
 		{
 			control.Available = false;
 			control.UnavailableReason = "Mapped config value was not found.";
@@ -447,7 +447,7 @@ public sealed class ImmConfigClient : IDisposable
 		{
 			config = ClientApi.LoadModConfig<JObject>(configFile)!;
 
-			if (config == null) { error = $"Config file '{configFile}' was not found."; return false; }
+			if (config is null) { error = $"Config file '{configFile}' was not found."; return false; }
 
 			configs[configFile] = config;
 

@@ -61,7 +61,7 @@ public sealed class ImmConfigRegistry
 			if (string.IsNullOrWhiteSpace(modId)) { loadOrder++; continue; }
 
 			IAsset? asset = api.Assets.TryGet(new AssetLocation(modId, "config/imm.json"));
-			if (asset == null) { loadOrder++; continue; }
+			if (asset is null) { loadOrder++; continue; }
 
 			try
 			{
@@ -142,7 +142,7 @@ public sealed class ImmConfigRegistry
 
 		foreach (KeyValuePair<string, JToken> pair in descriptor.Constants)
 		{
-			if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value == null)
+			if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value is null)
 			{
 				throw new InvalidDataException("Constants require non-empty codes and non-null JSON values.");
 			}
@@ -159,7 +159,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmConfigBlock? block = descriptor.Configuration[blockIndex];
 
-			if (block == null)
+			if (block is null)
 			{
 				throw new InvalidDataException($"Configuration[{blockIndex}] cannot be null.");
 			}
@@ -172,7 +172,7 @@ public sealed class ImmConfigRegistry
 			{
 				ImmConfigEntry? entry = block.Settings[entryIndex];
 
-				if (entry == null)
+				if (entry is null)
 				{
 					throw new InvalidDataException($"Configuration[{blockIndex}].Settings[{entryIndex}] cannot be null.");
 				}
@@ -199,7 +199,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmContentPatchTarget? target = descriptor.ContentPatches[patchIndex];
 
-			if (target == null)
+			if (target is null)
 			{
 				throw new InvalidDataException($"ContentPatches[{patchIndex}] cannot be null.");
 			}
@@ -211,7 +211,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmDependencyEntry? entry = descriptor.Dependencies[entryIndex];
 
-			if (entry == null)
+			if (entry is null)
 			{
 				throw new InvalidDataException($"Dependencies[{entryIndex}] cannot be null.");
 			}
@@ -268,7 +268,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmConfigEntry? entry = block.Settings[entryIndex];
 
-			if (entry == null)
+			if (entry is null)
 			{
 				throw new InvalidDataException($"{prefix}.Settings[{entryIndex}] cannot be null.");
 			}
@@ -334,7 +334,7 @@ public sealed class ImmConfigRegistry
 			throw new InvalidDataException($"{prefix}.Map must be omitted for PatchSettings.");
 		}
 
-		if (entry.Default == null)
+		if (entry.Default is null)
 		{
 			throw new InvalidDataException($"{prefix}.Default is required for PatchSettings.");
 		}
@@ -350,7 +350,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmContentPatchTarget? target = entry.Targets[targetIndex];
 
-			if (target == null)
+			if (target is null)
 			{
 				throw new InvalidDataException($"{prefix}.Targets[{targetIndex}] cannot be null.");
 			}
@@ -363,7 +363,7 @@ public sealed class ImmConfigRegistry
 	{
 		if (entry.Type == "Advanced")
 		{
-			if (entry.Advanced == null) { throw new InvalidDataException($"{prefix}.Advanced is required when Type is Advanced."); }
+			if (entry.Advanced is null) { throw new InvalidDataException($"{prefix}.Advanced is required when Type is Advanced."); }
 			if (entry.Min.HasValue || entry.Max.HasValue || entry.Step.HasValue || !string.IsNullOrWhiteSpace(entry.ElementType) || entry.Options.Count > 0) { throw new InvalidDataException($"{prefix} Advanced settings must declare control metadata inside Advanced, not on the top-level setting."); }
 
 			ImmAdvancedSchemaValidator.Validate(entry.Advanced, $"{prefix}.Advanced", source);
@@ -409,12 +409,12 @@ public sealed class ImmConfigRegistry
 		{
 			ImmConfigOption? option = entry.Options[optionIndex];
 
-			if (option == null || string.IsNullOrWhiteSpace(option.Label))
+			if (option is null || string.IsNullOrWhiteSpace(option.Label))
 			{
 				throw new InvalidDataException($"{prefix}.Options[{optionIndex}] requires Label.");
 			}
 
-			if (source == ImmConfigSource.ModConfig && (option.Value == null || option.Value is JContainer || option.Value.Type == JTokenType.Null))
+			if (source == ImmConfigSource.ModConfig && (option.Value is null || option.Value is JContainer || option.Value.Type == JTokenType.Null))
 			{
 				throw new InvalidDataException($"{prefix}.Options[{optionIndex}].Value must be a primitive for ModConfig.");
 			}
@@ -535,7 +535,7 @@ public sealed class ImmConfigRegistry
 		{
 			ImmDependencyCriterion? criterion = entry.Criteria[criterionIndex];
 
-			if (criterion == null)
+			if (criterion is null)
 			{
 				throw new InvalidDataException($"{prefix}.Criteria[{criterionIndex}] cannot be null.");
 			}
@@ -563,7 +563,7 @@ public sealed class ImmConfigRegistry
 			case ImmDependencyCriterionType.Setting:
 				ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
 
-				if (criterion.Target == null)
+				if (criterion.Target is null)
 				{
 					throw new InvalidDataException($"{prefix}.Target is required for Setting.");
 				}
@@ -577,14 +577,14 @@ public sealed class ImmConfigRegistry
 				ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
 				ValidateAssetCode(criterion.Output, $"{prefix}.Output");
 
-				if (criterion.Value == null || criterion.Value.Type != JTokenType.Integer || criterion.Value.Value<long>() < 0)
+				if (criterion.Value is null || criterion.Value.Type != JTokenType.Integer || criterion.Value.Value<long>() < 0)
 				{
 					throw new InvalidDataException($"{prefix}.Value must be a non-negative integer.");
 				}
 			break;
 
 			case ImmDependencyCriterionType.HasModID:
-				if (criterion.Value == null || criterion.Value.Type != JTokenType.String || string.IsNullOrWhiteSpace(criterion.Value.Value<string>()))
+				if (criterion.Value is null || criterion.Value.Type != JTokenType.String || string.IsNullOrWhiteSpace(criterion.Value.Value<string>()))
 				{
 					throw new InvalidDataException($"{prefix}.Value must be a non-empty mod ID string.");
 				}
@@ -659,7 +659,7 @@ public sealed class ImmConfigRegistry
 				{
 					ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
 
-					if (criterion.Value == null)
+					if (criterion.Value is null)
 					{
 						throw new InvalidDataException($"{prefix}.Value is required for {criterion.Operator}.");
 					}
@@ -683,14 +683,14 @@ public sealed class ImmConfigRegistry
 		switch (resolution.Type)
 		{
 			case ImmDependencyResolutionType.SetSetting:
-				if (resolution.Target == null)
+				if (resolution.Target is null)
 				{
 					throw new InvalidDataException($"{prefix}.Target is required for SetSetting.");
 				}
 
 				bool patchSetting = ValidateSettingTarget(resolution.Target, $"{prefix}.Target");
 
-				if (resolution.Value == null)
+				if (resolution.Value is null)
 				{
 					throw new InvalidDataException($"{prefix}.Value is required.");
 				}
@@ -706,7 +706,7 @@ public sealed class ImmConfigRegistry
 			break;
 
 			case ImmDependencyResolutionType.RunCommand:
-				if (resolution.Value == null || resolution.Value.Type != JTokenType.String || string.IsNullOrWhiteSpace(resolution.Value.Value<string>()))
+				if (resolution.Value is null || resolution.Value.Type != JTokenType.String || string.IsNullOrWhiteSpace(resolution.Value.Value<string>()))
 				{
 					throw new InvalidDataException($"{prefix}.Value must be a non-empty command string for RunCommand.");
 				}
@@ -732,7 +732,7 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidateCollectibleCriterionTarget(ImmDependencyCriterionTarget? target, string prefix)
 	{
-		if (target == null)
+		if (target is null)
 		{
 			throw new InvalidDataException($"{prefix} is required.");
 		}
@@ -790,7 +790,7 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidateSettingComparisonValue(JToken? value, ImmDependencyOperator comparison, bool patchSetting, string prefix)
 	{
-		if (value == null)
+		if (value is null)
 		{
 			throw new InvalidDataException($"{prefix} is required.");
 		}
@@ -820,7 +820,7 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidatePrimitiveValue(JToken? value, string prefix)
 	{
-		if (value == null || value is JContainer || value.Type is JTokenType.Null or JTokenType.Undefined)
+		if (value is null || value is JContainer || value.Type is JTokenType.Null or JTokenType.Undefined)
 		{
 			throw new InvalidDataException($"{prefix} must be a non-null primitive.");
 		}

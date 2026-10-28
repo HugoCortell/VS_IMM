@@ -56,14 +56,26 @@ public sealed class IntegratedModManagerSystem : ModSystem
 		ModUpdates = new GuiDialogModUpdates(api, ModUpdateClient);
 		ModSelector = new GuiDialogModSelector(api, ConfigClient, ModUpdateClient, OpenSelectedMod, OpenUpdates);
 
-		api.ChatCommands.Create("imm").WithDescription(ImmLocalization.Get("command-description")).HandleWith(_ => { Nudge.Dismiss(); OpenManager(); return TextCommandResult.Success(); });
+		api.ChatCommands
+            .Create("imm")
+            .WithDescription(ImmLocalization.Get("command-description"))
+            .HandleWith(_ =>
+            {
+                Nudge.Dismiss(); 
+                OpenManager(); 
+                return TextCommandResult.Success();
+            });
 	}
 
 	public override void StartServerSide(ICoreServerAPI api)
 	{
 		ImmContentPatchCoordinatorSystem? coordinator = api.ModLoader.GetModSystem<ImmContentPatchCoordinatorSystem>();
 
-		if (coordinator == null || ConfigRegistry == null) { api.Logger.Error("[integratedmodmanager] Managed content patch coordinator was not initialized."); return; }
+		if (coordinator is null || ConfigRegistry is null) 
+        { 
+            api.Logger.Error("[integratedmodmanager] Managed content patch coordinator was not initialized.");
+            return;
+        }
 
 		DependencyService = new ImmDependencyService(api, ConfigRegistry, coordinator.PatchSettings, coordinator.ExternalManagers);
 		DependencyService.EvaluateAll();
@@ -84,8 +96,12 @@ public sealed class IntegratedModManagerSystem : ModSystem
 
     private void OpenSelectedMod(ModSelectorEntry entry)
 	{
-		if (!entry.HasConfiguration && !entry.HasWarnings && !entry.HasErrors) { Notification?.Show(ImmLocalization.Get("notification-no-configuration"), ImmLocalization.Get("button-alright")); return; }
-		if (ModManager == null) { return; }
+        if (!entry.HasConfiguration && !entry.HasWarnings && !entry.HasErrors) 
+        { 
+            Notification?.Show(ImmLocalization.Get("notification-no-configuration"), ImmLocalization.Get("button-alright")); 
+            return; 
+        }
+        if (ModManager is null) return;
 
 		ModManager.SetMod(entry.ModId, entry.Name);
 		ModManager.TryOpen();
@@ -93,7 +109,7 @@ public sealed class IntegratedModManagerSystem : ModSystem
 
 	public override void Dispose()
 	{
-		if (ClientSideStarted) { IntegratedModManagerConfig.Stop(); }
+		if (ClientSideStarted) IntegratedModManagerConfig.Stop();
 		ClientSideStarted = false;
 
 		Notification?.Dispose();

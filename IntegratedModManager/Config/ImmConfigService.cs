@@ -120,7 +120,7 @@ public sealed class ImmConfigService
 
 						PopulatePatchSettingControl(request.ModId, entry, control, effectiveSide, savedValue);
 					}
-					else if (config == null)
+					else if (config is null)
 					{
 						control.Available = false;
 						control.UnavailableReason = configError;
@@ -169,7 +169,7 @@ public sealed class ImmConfigService
 
 			if (location.Block.ConfigSource == ImmConfigSource.PatchSettings)
 			{
-				if (location.Entry.Default == null) { return ApplyError(request.ModId, $"{location.Control.Label}: PatchSetting has no Default."); }
+				if (location.Entry.Default is null) { return ApplyError(request.ModId, $"{location.Control.Label}: PatchSetting has no Default."); }
 
 				JToken current = PatchSettings.GetEffectiveValue(request.ModId, location.Entry, ImmConfigSide.Server, patchSettingsDocument);
 				JToken validationTarget = location.Control.Type == "Advanced" ? current : location.Entry.Default;
@@ -180,14 +180,14 @@ public sealed class ImmConfigService
 				continue;
 			}
 
-			if (!TryGetServerConfig(location.Block.ConfigFile, configs, out JObject? config, out string configError) || config == null) { return ApplyError(request.ModId, configError); }
+			if (!TryGetServerConfig(location.Block.ConfigFile, configs, out JObject? config, out string configError) || config is null) { return ApplyError(request.ModId, configError); }
 
 			JToken? target;
 
 			try { target = config.SelectToken(location.Control.Map); }
 			catch (Exception exception) { return ApplyError(request.ModId, $"{location.Control.Label}: invalid Map ({exception.Message})."); }
 
-			if (target == null) { return ApplyError(request.ModId, $"{location.Control.Label}: mapped config value was not found."); }
+			if (target is null) { return ApplyError(request.ModId, $"{location.Control.Label}: mapped config value was not found."); }
 
 			if (!ImmConfigValueValidator.TryNormalizeValue(location.Control, target, submitted, out JToken normalizedConfig, out string configValidationError)) { return ApplyError(request.ModId, $"{location.Control.Label}: {configValidationError}"); }
 			if (JToken.DeepEquals(target, normalizedConfig)) { continue; }
@@ -241,7 +241,7 @@ public sealed class ImmConfigService
 			ImmDependencyEntry entry = registered.Entry;
 			ImmDependencyResolution? resolution = entry.Resolution;
 
-			(string resolutionKey, string[] resolutionArgs) = resolution == null ? ("", Array.Empty<string>()) : BuildResolutionLocalization(resolution);
+			(string resolutionKey, string[] resolutionArgs) = resolution is null ? ("", Array.Empty<string>()) : BuildResolutionLocalization(resolution);
 			packets.Add(new ImmDependencyPacket { RuntimeId = active.RuntimeId, Label = entry.Label, Description = entry.Description ?? "", Severity = active.Severity, HasResolution = resolution != null, ResolutionType = resolution?.Type ?? ImmDependencyResolutionType.Unknown, ResolutionDescription = "", ResolutionDescriptionKey = resolutionKey, ResolutionDescriptionArgs = resolutionArgs });
 		}
 
@@ -303,7 +303,7 @@ public sealed class ImmConfigService
 			return;
 		}
 
-		if (target == null)
+		if (target is null)
 		{
 			control.Available = false;
 			control.UnavailableReason = "Mapped config value was not found.";
@@ -325,7 +325,7 @@ public sealed class ImmConfigService
 
 	private bool TryGetServerConfig(string configFile, Dictionary<string, JObject?> configs, out JObject? config, out string error)
 	{
-		if (configs.TryGetValue(configFile, out config)) { error = config == null ? $"Config file '{configFile}' was not found." : ""; return config != null; }
+		if (configs.TryGetValue(configFile, out config)) { error = config is null ? $"Config file '{configFile}' was not found." : ""; return config != null; }
 
 		try
 		{
@@ -333,7 +333,7 @@ public sealed class ImmConfigService
 
 			configs[configFile] = config;
 
-			if (config == null) { error = $"Config file '{configFile}' was not found."; return false; }
+			if (config is null) { error = $"Config file '{configFile}' was not found."; return false; }
 
 			error = "";
 			return true;

@@ -10,11 +10,11 @@ public static class ImmConfigValueValidator
 		normalized = submitted;
 		error = "";
 
-		if (entry.Default == null) { error = "PatchSetting has no Default value."; return false; }
+		if (entry.Default is null) { error = "PatchSetting has no Default value."; return false; }
 
 		if (entry.Type == "Advanced")
 		{
-			if (entry.Advanced == null) { error = "Advanced PatchSetting has no Advanced schema."; return false; }
+			if (entry.Advanced is null) { error = "Advanced PatchSetting has no Advanced schema."; return false; }
 
 			// PatchSettings are whole JToken values.
 			// Use the submitted value as the structural baseline so undeclared members survive round trips, just as they do for ModConfig objects.
@@ -141,7 +141,7 @@ public static class ImmConfigValueValidator
 			case "Dropdown":
 				ImmConfigOptionPacket? matchingOption = control.Options.FirstOrDefault(option => JToken.DeepEquals(JToken.Parse(option.ValueJson), submitted));
 
-				if (matchingOption == null) { error = "value is not one of the declared Options."; return false; }
+				if (matchingOption is null) { error = "value is not one of the declared Options."; return false; }
 
 				if (control.ConfigSource == ImmConfigSource.ModConfig && (target is JContainer || target.Type == JTokenType.Null)) { error = "mapped config value is not primitive."; return false; }
 

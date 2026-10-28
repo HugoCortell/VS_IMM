@@ -88,7 +88,7 @@ public sealed class ImmDependencyService
 
 		ImmDependencyResolution? resolution = registered.Entry.Resolution;
 
-		if (resolution == null) { error = "This dependency issue has no automatic resolution."; return false; }
+		if (resolution is null) { error = "This dependency issue has no automatic resolution."; return false; }
 		bool success;
 
 		switch (resolution.Type)
@@ -125,7 +125,7 @@ public sealed class ImmDependencyService
 	private ImmDependencyResolutionWarning GetResolutionWarning(string sourceModId, ImmDependencyResolution resolution)
 	{
 		ImmDependencySettingTarget? target = resolution.Target;
-		if (target == null) { return ImmDependencyResolutionWarning.None; }
+		if (target is null) { return ImmDependencyResolutionWarning.None; }
 
 		string targetModId = string.IsNullOrWhiteSpace(target.ModId) ? sourceModId : target.ModId;
 		if (!ExternalManagers.IsControlled(targetModId)) { return ImmDependencyResolutionWarning.None; }
@@ -191,7 +191,7 @@ public sealed class ImmDependencyService
 		matched = false;
 
 		ImmDependencyCriterionTarget target = criterion.Target!;
-		if (!TryGetCollectible(target, collectibles, out CollectibleObject? collectible, out error) || collectible == null) { return false; }
+		if (!TryGetCollectible(target, collectibles, out CollectibleObject? collectible, out error) || collectible is null) { return false; }
 
 		ImmDependencyCollectibleClass collectibleClass = target.Class!.Value;
 		Type? behaviorType = Api.ClassRegistry.GetCollectibleBehaviorClass(criterion.Behavior);
@@ -214,12 +214,12 @@ public sealed class ImmDependencyService
 		matched = false;
 
 		ImmDependencyCriterionTarget target = criterion.Target!;
-		if (!TryGetCollectible(target, collectibles, out CollectibleObject? collectible, out error) || collectible == null) { return false; }
+		if (!TryGetCollectible(target, collectibles, out CollectibleObject? collectible, out error) || collectible is null) { return false; }
 
 		JToken? attributes = collectible.Attributes?.Token;
 		IReadOnlyList<JToken> values;
 
-		if (attributes == null) { values = Array.Empty<JToken>(); }
+		if (attributes is null) { values = Array.Empty<JToken>(); }
 		else
 		{
 			try
@@ -276,7 +276,7 @@ public sealed class ImmDependencyService
 			collectibles[cacheKey] = collectible;
 		}
 
-		if (collectible == null)
+		if (collectible is null)
 		{
 			error = $"{target.Class} collectible '{target.Code}' was not found.";
 			return false;
@@ -319,13 +319,13 @@ public sealed class ImmDependencyService
 			return TryCompare(patchValue, criterion.Value!, criterion.Operator, out matched, out error);
 		}
 
-		if (!TryGetConfig(target.ConfigFile, configs, out JObject? config, out error) || config == null) { return false; }
+		if (!TryGetConfig(target.ConfigFile, configs, out JObject? config, out error) || config is null) { return false; }
 		JToken? current;
 
 		try { current = config.SelectToken(target.Map); }
 		catch (Exception exception) { error = $"Invalid setting Map '{target.Map}': {exception.Message}"; return false; }
 
-		if (current == null) { error = $"Setting '{target.ConfigFile}' to '{target.Map}' was not found."; return false; }
+		if (current is null) { error = $"Setting '{target.ConfigFile}' to '{target.Map}' was not found."; return false; }
 		if (current is JContainer || current.Type is JTokenType.Null or JTokenType.Undefined) { error = $"Setting '{target.ConfigFile}' to '{target.Map}' is not a primitive value."; return false; }
 
 		return TryCompare(current, criterion.Value!, criterion.Operator, out matched, out error);
@@ -337,7 +337,7 @@ public sealed class ImmDependencyService
 		{
 			AssetLocation outputCode = new(criterion.Output);
 
-			count = Api.World.GridRecipes.Count(recipe => { if (!recipe.Enabled || recipe.Output == null) { return false; } AssetLocation? recipeOutput = recipe.Output.ResolvedItemStack?.Collectible?.Code ?? recipe.Output.Code; return recipeOutput != null && recipeOutput.Equals(outputCode); });
+			count = Api.World.GridRecipes.Count(recipe => { if (!recipe.Enabled || recipe.Output is null) { return false; } AssetLocation? recipeOutput = recipe.Output.ResolvedItemStack?.Collectible?.Code ?? recipe.Output.Code; return recipeOutput != null && recipeOutput.Equals(outputCode); });
 			recipeCounts[criterion.Output] = count;
 		}
 
@@ -407,14 +407,14 @@ public sealed class ImmDependencyService
 		try { config = Api.LoadModConfig<JObject>(target.ConfigFile); }
 		catch (Exception exception) { error = $"Failed to read '{target.ConfigFile}': {exception.Message}"; return false; }
 
-		if (config == null) { error = $"Config file '{target.ConfigFile}' was not found."; return false; }
+		if (config is null) { error = $"Config file '{target.ConfigFile}' was not found."; return false; }
 
 		JToken? current;
 
 		try { current = config.SelectToken(target.Map); }
 		catch (Exception exception) { error = $"Invalid setting Map '{target.Map}': {exception.Message}"; return false; }
 
-		if (current == null) { error = $"Setting '{target.ConfigFile}' to '{target.Map}' was not found."; return false; }
+		if (current is null) { error = $"Setting '{target.ConfigFile}' to '{target.Map}' was not found."; return false; }
 
 		if (!TryNormalizeResolutionValue(current, resolution.Value!, out JToken normalized, out error)) { return false; }
 
@@ -462,7 +462,7 @@ public sealed class ImmDependencyService
 
 	private bool TryGetConfig(string configFile, Dictionary<string, JObject?> configs, out JObject? config, out string error)
 	{
-		if (configs.TryGetValue(configFile, out config)) { error = config == null ? $"Config file '{configFile}' was not found." : ""; return config != null; }
+		if (configs.TryGetValue(configFile, out config)) { error = config is null ? $"Config file '{configFile}' was not found." : ""; return config != null; }
 
 		try
 		{
@@ -470,7 +470,7 @@ public sealed class ImmDependencyService
 
 			configs[configFile] = config;
 
-			if (config == null) { error = $"Config file '{configFile}' was not found."; return false; }
+			if (config is null) { error = $"Config file '{configFile}' was not found."; return false; }
 
 			error = "";
 			return true;
