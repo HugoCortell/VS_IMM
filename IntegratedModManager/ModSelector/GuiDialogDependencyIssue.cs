@@ -5,7 +5,7 @@ using Vintagestory.API.Client;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogDependencyIssue : GuiDialog
+public sealed class GuiDialogDependencyIssue(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double Width = 620;
 	private const double Padding = 28;
@@ -25,9 +25,7 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogDependencyIssue(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(ImmDependencyPacket issue, bool canAutoResolve, Action<int> autoResolve)
+    public bool Show(ImmDependencyPacket issue, bool canAutoResolve, Action<int> autoResolve)
 	{
 		Issue = issue;
 		CanAutoResolve = canAutoResolve && issue.HasResolution;

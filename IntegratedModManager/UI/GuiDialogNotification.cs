@@ -3,7 +3,7 @@ using Vintagestory.API.Client;
 
 namespace IntegratedModManager.UI;
 
-public sealed class GuiDialogNotification : GuiDialog
+public sealed class GuiDialogNotification(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double Width = 420;
 	private const double TextPadding = 20;
@@ -20,8 +20,6 @@ public sealed class GuiDialogNotification : GuiDialog
 	public override bool DisableMouseGrab => true;
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
-
-	public GuiDialogNotification(ICoreClientAPI capi) : base(capi) { }
 
     public bool Show(string description, string buttonLabel) => Show("", description, buttonLabel);
 

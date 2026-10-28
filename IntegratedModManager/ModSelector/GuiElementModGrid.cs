@@ -8,28 +8,17 @@ using Vintagestory.API.MathTools;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class ModSelectorEntry
+public sealed class ModSelectorEntry(ImmServerModPacket serverMod, Mod? localMod)
 {
-	public Mod? LocalMod { get; }
-	public string Name { get; }
-	public string ModId { get; }
-	public bool HasConfiguration { get; }
-	public int WarningCount { get; }
-	public int ErrorCount { get; }
+    public Mod? LocalMod { get; } = localMod;
+    public string Name { get; } = string.IsNullOrWhiteSpace(serverMod.Name) ? serverMod.ModId : serverMod.Name;
+    public string ModId { get; } = serverMod.ModId;
+    public bool HasConfiguration { get; } = serverMod.HasConfiguration;
+    public int WarningCount { get; } = Math.Max(0, serverMod.WarningCount);
+    public int ErrorCount { get; } = Math.Max(0, serverMod.ErrorCount);
 
-	public bool HasWarnings => WarningCount > 0;
+    public bool HasWarnings => WarningCount > 0;
 	public bool HasErrors => ErrorCount > 0;
-
-	public ModSelectorEntry(ImmServerModPacket serverMod, Mod? localMod)
-	{
-		LocalMod = localMod;
-		ModId = serverMod.ModId;
-		Name = string.IsNullOrWhiteSpace(serverMod.Name) ? serverMod.ModId : serverMod.Name;
-
-		HasConfiguration = serverMod.HasConfiguration;
-		WarningCount = Math.Max(0, serverMod.WarningCount);
-		ErrorCount = Math.Max(0, serverMod.ErrorCount);
-	}
 }
 
 public sealed class GuiElementModGrid : GuiElement
@@ -582,18 +571,12 @@ public sealed class GuiElementModGrid : GuiElement
 		base.Dispose();
 	}
 
-	private sealed class CardTexture : IDisposable
+	private sealed class CardTexture(LoadedTexture? iconTexture, LoadedTexture nameTexture) : IDisposable
 	{
-		public LoadedTexture? IconTexture { get; }
-		public LoadedTexture NameTexture { get; }
+        public LoadedTexture? IconTexture { get; } = iconTexture;
+        public LoadedTexture NameTexture { get; } = nameTexture;
 
-		public CardTexture(LoadedTexture? iconTexture, LoadedTexture nameTexture)
-		{
-			IconTexture = iconTexture;
-			NameTexture = nameTexture;
-		}
-
-		public void Dispose()
+        public void Dispose()
 		{
 			IconTexture?.Dispose();
 			NameTexture.Dispose();

@@ -10,7 +10,7 @@ using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogAdvancedEditor : GuiDialog
+public sealed class GuiDialogAdvancedEditor(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double PreferredWidth = 620;
 	private const double PreferredHeight = 720;
@@ -65,9 +65,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogAdvancedEditor(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(string label, string schemaJson, string valueJson, ImmConfigSource configSource, Action<string> valueChanged)
+    public bool Show(string label, string schemaJson, string valueJson, ImmConfigSource configSource, Action<string> valueChanged)
 	{
 		TryClose();
 
@@ -1123,38 +1121,21 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		base.Dispose();
 	}
 
-	private sealed class NavigationFrame
-	{
-		public ImmAdvancedSchema Schema { get; }
-		public string Label { get; }
-		public Func<JToken> GetValue { get; }
-		public Action<JToken> SetValue { get; }
-		public string PendingNewKey = "";
+	private sealed class NavigationFrame(ImmAdvancedSchema schema, string label, Func<JToken> getValue, Action<JToken> setValue)
+    {
+        public ImmAdvancedSchema Schema { get; } = schema;
+        public string Label { get; } = label;
+        public Func<JToken> GetValue { get; } = getValue;
+        public Action<JToken> SetValue { get; } = setValue;
+        public string PendingNewKey = "";
+    }
 
-		public NavigationFrame(ImmAdvancedSchema schema, string label, Func<JToken> getValue, Action<JToken> setValue)
-		{
-			Schema = schema;
-			Label = label;
-			GetValue = getValue;
-			SetValue = setValue;
-		}
-	}
-
-	private sealed class EditorRow
-	{
-		public ImmAdvancedSchema Schema { get; }
-		public double X { get; }
-		public double Y { get; set; }
-		public double Width { get; }
-		public double Height { get; set; }
-
-		public EditorRow(ImmAdvancedSchema schema, double x, double y, double width, double height)
-		{
-			Schema = schema;
-			X = x;
-			Y = y;
-			Width = width;
-			Height = height;
-		}
-	}
+    private sealed class EditorRow(ImmAdvancedSchema schema, double x, double y, double width, double height)
+    {
+        public ImmAdvancedSchema Schema { get; } = schema;
+        public double X { get; } = x;
+        public double Y { get; set; } = y;
+        public double Width { get; } = width;
+        public double Height { get; set; } = height;
+    }
 }

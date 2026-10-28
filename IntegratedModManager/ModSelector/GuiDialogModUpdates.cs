@@ -558,18 +558,12 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 	}
 }
 
-internal sealed class GuiElementModUpdateCard : GuiElement
+internal sealed class GuiElementModUpdateCard(ICoreClientAPI capi, bool pendingRestart, bool retracted, ElementBounds bounds) : GuiElement(capi, bounds)
 {
-	private readonly bool PendingRestart;
-	private readonly bool Retracted;
+	private readonly bool PendingRestart = pendingRestart;
+	private readonly bool Retracted = retracted;
 
-	public GuiElementModUpdateCard(ICoreClientAPI capi, bool pendingRestart, bool retracted, ElementBounds bounds) : base(capi, bounds)
-	{
-		PendingRestart = pendingRestart;
-		Retracted = retracted;
-	}
-
-	public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
+    public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
 	{
 		// Visual chrome only. Controls layered over the card receive clicks.
 	}

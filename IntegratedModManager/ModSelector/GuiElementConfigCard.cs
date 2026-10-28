@@ -4,11 +4,9 @@ using Vintagestory.API.Client;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiElementConfigCard : GuiElement
+public sealed class GuiElementConfigCard(ICoreClientAPI capi, ElementBounds bounds) : GuiElement(capi, bounds)
 {
-	public GuiElementConfigCard(ICoreClientAPI capi, ElementBounds bounds) : base(capi, bounds) { }
-
-	public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
+    public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
 	{
 		// This element is visual chrome only.
 		// GuiElement's default implementation consumes mouse-down events, which prevents the interactive control layered inside this card from receiving them.

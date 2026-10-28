@@ -8,7 +8,7 @@ using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 
-public sealed class GuiDialogArrayEditor : GuiDialog
+public sealed class GuiDialogArrayEditor(ICoreClientAPI capi) : GuiDialog(capi)
 {
 	private const double PreferredWidth = 620;
 	private const double PreferredHeight = 560;
@@ -53,9 +53,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 	public override bool PrefersUngrabbedMouse => true;
 	public override bool CaptureAllInputs() => true;
 
-	public GuiDialogArrayEditor(ICoreClientAPI capi) : base(capi) { }
-
-	public bool Show(string label, string elementType, string valueJson, Action<string> valueChanged)
+    public bool Show(string label, string elementType, string valueJson, Action<string> valueChanged)
 	{
 		TryClose();
 

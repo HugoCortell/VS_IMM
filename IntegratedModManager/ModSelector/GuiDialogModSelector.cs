@@ -353,13 +353,11 @@ public sealed class GuiDialogModSelector : GuiDialog
 	}
 }
 
-public sealed class GuiElementImmDiagnosticToggleButton : GuiElementToggleButton
+public sealed class GuiElementImmDiagnosticToggleButton(ICoreClientAPI capi, string text, CairoFont font, Action<bool> onToggled, ElementBounds bounds, ImmDiagnosticLevel level) : GuiElementToggleButton(capi, "", text, font, onToggled, bounds, toggleable: true)
 {
-	private readonly double[] BackgroundColor;
+	private readonly double[] BackgroundColor = ImmDiagnosticPulse.CreateFlatGuiColor(level);
 
-	public GuiElementImmDiagnosticToggleButton(ICoreClientAPI capi, string text, CairoFont font, Action<bool> onToggled, ElementBounds bounds, ImmDiagnosticLevel level) : base(capi, "", text, font, onToggled, bounds, toggleable: true) { BackgroundColor = ImmDiagnosticPulse.CreateFlatGuiColor(level); }
-
-	public override void ComposeElements(Cairo.Context ctx, Cairo.ImageSurface surface)
+    public override void ComposeElements(Cairo.Context ctx, Cairo.ImageSurface surface)
 	{
 		double[] originalColor = GuiStyle.DialogDefaultBgColor;
 
@@ -382,11 +380,9 @@ public static class GuiComposerImmDiagnosticToggleExtensions
 
 
 
-internal sealed class GuiElementImmSearchInput : GuiElementTextInput
+internal sealed class GuiElementImmSearchInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : GuiElementTextInput(capi, bounds, onTextChanged, font)
 {
-	public GuiElementImmSearchInput(ICoreClientAPI capi, ElementBounds bounds, Action<string> onTextChanged, CairoFont font) : base(capi, bounds, onTextChanged, font) { }
-
-	public override void ComposeTextElements(Context ctx, ImageSurface surface)
+    public override void ComposeTextElements(Context ctx, ImageSurface surface)
 	{
 		base.ComposeTextElements(ctx, surface);
 
