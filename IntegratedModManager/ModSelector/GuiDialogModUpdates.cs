@@ -510,12 +510,9 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 		}
 	}
 
-	private static double MeasureText(string text, CairoFont font, double width)
-	{
-		return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(100, width)));
-	}
+    private static double MeasureText(string text, CairoFont font, double width) => Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(100, width)));
 
-	private bool OnUpdateClicked()
+    private bool OnUpdateClicked()
 	{
 		if (Update == null || RequestingUpdate || !Update.Installable || Update.State != ImmModUpdateEntryState.Available) { return true; }
 
@@ -528,14 +525,11 @@ public sealed class GuiDialogModUpdateDetails : GuiDialog
 
 	private bool OnCloseClicked() { TryClose(); return true; }
 
-	private bool Matches(string modId, string targetVersion)
-	{
-		return Update != null
-			&& string.Equals(Update.ModId, modId, StringComparison.OrdinalIgnoreCase)
-			&& string.Equals(Update.TargetVersion, targetVersion, StringComparison.OrdinalIgnoreCase);
-	}
+    private bool Matches(string modId, string targetVersion) => Update != null
+            && string.Equals(Update.ModId, modId, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(Update.TargetVersion, targetVersion, StringComparison.OrdinalIgnoreCase);
 
-	private void OnScrollbarChanged(float value)
+    private void OnScrollbarChanged(float value)
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (ContentClipBounds == null ? 0 : (float)ContentClipBounds.fixedHeight)));
 

@@ -34,9 +34,9 @@ public sealed class ImmExternalManagerOwnership
 		}
 	}
 
-	public bool IsControlled(string modId) { return !string.IsNullOrWhiteSpace(modId) && Claims.ContainsKey(modId); }
+    public bool IsControlled(string modId) => !string.IsNullOrWhiteSpace(modId) && Claims.ContainsKey(modId);
 
-	public IReadOnlyList<ImmExternalManagerClaim> GetClaims(string modId)
+    public IReadOnlyList<ImmExternalManagerClaim> GetClaims(string modId)
 	{
 		if (string.IsNullOrWhiteSpace(modId) || !Claims.TryGetValue(modId, out List<ImmExternalManagerClaim>? claims)) { return Array.Empty<ImmExternalManagerClaim>(); }
 		return claims;

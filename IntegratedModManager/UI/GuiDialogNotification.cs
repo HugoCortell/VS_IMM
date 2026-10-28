@@ -27,9 +27,9 @@ public sealed class GuiDialogNotification : GuiDialog
 
 	public GuiDialogNotification(ICoreClientAPI capi) : base(capi) { }
 
-	public bool Show(string description, string buttonLabel) { return Show("", description, buttonLabel); }
+    public bool Show(string description, string buttonLabel) => Show("", description, buttonLabel);
 
-	public bool Show(string title, string description, string buttonLabel)
+    public bool Show(string title, string description, string buttonLabel)
 	{
 		Title = title ?? "";
 		Description = description ?? "";

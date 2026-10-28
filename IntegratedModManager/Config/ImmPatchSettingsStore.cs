@@ -211,11 +211,11 @@ public sealed class ImmPatchSettingsStore
 		return entry.Default?.DeepClone() ?? JValue.CreateNull();
 	}
 
-	private static bool IsDefaultValue(ImmConfigEntry entry, JToken value) { return JToken.DeepEquals(value, GetNormalizedDefault(entry)); }
+    private static bool IsDefaultValue(ImmConfigEntry entry, JToken value) => JToken.DeepEquals(value, GetNormalizedDefault(entry));
 
-	private static string GetSectionName(ImmConfigSide side) { return side == ImmConfigSide.Server ? "Server" : "Client"; }
+    private static string GetSectionName(ImmConfigSide side) => side == ImmConfigSide.Server ? "Server" : "Client";
 
-	private static void ValidateModIdForPath(string modId)
+    private static void ValidateModIdForPath(string modId)
 	{
 		if (string.IsNullOrWhiteSpace(modId) || modId.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || modId.Contains('/') || modId.Contains('\\') || modId is "." or "..")
 		{

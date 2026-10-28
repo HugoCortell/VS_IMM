@@ -507,9 +507,9 @@ public sealed class GuiElementModGrid : GuiElement
 		args.Handled = true;
 	}
 
-	public override void OnMouseUp(ICoreClientAPI api, MouseEvent args) { DraggingScrollbar = false; }
+    public override void OnMouseUp(ICoreClientAPI api, MouseEvent args) => DraggingScrollbar = false;
 
-	private ModSelectorEntry? GetEntryAt(double mouseX, double mouseY)
+    private ModSelectorEntry? GetEntryAt(double mouseX, double mouseY)
 	{
 		if (ViewportBounds == null || !ViewportBounds.PointInside((int)mouseX, (int)mouseY)) { return null; }
 
@@ -615,5 +615,5 @@ public static class GuiComposerModSelectorExtensions
 		return composer;
 	}
 
-	public static GuiElementModGrid GetModSelectorGrid(this GuiComposer composer, string key) { return (GuiElementModGrid)composer.GetElement(key); }
+    public static GuiElementModGrid GetModSelectorGrid(this GuiComposer composer, string key) => (GuiElementModGrid)composer.GetElement(key);
 }

@@ -381,9 +381,9 @@ public sealed class ImmConfigService
 		return result;
 	}
 
-	private static string ReadRootDescription(JObject config) { return config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : ""; }
+    private static string ReadRootDescription(JObject config) => config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 
-	private static string ReadSettingDescription(JToken target)
+    private static string ReadSettingDescription(JToken target)
 	{
 		if (target.Parent is not JProperty property || property.Parent is not JObject parent) { return ""; }
 
@@ -392,9 +392,9 @@ public sealed class ImmConfigService
 		return parent.TryGetValue(descriptionName, StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 	}
 
-	private static ImmConfigPageResponse PageError(string modId, string error) { return new ImmConfigPageResponse { ModId = modId, Error = error }; }
-	private static ImmConfigApplyResponse ApplyError(string modId, string error) { return new ImmConfigApplyResponse { ModId = modId, Error = error }; }
-	private sealed record ServerControlLocation(ImmConfigBlock Block, ImmConfigEntry Entry, ImmConfigControlPacket Control);
+    private static ImmConfigPageResponse PageError(string modId, string error) => new ImmConfigPageResponse { ModId = modId, Error = error };
+    private static ImmConfigApplyResponse ApplyError(string modId, string error) => new ImmConfigApplyResponse { ModId = modId, Error = error };
+    private sealed record ServerControlLocation(ImmConfigBlock Block, ImmConfigEntry Entry, ImmConfigControlPacket Control);
 	private sealed record PreparedServerChange(JToken Target, JToken Value);
 	private sealed record PreparedPatchSettingChange(ImmConfigEntry Entry, ImmConfigSide Side, JToken Value);
 }

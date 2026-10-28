@@ -354,9 +354,9 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 		}
 	}
 
-	private string FormatValue(JToken value) { return ElementType switch { "Boolean" => value.Value<bool>() ? "true" : "false", "Integer" => value.Value<int>().ToString(CultureInfo.InvariantCulture), "Decimal" => value.Value<double>().ToString("G", GlobalConstants.DefaultCultureInfo), "String" => value.Value<string>() ?? "", _ => value.ToString(Formatting.None) }; }
+    private string FormatValue(JToken value) => ElementType switch { "Boolean" => value.Value<bool>() ? "true" : "false", "Integer" => value.Value<int>().ToString(CultureInfo.InvariantCulture), "Decimal" => value.Value<double>().ToString("G", GlobalConstants.DefaultCultureInfo), "String" => value.Value<string>() ?? "", _ => value.ToString(Formatting.None) };
 
-	private void OnScrollbarChanged(float value)
+    private void OnScrollbarChanged(float value)
 	{
 		ScrollValue = Math.Clamp(value, 0, Math.Max(0, ContentHeight - (float)(ClipBounds?.fixedHeight ?? 0)));
 

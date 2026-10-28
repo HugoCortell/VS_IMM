@@ -10,11 +10,11 @@ public static class ImmLocalization
 {
 	private const string Domain = IntegratedModManagerSystem.ModId;
 
-	public static string Get(string key, params object[] args) { return Lang.Get($"{Domain}:{key}", args); }
+    public static string Get(string key, params object[] args) => Lang.Get($"{Domain}:{key}", args);
 
-	public static string GetForLanguage(string languageCode, string key, params object[] args) { return Lang.GetL(languageCode, $"{Domain}:{key}", args); }
+    public static string GetForLanguage(string languageCode, string key, params object[] args) => Lang.GetL(languageCode, $"{Domain}:{key}", args);
 
-	public static string Resolve(string? text)
+    public static string Resolve(string? text)
 	{
 		if (string.IsNullOrEmpty(text)) { return ""; }
 		if (!LooksLikeLocalizationKey(text)) { return text; }
@@ -51,17 +51,11 @@ public static class ImmLocalization
 		return true;
 	}
 
-	public static void LocalizePage(ImmConfigPageResponse page)
-	{
-		LocalizePage(page, Resolve, (key, args) => Get(key, args));
-	}
+    public static void LocalizePage(ImmConfigPageResponse page) => LocalizePage(page, Resolve, (key, args) => Get(key, args));
 
-	public static void LocalizePage(ImmConfigPageResponse page, string languageCode)
-	{
-		LocalizePage(page, text => ResolveForLanguage(text, languageCode), (key, args) => GetForLanguage(languageCode, key, args));
-	}
+    public static void LocalizePage(ImmConfigPageResponse page, string languageCode) => LocalizePage(page, text => ResolveForLanguage(text, languageCode), (key, args) => GetForLanguage(languageCode, key, args));
 
-	private static void LocalizePage(ImmConfigPageResponse page, Func<string?, string> resolve, Func<string, object[], string> get)
+    private static void LocalizePage(ImmConfigPageResponse page, Func<string?, string> resolve, Func<string, object[], string> get)
 	{
 		page.Error = resolve(page.Error);
 

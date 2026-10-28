@@ -221,8 +221,5 @@ public static class ImmAdvancedSchemaValidator
 		if (schema.MaxItems.HasValue && schema.MaxItems.Value < schema.MinItems) { throw new InvalidDataException($"{prefix}.MaxItems cannot be less than MinItems."); }
 	}
 
-	private static bool HasPrimitiveMetadata(ImmAdvancedSchema schema)
-	{
-		return schema.Min.HasValue || schema.Max.HasValue || schema.Step.HasValue || schema.Options.Count > 0;
-	}
+    private static bool HasPrimitiveMetadata(ImmAdvancedSchema schema) => schema.Min.HasValue || schema.Max.HasValue || schema.Step.HasValue || schema.Options.Count > 0;
 }

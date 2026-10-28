@@ -264,12 +264,9 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		return y + (CanAdd(schema, count) ? 42 + CardGap : 0) + 4;
 	}
 
-	private double MeasureTuple(ImmAdvancedSchema schema, JArray? tuple, double contentWidth)
-	{
-		return Math.Max(48, 4 + schema.Items.Count * (76 + CardGap));
-	}
+    private double MeasureTuple(ImmAdvancedSchema schema, JArray? tuple, double contentWidth) => Math.Max(48, 4 + schema.Items.Count * (76 + CardGap));
 
-	private double MeasureRootPrimitive(ImmAdvancedSchema schema, double contentWidth)
+    private double MeasureRootPrimitive(ImmAdvancedSchema schema, double contentWidth)
 	{
 		double descriptionHeight = MeasureTextHeight(ImmLocalization.Resolve(schema.Description), CairoFont.WhiteDetailText(), Math.Max(80, contentWidth - 24));
 		return 4 + 76 + (descriptionHeight > 0 ? descriptionHeight + DescriptionGap : 0) + 4;
@@ -1036,10 +1033,10 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		container.Add(button);
 	}
 
-	private static bool IsContainer(string type) { return type is "Object" or "Dictionary" or "Array" or "Tuple"; }
-	private static bool CanAdd(ImmAdvancedSchema schema, int count) { return !schema.MaxItems.HasValue || count < schema.MaxItems.Value; }
+    private static bool IsContainer(string type) => type is "Object" or "Dictionary" or "Array" or "Tuple";
+    private static bool CanAdd(ImmAdvancedSchema schema, int count) => !schema.MaxItems.HasValue || count < schema.MaxItems.Value;
 
-	private static string ResolveLabel(ImmAdvancedSchema schema, string fallback)
+    private static string ResolveLabel(ImmAdvancedSchema schema, string fallback)
 	{
 		string label = ImmLocalization.Resolve(schema.Label);
 		return string.IsNullOrWhiteSpace(label) ? fallback : label;
@@ -1061,22 +1058,13 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		return 0;
 	}
 
-	private static string FormatSliderValue(double value, bool integer)
-	{
-		return integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture);
-	}
+    private static string FormatSliderValue(double value, bool integer) => integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture);
 
-	private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds)
-	{
-		container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font));
-	}
+    private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font));
 
-	private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds)
-	{
-		container.Add(IntegratedModManager.UI.ImmRichText.Create(capi, text, font, bounds));
-	}
+    private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(IntegratedModManager.UI.ImmRichText.Create(capi, text, font, bounds));
 
-	private static double MeasureTextHeight(string? text, CairoFont font, double width)
+    private static double MeasureTextHeight(string? text, CairoFont font, double width)
 	{
 		if (string.IsNullOrWhiteSpace(text)) { return 0; }
 		return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width)));

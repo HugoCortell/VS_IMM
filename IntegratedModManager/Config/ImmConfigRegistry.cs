@@ -92,9 +92,9 @@ public sealed class ImmConfigRegistry
 		}
 	}
 
-	public bool TryGet(string modId, out ImmConfigDescriptor descriptor) { return Descriptors.TryGetValue(modId, out descriptor!); }
+    public bool TryGet(string modId, out ImmConfigDescriptor descriptor) => Descriptors.TryGetValue(modId, out descriptor!);
 
-	public bool TryGetPatchSetting(string modId, string code, out ImmConfigBlock block, out ImmConfigEntry entry, out ImmConfigSide effectiveSide)
+    public bool TryGetPatchSetting(string modId, string code, out ImmConfigBlock block, out ImmConfigEntry entry, out ImmConfigSide effectiveSide)
 	{
 		block = null!;
 		entry = null!;
@@ -121,9 +121,9 @@ public sealed class ImmConfigRegistry
 		return false;
 	}
 
-	public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) { return DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!); }
+    public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) => DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!);
 
-	private static ImmConfigDescriptor ParseDescriptor(string text)
+    private static ImmConfigDescriptor ParseDescriptor(string text)
 	{
 		using StringReader stringReader = new(text);
 		using JsonTextReader jsonReader = new(stringReader) { DateParseHandling = DateParseHandling.None, FloatParseHandling = FloatParseHandling.Double };
@@ -832,9 +832,9 @@ public sealed class ImmConfigRegistry
 		}
 	}
 
-	private static bool IsNumeric(JToken value) { return value.Type is JTokenType.Integer or JTokenType.Float; }
+    private static bool IsNumeric(JToken value) => value.Type is JTokenType.Integer or JTokenType.Float;
 
-	private static void ValidateConfigPath(string configFile, string prefix)
+    private static void ValidateConfigPath(string configFile, string prefix)
 	{
 		if (Path.IsPathRooted(configFile) || configFile.Contains(':'))
 		{

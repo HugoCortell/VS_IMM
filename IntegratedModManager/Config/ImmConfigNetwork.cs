@@ -37,20 +37,20 @@ public sealed class ImmConfigClient : IDisposable
 		Channel = clientApi.Network.GetChannel(ImmConfigNetwork.NetworkChannelCode).SetMessageHandler<ImmConfigCatalogResponse>(OnCatalogReceived).SetMessageHandler<ImmConfigPageResponse>(OnPageReceived).SetMessageHandler<ImmConfigApplyResponse>(OnApplyReceived).SetMessageHandler<ImmDependencyResolveResponse>(OnDependencyResolveReceived);
 	}
 
-	public void RequestCatalog() { Channel.SendPacket(new ImmConfigCatalogRequest()); }
+    public void RequestCatalog() => Channel.SendPacket(new ImmConfigCatalogRequest());
 
-	public void RequestPage(string modId)
+    public void RequestPage(string modId)
 	{
 		if (!ServerPageModIds.Contains(modId) && TryBuildLocalClientPage(modId, out ImmConfigPageResponse localPage)) { ClientApi.Event.EnqueueMainThreadTask(() => FinalizePage(localPage), "integratedmodmanager-local-config-page"); return; }
 
 		Channel.SendPacket(new ImmConfigPageRequest { ModId = modId });
 	}
 
-	public void ApplyServer(string modId, ImmConfigChangePacket[] changes) { Channel.SendPacket(new ImmConfigApplyRequest { ModId = modId, Changes = changes }); }
+    public void ApplyServer(string modId, ImmConfigChangePacket[] changes) => Channel.SendPacket(new ImmConfigApplyRequest { ModId = modId, Changes = changes });
 
-	public void ResolveDependency(int runtimeId) { Channel.SendPacket(new ImmDependencyResolveRequest { RuntimeId = runtimeId }); }
+    public void ResolveDependency(int runtimeId) => Channel.SendPacket(new ImmDependencyResolveRequest { RuntimeId = runtimeId });
 
-	public bool TryApplyClient(ImmConfigPageResponse page, ImmConfigChangePacket[] changes, out ImmReloadRequirement reloadRequirement, out string error)
+    public bool TryApplyClient(ImmConfigPageResponse page, ImmConfigChangePacket[] changes, out ImmReloadRequirement reloadRequirement, out string error)
 	{
 		reloadRequirement = ImmReloadRequirement.None;
 
@@ -142,15 +142,15 @@ public sealed class ImmConfigClient : IDisposable
 		catch (Exception exception) { error = $"Failed to prepare client configuration: {exception.Message}"; return false; }
 	}
 
-	private void OnCatalogReceived(ImmConfigCatalogResponse packet) { ClientApi.Event.EnqueueMainThreadTask(() => { if (packet.Success) { FinalizeCatalog(packet); } else { ServerPageModIds.Clear(); CanManageServer = false; } CatalogReceived?.Invoke(packet); }, "integratedmodmanager-config-catalog"); }
+    private void OnCatalogReceived(ImmConfigCatalogResponse packet) => ClientApi.Event.EnqueueMainThreadTask(() => { if (packet.Success) { FinalizeCatalog(packet); } else { ServerPageModIds.Clear(); CanManageServer = false; } CatalogReceived?.Invoke(packet); }, "integratedmodmanager-config-catalog");
 
-	private void OnPageReceived(ImmConfigPageResponse packet) { ClientApi.Event.EnqueueMainThreadTask(() => FinalizePage(packet), "integratedmodmanager-config-page"); }
+    private void OnPageReceived(ImmConfigPageResponse packet) => ClientApi.Event.EnqueueMainThreadTask(() => FinalizePage(packet), "integratedmodmanager-config-page");
 
-	private void OnApplyReceived(ImmConfigApplyResponse packet) { ClientApi.Event.EnqueueMainThreadTask(() => ApplyReceived?.Invoke(packet), "integratedmodmanager-config-apply"); }
+    private void OnApplyReceived(ImmConfigApplyResponse packet) => ClientApi.Event.EnqueueMainThreadTask(() => ApplyReceived?.Invoke(packet), "integratedmodmanager-config-apply");
 
-	private void OnDependencyResolveReceived(ImmDependencyResolveResponse packet) { ClientApi.Event.EnqueueMainThreadTask(() => DependencyResolveReceived?.Invoke(packet), "integratedmodmanager-dependency-resolve"); }
+    private void OnDependencyResolveReceived(ImmDependencyResolveResponse packet) => ClientApi.Event.EnqueueMainThreadTask(() => DependencyResolveReceived?.Invoke(packet), "integratedmodmanager-dependency-resolve");
 
-	private void FinalizeCatalog(ImmConfigCatalogResponse packet)
+    private void FinalizeCatalog(ImmConfigCatalogResponse packet)
 	{
 		CanManageServer = packet.CanManageServer;
 		ServerPageModIds.Clear();
@@ -423,9 +423,9 @@ public sealed class ImmConfigClient : IDisposable
 		if (block.ParseDescriptions) { control.Description = ReadSettingDescription(target); }
 	}
 
-	private static string ReadRootDescription(JObject config) { return config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : ""; }
+    private static string ReadRootDescription(JObject config) => config.TryGetValue("Description", StringComparison.OrdinalIgnoreCase, out JToken? description) && description.Type == JTokenType.String ? description.Value<string>() ?? "" : "";
 
-	private static string ReadSettingDescription(JToken target)
+    private static string ReadSettingDescription(JToken target)
 	{
 		if (target.Parent is not JProperty property || property.Parent is not JObject parent) { return ""; }
 
@@ -501,9 +501,9 @@ public static class ImmConfigNetwork
 {
 	public const string NetworkChannelCode = "integratedmodmanager-config";
 
-	public static void RegisterNetwork(ICoreAPI api) { api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<ImmConfigCatalogRequest>().RegisterMessageType<ImmConfigCatalogResponse>().RegisterMessageType<ImmServerModPacket>().RegisterMessageType<ImmConfigPageRequest>().RegisterMessageType<ImmConfigPageResponse>().RegisterMessageType<ImmConfigBlockPacket>().RegisterMessageType<ImmConfigControlPacket>().RegisterMessageType<ImmConfigOptionPacket>().RegisterMessageType<ImmConfigApplyRequest>().RegisterMessageType<ImmConfigChangePacket>().RegisterMessageType<ImmConfigApplyResponse>().RegisterMessageType<ImmDependencyPacket>().RegisterMessageType<ImmDependencyResolveRequest>().RegisterMessageType<ImmDependencyResolveResponse>(); }
+    public static void RegisterNetwork(ICoreAPI api) => api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<ImmConfigCatalogRequest>().RegisterMessageType<ImmConfigCatalogResponse>().RegisterMessageType<ImmServerModPacket>().RegisterMessageType<ImmConfigPageRequest>().RegisterMessageType<ImmConfigPageResponse>().RegisterMessageType<ImmConfigBlockPacket>().RegisterMessageType<ImmConfigControlPacket>().RegisterMessageType<ImmConfigOptionPacket>().RegisterMessageType<ImmConfigApplyRequest>().RegisterMessageType<ImmConfigChangePacket>().RegisterMessageType<ImmConfigApplyResponse>().RegisterMessageType<ImmDependencyPacket>().RegisterMessageType<ImmDependencyResolveRequest>().RegisterMessageType<ImmDependencyResolveResponse>();
 
-	public static void StartServer(ICoreServerAPI api, ImmConfigService service)
+    public static void StartServer(ICoreServerAPI api, ImmConfigService service)
 	{
 		IServerNetworkChannel channel = api.Network.GetChannel(NetworkChannelCode);
 

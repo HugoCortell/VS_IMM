@@ -54,9 +54,9 @@ public sealed class ImmDependencyService
 		StratumActive = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false) != null;
 	}
 
-	public ImmActiveDependency[] GetForMod(string sourceModId) { return Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase)).ToArray(); }
+    public ImmActiveDependency[] GetForMod(string sourceModId) => Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase)).ToArray();
 
-	public void EvaluateAll()
+    public void EvaluateAll()
 	{
 		Dictionary<string, JObject?> configs = new(StringComparer.OrdinalIgnoreCase);
 		Dictionary<string, int> recipeCounts = new(StringComparer.OrdinalIgnoreCase);

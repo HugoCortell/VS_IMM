@@ -155,11 +155,11 @@ public sealed class GuiDialogDependencyIssue : GuiDialog
 
 	private bool OnCloseClicked() { TryClose(); return true; }
 
-	private static string NormalizeText(string? text) { return string.IsNullOrWhiteSpace(text) ? "" : text.Replace("\r\n", "\n").Replace('\r', '\n'); }
+    private static string NormalizeText(string? text) => string.IsNullOrWhiteSpace(text) ? "" : text.Replace("\r\n", "\n").Replace('\r', '\n');
 
-	private static double Measure(string text, CairoFont font, double width) { return Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width))); }
+    private static double Measure(string text, CairoFont font, double width) => Math.Ceiling(new TextDrawUtil().GetMultilineTextHeight(font, text, Math.Max(1, width)));
 
-	public override void Dispose()
+    public override void Dispose()
 	{
 		Issue = null;
 		AutoResolve = null;

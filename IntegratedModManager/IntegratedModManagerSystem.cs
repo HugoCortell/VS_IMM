@@ -25,9 +25,9 @@ public sealed class IntegratedModManagerSystem : ModSystem
 	private GuiDialogNotification? Notification;
 	private bool ClientSideStarted;
 
-	public override bool ShouldLoad(EnumAppSide forSide) { return true; }
+    public override bool ShouldLoad(EnumAppSide forSide) => true;
 
-	public override void Start(ICoreAPI api)
+    public override void Start(ICoreAPI api)
 	{
 		IntegratedModManagerNudge.RegisterNetwork(api);
 		ImmConfigNetwork.RegisterNetwork(api);
@@ -79,11 +79,11 @@ public sealed class IntegratedModManagerSystem : ModSystem
 		ImmConfigNetwork.StartServer(api, configService);
 	}
 
-	public void OpenManager() { ModSelector?.TryOpen(); }
+    public void OpenManager() => ModSelector?.TryOpen();
 
-	private void OpenUpdates() { ModUpdates?.TryOpen(); }
+    private void OpenUpdates() => ModUpdates?.TryOpen();
 
-	private void OpenSelectedMod(ModSelectorEntry entry)
+    private void OpenSelectedMod(ModSelectorEntry entry)
 	{
 		if (!entry.HasConfiguration && !entry.HasWarnings && !entry.HasErrors) { Notification?.Show(ImmLocalization.Get("notification-no-configuration"), ImmLocalization.Get("button-alright")); return; }
 		if (ModManager == null) { return; }

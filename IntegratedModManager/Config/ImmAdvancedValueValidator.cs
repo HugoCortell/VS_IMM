@@ -11,17 +11,11 @@ namespace IntegratedModManager.Config;
 
 public static class ImmAdvancedValueValidator
 {
-	public static bool TryValidateCurrentValue(ImmAdvancedSchema schema, ImmConfigSource source, JToken target, out string error)
-	{
-		return TryNormalizeNode(schema, source, target, target, out _, out error);
-	}
+    public static bool TryValidateCurrentValue(ImmAdvancedSchema schema, ImmConfigSource source, JToken target, out string error) => TryNormalizeNode(schema, source, target, target, out _, out error);
 
-	public static bool TryNormalizeValue(ImmAdvancedSchema schema, ImmConfigSource source, JToken target, JToken submitted, out JToken normalized, out string error)
-	{
-		return TryNormalizeNode(schema, source, target, submitted, out normalized, out error);
-	}
+    public static bool TryNormalizeValue(ImmAdvancedSchema schema, ImmConfigSource source, JToken target, JToken submitted, out JToken normalized, out string error) => TryNormalizeNode(schema, source, target, submitted, out normalized, out error);
 
-	public static bool TryNormalizeNode(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)
+    public static bool TryNormalizeNode(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)
 	{
 		normalized = submitted;
 		error = "";
@@ -160,27 +154,24 @@ public static class ImmAdvancedValueValidator
 		}
 	}
 
-	public static ImmConfigControlPacket CreateLeafControl(ImmAdvancedSchema schema, ImmConfigSource source)
-	{
-		return new ImmConfigControlPacket
-		{
-			Type = schema.Type,
-			ConfigSource = source,
-			HasMin = schema.Min.HasValue,
-			Min = schema.Min ?? 0,
-			HasMax = schema.Max.HasValue,
-			Max = schema.Max ?? 0,
-			HasStep = schema.Step.HasValue,
-			Step = schema.Step ?? 0,
-			Options = schema.Options?.Select(option => new ImmConfigOptionPacket
-			{
-				Label = option.Label,
-				ValueJson = option.Value?.ToString(Formatting.None) ?? "null"
-			}).ToArray() ?? Array.Empty<ImmConfigOptionPacket>()
-		};
-	}
+    public static ImmConfigControlPacket CreateLeafControl(ImmAdvancedSchema schema, ImmConfigSource source) => new ImmConfigControlPacket
+    {
+        Type = schema.Type,
+        ConfigSource = source,
+        HasMin = schema.Min.HasValue,
+        Min = schema.Min ?? 0,
+        HasMax = schema.Max.HasValue,
+        Max = schema.Max ?? 0,
+        HasStep = schema.Step.HasValue,
+        Step = schema.Step ?? 0,
+        Options = schema.Options?.Select(option => new ImmConfigOptionPacket
+        {
+            Label = option.Label,
+            ValueJson = option.Value?.ToString(Formatting.None) ?? "null"
+        }).ToArray() ?? Array.Empty<ImmConfigOptionPacket>()
+    };
 
-	private static bool TryNormalizeObject(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)
+    private static bool TryNormalizeObject(ImmAdvancedSchema schema, ImmConfigSource source, JToken? target, JToken submitted, out JToken normalized, out string error)
 	{
 		normalized = submitted;
 		error = "";
@@ -342,8 +333,5 @@ public static class ImmAdvancedValueValidator
 		return true;
 	}
 
-	private static bool IsWholeNumber(double value)
-	{
-		return double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= 0.000001 && value >= long.MinValue && value <= long.MaxValue;
-	}
+    private static bool IsWholeNumber(double value) => double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= 0.000001 && value >= long.MinValue && value <= long.MaxValue;
 }

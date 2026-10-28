@@ -190,9 +190,9 @@ public sealed class ImmContentPath
 		return new JValue(text);
 	}
 
-	private static string UnescapeProperty(string value) { return value.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal); }
+    private static string UnescapeProperty(string value) => value.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal);
 
-	private interface IPathStep
+    private interface IPathStep
 	{
 		IEnumerable<JToken> Apply(IEnumerable<JToken> input);
 	}

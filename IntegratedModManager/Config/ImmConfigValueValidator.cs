@@ -277,9 +277,9 @@ public static class ImmConfigValueValidator
 		return IsWholeNumber(token.Value<double>());
 	}
 
-	private static bool IsWholeNumber(double value) { return double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= StepTolerance; }
+    private static bool IsWholeNumber(double value) => double.IsFinite(value) && Math.Abs(value - Math.Round(value)) <= StepTolerance;
 
-	private static bool RequireTokenType(JToken token, JTokenType expected, string expectedName, out string error)
+    private static bool RequireTokenType(JToken token, JTokenType expected, string expectedName, out string error)
 	{
 		if (token.Type == expected) { error = ""; return true; }
 

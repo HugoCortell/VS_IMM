@@ -77,9 +77,9 @@ public sealed class IntegratedModManagerNudge : IRenderer
 
 	public IntegratedModManagerNudge(ICoreClientAPI clientApi) { ClientApi = clientApi; }
 
-	public static void RegisterNetwork(ICoreAPI api) { api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<NudgeStateRequest>().RegisterMessageType<NudgeStateResponse>().RegisterMessageType<NudgeDismissRequest>(); }
+    public static void RegisterNetwork(ICoreAPI api) => api.Network.RegisterChannel(NetworkChannelCode).RegisterMessageType<NudgeStateRequest>().RegisterMessageType<NudgeStateResponse>().RegisterMessageType<NudgeDismissRequest>();
 
-	public static void StartServer(ICoreServerAPI api, ImmDependencyService dependencyService)
+    public static void StartServer(ICoreServerAPI api, ImmDependencyService dependencyService)
 	{
 		IServerNetworkChannel channel = api.Network.GetChannel(NetworkChannelCode);
 

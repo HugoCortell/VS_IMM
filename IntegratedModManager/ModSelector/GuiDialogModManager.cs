@@ -212,9 +212,9 @@ public sealed class GuiDialogModManager : GuiDialog
 		base.OnMouseWheel(args);
 	}
 
-	private void OnLevelFinalize() { PendingRestartDependencies.Clear(); }
+    private void OnLevelFinalize() => PendingRestartDependencies.Clear();
 
-	private void ResetState()
+    private void ResetState()
 	{
 		Page = null;
 		PendingChanges.Clear();
@@ -987,10 +987,10 @@ public sealed class GuiDialogModManager : GuiDialog
 		ControlElements[control.Index] = element;
 	}
 
-	private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) { container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font)); }
-	private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) { container.Add(ImmRichText.Create(capi, text, font, bounds)); }
+    private void AddText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(new GuiElementStaticText(capi, text, font.Orientation, bounds, font));
+    private void AddRichText(GuiElementContainer container, string text, CairoFont font, ElementBounds bounds) => container.Add(ImmRichText.Create(capi, text, font, bounds));
 
-	private void InitializeControlValues()
+    private void InitializeControlValues()
 	{
 		SettingControlValues = true;
 
@@ -1043,11 +1043,11 @@ public sealed class GuiDialogModManager : GuiDialog
 	private bool OnEditArray(ImmConfigControlPacket control) { ArrayEditorDialog.Show(control.Label, control.ElementType, control.ValueJson, valueJson => SetPendingValue(control, valueJson)); return true; }
 	private bool OnEditAdvanced(ImmConfigControlPacket control) { AdvancedEditorDialog.Show(control.Label, control.AdvancedSchemaJson, control.ValueJson, control.ConfigSource, valueJson => SetPendingValue(control, valueJson)); return true; }
 
-	private void SetPendingBoolean(ImmConfigControlPacket control, bool value) { SetPendingValue(control, value ? "true" : "false"); }
+    private void SetPendingBoolean(ImmConfigControlPacket control, bool value) => SetPendingValue(control, value ? "true" : "false");
 
-	private void SetPendingString(ImmConfigControlPacket control, string value) { SetPendingValue(control, JsonConvert.SerializeObject(value)); }
+    private void SetPendingString(ImmConfigControlPacket control, string value) => SetPendingValue(control, JsonConvert.SerializeObject(value));
 
-	private void SetPendingNumber(ImmConfigControlPacket control, string value)
+    private void SetPendingNumber(ImmConfigControlPacket control, string value)
 	{
 		if (SettingControlValues) { return; }
 
@@ -1188,9 +1188,9 @@ public sealed class GuiDialogModManager : GuiDialog
 		return true;
 	}
 
-	private static ImmConfigChangePacket ToChangePacket(KeyValuePair<int, string> change) { return new ImmConfigChangePacket { Index = change.Key, ValueJson = change.Value }; }
+    private static ImmConfigChangePacket ToChangePacket(KeyValuePair<int, string> change) => new ImmConfigChangePacket { Index = change.Key, ValueJson = change.Value };
 
-	private void RemovePendingChanges(IReadOnlyDictionary<int, string> changes)
+    private void RemovePendingChanges(IReadOnlyDictionary<int, string> changes)
 	{
 		foreach (KeyValuePair<int, string> change in changes)
 		{
@@ -1265,11 +1265,11 @@ public sealed class GuiDialogModManager : GuiDialog
 		}
 	}
 
-	private ImmConfigBlockPacket[] GetBlocks() { return Page?.Success == true ? (Page.Configuration ?? Array.Empty<ImmConfigBlockPacket>()).Where(block => block != null).ToArray() : Array.Empty<ImmConfigBlockPacket>(); }
-	private ImmDependencyPacket[] GetDependencies() { ImmConfigPageResponse? page = Page; return page?.Success == true && page.CanManageServer ? (page.Dependencies ?? Array.Empty<ImmDependencyPacket>()).Where(dependency => dependency != null).ToArray() : Array.Empty<ImmDependencyPacket>(); }
-	private IEnumerable<ImmConfigControlPacket> GetControls() { return GetBlocks().SelectMany(block => (block.Controls ?? Array.Empty<ImmConfigControlPacket>()).Where(control => control != null)); }
+    private ImmConfigBlockPacket[] GetBlocks() => Page?.Success == true ? (Page.Configuration ?? Array.Empty<ImmConfigBlockPacket>()).Where(block => block != null).ToArray() : Array.Empty<ImmConfigBlockPacket>();
+    private ImmDependencyPacket[] GetDependencies() { ImmConfigPageResponse? page = Page; return page?.Success == true && page.CanManageServer ? (page.Dependencies ?? Array.Empty<ImmDependencyPacket>()).Where(dependency => dependency != null).ToArray() : Array.Empty<ImmDependencyPacket>(); }
+    private IEnumerable<ImmConfigControlPacket> GetControls() => GetBlocks().SelectMany(block => (block.Controls ?? Array.Empty<ImmConfigControlPacket>()).Where(control => control != null));
 
-	private string GetSelectedModName() { string title = !string.IsNullOrWhiteSpace(SelectedModName) ? SelectedModName : string.IsNullOrWhiteSpace(SelectedModId) ? ImmLocalization.Get("mod-configuration-title") : SelectedModId; return title.Replace('\r', ' ').Replace('\n', ' '); }
+    private string GetSelectedModName() { string title = !string.IsNullOrWhiteSpace(SelectedModName) ? SelectedModName : string.IsNullOrWhiteSpace(SelectedModId) ? ImmLocalization.Get("mod-configuration-title") : SelectedModId; return title.Replace('\r', ' ').Replace('\n', ' '); }
 
 	private static CairoFont CreateSingleLineTitleFont(string text, ElementBounds bounds)
 	{
@@ -1290,9 +1290,9 @@ public sealed class GuiDialogModManager : GuiDialog
 		return font;
 	}
 
-	private static string FormatSliderValue(double value, bool integer) { return integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture); }
+    private static string FormatSliderValue(double value, bool integer) => integer ? Math.Round(value).ToString(CultureInfo.InvariantCulture) : value.ToString("0.####", CultureInfo.InvariantCulture);
 
-	private static string NormalizeDescription(string? description)
+    private static string NormalizeDescription(string? description)
 	{
 		if (string.IsNullOrWhiteSpace(description)) { return ""; }
 
@@ -1372,11 +1372,11 @@ public sealed class GuiDialogModManager : GuiDialog
 		Compose();
 	}
 
-	private static ImmReloadRequirement CombineReloadRequirements(ImmReloadRequirement first, ImmReloadRequirement second) { return (ImmReloadRequirement)Math.Max((int)first, (int)second); }
+    private static ImmReloadRequirement CombineReloadRequirements(ImmReloadRequirement first, ImmReloadRequirement second) => (ImmReloadRequirement)Math.Max((int)first, (int)second);
 
-	private static string GetSavedStatusMessage(ImmReloadRequirement reloadRequirement) { return reloadRequirement switch { ImmReloadRequirement.ServerRestart => ImmLocalization.Get("status-saved-server-restart"), ImmReloadRequirement.ReenterWorld => ImmLocalization.Get("status-saved-reenter-world"), _ => ImmLocalization.Get("status-saved") }; }
+    private static string GetSavedStatusMessage(ImmReloadRequirement reloadRequirement) => reloadRequirement switch { ImmReloadRequirement.ServerRestart => ImmLocalization.Get("status-saved-server-restart"), ImmReloadRequirement.ReenterWorld => ImmLocalization.Get("status-saved-reenter-world"), _ => ImmLocalization.Get("status-saved") };
 
-	private static string GetControlDescription(ImmConfigControlPacket control)
+    private static string GetControlDescription(ImmConfigControlPacket control)
 	{
 		string description = NormalizeDescription(control.Description);
 
@@ -1474,16 +1474,13 @@ public sealed class GuiDialogModManager : GuiDialog
 		return true;
 	}
 
-	private bool CanUseFileActions()
-	{
-		return IntegratedModManagerConfig.ShouldShowFileLocationButtons
-			&& ActiveTab == 0
-			&& Page?.Success == true
-			&& !Page.ConfigurationExternallyManaged
-			&& (capi.IsSinglePlayer || Page.CanManageServer);
-	}
+    private bool CanUseFileActions() => IntegratedModManagerConfig.ShouldShowFileLocationButtons
+            && ActiveTab == 0
+            && Page?.Success == true
+            && !Page.ConfigurationExternallyManaged
+            && (capi.IsSinglePlayer || Page.CanManageServer);
 
-	private bool OpenLocalFolder(string path)
+    private bool OpenLocalFolder(string path)
 	{
 		try
 		{

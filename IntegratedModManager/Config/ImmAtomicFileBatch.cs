@@ -12,11 +12,11 @@ public sealed class ImmAtomicFileBatch
 	private readonly List<FileChange> Changes = new();
 	private readonly HashSet<string> Paths = new(StringComparer.OrdinalIgnoreCase);
 
-	public void Write(string path, string contents) { Add(path, contents); }
+    public void Write(string path, string contents) => Add(path, contents);
 
-	public void Delete(string path) { Add(path, contents: null); }
+    public void Delete(string path) => Add(path, contents: null);
 
-	public bool TryCommit(out string error)
+    public bool TryCommit(out string error)
 	{
 		if (Changes.Count == 0) { error = ""; return true; }
 
