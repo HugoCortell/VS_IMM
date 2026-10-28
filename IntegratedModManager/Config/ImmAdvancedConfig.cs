@@ -26,10 +26,10 @@ public sealed class ImmAdvancedSchema
 	public JToken? InitialValue;
 
 	// Structural metadata.
-	public List<ImmAdvancedSchema> Fields = new();
+	public List<ImmAdvancedSchema> Fields = [];
 	public ImmAdvancedSchema? Element;
 	public ImmAdvancedSchema? Value;
-	public List<ImmAdvancedSchema> Items = new();
+	public List<ImmAdvancedSchema> Items = [];
 
 	// Dictionary metadata.
 	public string KeyLabel = "";
@@ -43,5 +43,5 @@ public sealed class ImmAdvancedSchema
 	public double? Min;
 	public double? Max;
 	public double? Step;
-	public List<ImmConfigOption> Options = new();
+	public List<ImmConfigOption> Options = [];
 }

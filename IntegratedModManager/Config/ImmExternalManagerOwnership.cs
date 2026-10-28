@@ -63,7 +63,7 @@ public sealed class ImmExternalManagerOwnership
 
 		if (!Claims.TryGetValue(modId, out List<ImmExternalManagerClaim>? claims))
 		{
-			claims = new List<ImmExternalManagerClaim>();
+			claims = [];
 			Claims[modId] = claims;
 		}
 

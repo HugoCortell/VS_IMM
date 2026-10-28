@@ -52,8 +52,8 @@ public sealed class GuiElementModGrid : GuiElement
 	private static readonly int HoverCardBackgroundColor = ColorUtil.ColorFromRgba(70, 62, 53, 175);
 
 	private readonly List<ModSelectorEntry> AllEntries;
-	private readonly Dictionary<ModSelectorEntry, CardTexture> Textures = new();
-	private readonly List<ModSelectorEntry> VisibleEntries = new();
+	private readonly Dictionary<ModSelectorEntry, CardTexture> Textures = [];
+	private readonly List<ModSelectorEntry> VisibleEntries = [];
 	private readonly Action<ModSelectorEntry> ModClicked;
 	private readonly int Rows;
 	private readonly ImmImportantInformationHighlight HighlightMode;

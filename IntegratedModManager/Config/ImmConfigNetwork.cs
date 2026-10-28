@@ -67,9 +67,9 @@ public sealed class ImmConfigClient : IDisposable
 		Dictionary<int, ControlLocation> controls = BuildControlIndex(page);
 		Dictionary<string, JObject> configs = new(StringComparer.OrdinalIgnoreCase);
 		HashSet<string> changedFiles = new(StringComparer.OrdinalIgnoreCase);
-		HashSet<int> seenIndexes = new();
+		HashSet<int> seenIndexes = [];
 		List<PreparedClientChange> preparedConfigChanges = new(changes.Length);
-		List<PreparedPatchClientChange> preparedPatchChanges = new();
+		List<PreparedPatchClientChange> preparedPatchChanges = [];
 		JObject? patchDocument = null;
 
 		foreach (ImmConfigChangePacket change in changes)
@@ -206,12 +206,12 @@ public sealed class ImmConfigClient : IDisposable
 
 		int globalIndex = 0;
 
-		List<ImmConfigBlockPacket> blocks = new();
+		List<ImmConfigBlockPacket> blocks = [];
 
 		for (int blockIndex = 0; blockIndex < descriptor.Configuration.Count; blockIndex++)
 		{
 			ImmConfigBlock block = descriptor.Configuration[blockIndex];
-			List<ImmConfigControlPacket> controls = new();
+			List<ImmConfigControlPacket> controls = [];
 
 			foreach (ImmConfigEntry entry in block.Settings)
 			{
@@ -462,7 +462,7 @@ public sealed class ImmConfigClient : IDisposable
 		}
 		catch (Exception exception)
 		{
-			config = new JObject();
+			config = [];
 			error = $"Failed to read '{configFile}': {exception.Message}";
 			return false;
 		}
@@ -471,7 +471,7 @@ public sealed class ImmConfigClient : IDisposable
 	private static Dictionary<int, ControlLocation>
 		BuildControlIndex(ImmConfigPageResponse page)
 	{
-		Dictionary<int, ControlLocation> result = new();
+		Dictionary<int, ControlLocation> result = [];
 
 		foreach (ImmConfigBlockPacket block in page.Configuration ?? Array.Empty<ImmConfigBlockPacket>())
 		{

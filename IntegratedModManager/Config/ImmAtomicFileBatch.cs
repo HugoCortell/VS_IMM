@@ -9,7 +9,7 @@ namespace IntegratedModManager.Config;
 
 public sealed class ImmAtomicFileBatch
 {
-	private readonly List<FileChange> Changes = new();
+	private readonly List<FileChange> Changes = [];
 	private readonly HashSet<string> Paths = new(StringComparer.OrdinalIgnoreCase);
 
     public void Write(string path, string contents) => Add(path, contents);
@@ -106,7 +106,7 @@ public sealed class ImmAtomicFileBatch
 
 	private string Rollback()
 	{
-		List<string> errors = new();
+		List<string> errors = [];
 
 		foreach (FileChange change in Changes.Where(change => change.Committed).Reverse())
 		{

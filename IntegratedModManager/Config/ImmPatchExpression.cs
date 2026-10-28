@@ -919,7 +919,7 @@ public sealed class ImmPatchExpression
 		{
 			Expect(TokenKind.LeftParen);
 
-			List<ExpressionNode> arguments = new();
+			List<ExpressionNode> arguments = [];
 
 			if (!Take(TokenKind.RightParen))
 			{

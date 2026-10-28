@@ -22,7 +22,7 @@ public sealed class GuiDialogModSelector : GuiDialog
 	private const double HeaderHeight = 42;
 	private const double HeaderGap = 18;
 
-	private readonly List<ModSelectorEntry> Entries = new();
+	private readonly List<ModSelectorEntry> Entries = [];
 	private readonly ImmConfigClient ConfigClient;
 	private readonly ImmModUpdateClient UpdateClient;
 	private readonly Action<ModSelectorEntry> ModSelected;

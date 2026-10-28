@@ -31,8 +31,8 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 	private const double BottomPadding = 18;
 	private const double MouseWheelStep = 64;
 
-	private readonly List<string> Rows = new();
-	private readonly Dictionary<int, GuiElementImmTextInput> Inputs = new();
+	private readonly List<string> Rows = [];
+	private readonly Dictionary<int, GuiElementImmTextInput> Inputs = [];
 
 	private Action<string>? ValueChanged;
 	private string Label = "";
@@ -293,7 +293,7 @@ public sealed class GuiDialogArrayEditor : GuiDialog
 
 	private void TryCommit()
 	{
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < Rows.Count; index++)
 		{

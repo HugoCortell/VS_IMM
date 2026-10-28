@@ -69,7 +69,7 @@ public sealed class ImmDependencyEntry
 	public string Label = "";
 	public string Description = "";
 	public ImmDependencySeverity Severity = ImmDependencySeverity.Warning;
-	public List<ImmDependencyCriterion> Criteria = new();
+	public List<ImmDependencyCriterion> Criteria = [];
 	public ImmDependencyResolution? Resolution;
 }
 

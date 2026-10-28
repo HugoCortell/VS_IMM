@@ -84,10 +84,10 @@ public sealed class ImmConfigService
 		if (!canManageServer && !ImmConfigPacketFactory.HasConfigurationForSide(descriptor, ImmConfigSide.Client)) { return PageError(request.ModId, "integratedmodmanager:error-no-client-configuration"); }
 
 		Dictionary<string, JObject?> serverConfigs = new(StringComparer.OrdinalIgnoreCase);
-		JObject patchSettingsDocument = canManageServer ? PatchSettings.ReadDocument(request.ModId) : new JObject();
+		JObject patchSettingsDocument = canManageServer ? PatchSettings.ReadDocument(request.ModId) : [];
 
 		int globalIndex = 0;
-		List<ImmConfigBlockPacket> blocks = new();
+		List<ImmConfigBlockPacket> blocks = [];
 
 		for (int blockIndex = 0; blockIndex < descriptor.Configuration.Count; blockIndex++)
 		{
@@ -107,7 +107,7 @@ public sealed class ImmConfigService
 
 			if (canManageServer && block.ConfigSource == ImmConfigSource.ModConfig && block.ParseDescriptions && block.ConfigSide == ImmConfigSide.Server && config != null) { blockDescription = ReadRootDescription(config); }
 
-			List<ImmConfigControlPacket> controls = new();
+			List<ImmConfigControlPacket> controls = [];
 
 			for (int entryIndex = 0; entryIndex < block.Settings.Count; entryIndex++)
 			{
@@ -160,9 +160,9 @@ public sealed class ImmConfigService
 		Dictionary<int, ServerControlLocation> controls = BuildServerControlIndex(descriptor);
 		Dictionary<string, JObject?> configs = new(StringComparer.OrdinalIgnoreCase);
 		HashSet<string> changedFiles = new(StringComparer.OrdinalIgnoreCase);
-		HashSet<int> seenIndexes = new();
-		List<PreparedServerChange> preparedConfigChanges = new();
-		List<PreparedPatchSettingChange> preparedPatchChanges = new();
+		HashSet<int> seenIndexes = [];
+		List<PreparedServerChange> preparedConfigChanges = [];
+		List<PreparedPatchSettingChange> preparedPatchChanges = [];
 		JObject patchSettingsDocument = PatchSettings.ReadDocument(request.ModId);
 
 		foreach (ImmConfigChangePacket change in request.Changes ?? Array.Empty<ImmConfigChangePacket>())
@@ -240,7 +240,7 @@ public sealed class ImmConfigService
 
 	private ImmDependencyPacket[] BuildDependencyPackets(string sourceModId)
 	{
-		List<ImmDependencyPacket> packets = new();
+		List<ImmDependencyPacket> packets = [];
 
 		foreach (ImmActiveDependency active in Dependencies.GetForMod(sourceModId))
 		{
@@ -358,7 +358,7 @@ public sealed class ImmConfigService
 	private static Dictionary<int, ServerControlLocation>
 		BuildServerControlIndex(ImmConfigDescriptor descriptor)
 	{
-		Dictionary<int, ServerControlLocation> result = new();
+		Dictionary<int, ServerControlLocation> result = [];
 
 		int globalIndex = 0;
 

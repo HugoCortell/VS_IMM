@@ -289,7 +289,7 @@ public sealed class ImmModUpdateService : IDisposable
 
 	private async Task<ImmModUpdateEntry[]> FetchUpdatesAsync(List<ImmInstalledModSnapshot> snapshots, CancellationToken cancellationToken)
 	{
-		List<ImmModUpdateEntry> updates = new();
+		List<ImmModUpdateEntry> updates = [];
 
 		foreach (ImmInstalledModSnapshot[] batch in snapshots.Chunk(CheckBatchSize))
 		{

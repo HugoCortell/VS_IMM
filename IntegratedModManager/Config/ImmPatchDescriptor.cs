@@ -57,7 +57,7 @@ public sealed class ImmContentPatchTarget
 	public string AssetPattern = "";
 
 	public string Path = "";
-	public List<string> Paths = new();
+	public List<string> Paths = [];
 
 	public ImmPatchOperation Operation = ImmPatchOperation.Replace;
 	public ImmPatchTiming Timing = ImmPatchTiming.Auto;

@@ -174,7 +174,7 @@ public static class ImmConfigValueValidator
 
 		if (value is not JArray array) { error = "Map must target an Array."; return false; }
 
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < array.Count; index++)
 		{

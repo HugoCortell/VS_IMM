@@ -115,7 +115,7 @@ public sealed class ImmPatchSettingsStore
 
 			if (section == null)
 			{
-				section = new JObject();
+				section = [];
 
 				preparedDocument[sectionName] = section;
 			}
@@ -164,16 +164,16 @@ public sealed class ImmPatchSettingsStore
 	{
 		string path = GetPath(modId);
 
-		if (!File.Exists(path)) { return new JObject(); }
+		if (!File.Exists(path)) { return []; }
 
 		try
 		{
 			string text = File.ReadAllText(path);
-			if (string.IsNullOrWhiteSpace(text)) { return new JObject(); }
+			if (string.IsNullOrWhiteSpace(text)) { return []; }
 
 			return JObject.Parse(text);
 		}
-		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Failed to read PatchSettings '{0}': {1}", path, exception.Message); return new JObject(); }
+		catch (Exception exception) { Api.Logger.Warning("[integratedmodmanager] Failed to read PatchSettings '{0}': {1}", path, exception.Message); return []; }
 	}
 
 	private void PruneDocument(string modId, JObject document)

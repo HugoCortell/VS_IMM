@@ -66,12 +66,12 @@ public sealed class GuiDialogModManager : GuiDialog
 	private readonly GuiDialogDependencyIssue DependencyIssueDialog;
 	private readonly GuiDialogArrayEditor ArrayEditorDialog;
 	private readonly GuiDialogAdvancedEditor AdvancedEditorDialog;
-	private readonly Dictionary<int, string> PendingChanges = new();
-	private readonly Dictionary<int, string> OriginalValues = new();
-	private readonly HashSet<int> InvalidInputs = new();
-	private readonly Dictionary<int, string> InvalidInputValues = new();
-	private readonly Dictionary<int, GuiElement> ControlElements = new();
-	private readonly Dictionary<int, PendingRestartDependency> PendingRestartDependencies = new();
+	private readonly Dictionary<int, string> PendingChanges = [];
+	private readonly Dictionary<int, string> OriginalValues = [];
+	private readonly HashSet<int> InvalidInputs = [];
+	private readonly Dictionary<int, string> InvalidInputValues = [];
+	private readonly Dictionary<int, GuiElement> ControlElements = [];
+	private readonly Dictionary<int, PendingRestartDependency> PendingRestartDependencies = [];
 
 	private Dictionary<int, string>? ApplyingChanges;
 	private ImmConfigPageResponse? Page;
@@ -508,8 +508,8 @@ public sealed class GuiDialogModManager : GuiDialog
 
 		double availableContentWidth = width - PanelPadding * 2;
 
-		List<BlockLayout> layouts = showingDependencies ? new List<BlockLayout>() : BuildLayouts(blocks, availableContentWidth - 8, searchQuery);
-		List<DependencyLayout> dependencyLayouts = showingDependencies ? BuildDependencyLayouts(dependencyIssues, availableContentWidth - 8) : new List<DependencyLayout>();
+		List<BlockLayout> layouts = showingDependencies ? [] : BuildLayouts(blocks, availableContentWidth - 8, searchQuery);
+		List<DependencyLayout> dependencyLayouts = showingDependencies ? BuildDependencyLayouts(dependencyIssues, availableContentWidth - 8) : [];
 
 		double calculatedHeight = showingDependencies ? dependencyLayouts.Count == 0 ? 40 : dependencyLayouts[^1].Bottom + 4 : layouts.Count == 0 ? 40 : layouts[^1].Bottom + 4;
 
@@ -728,7 +728,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 	private List<BlockLayout> BuildLayouts(ImmConfigBlockPacket[] blocks, double contentWidth, string searchQuery)
 	{
-		List<BlockLayout> layouts = new();
+		List<BlockLayout> layouts = [];
 
 		double y = 4;
 		double cardWidth = Math.Max(120, contentWidth - CardX * 2);
@@ -745,7 +745,7 @@ public sealed class GuiDialogModManager : GuiDialog
 			double headerHeight = BlockTitleHeight + (blockDescriptionHeight > 0 ? BlockDescriptionGap + blockDescriptionHeight : 0);
 			double cardY = y + headerHeight + BlockContentGap;
 
-			List<ControlLayout> controls = new();
+			List<ControlLayout> controls = [];
 
 			foreach (ImmConfigControlPacket control in blockControls)
 			{
@@ -777,7 +777,7 @@ public sealed class GuiDialogModManager : GuiDialog
 
 	private List<DependencyLayout> BuildDependencyLayouts(ImmDependencyPacket[] dependencies, double contentWidth)
 	{
-		List<DependencyLayout> layouts = new();
+		List<DependencyLayout> layouts = [];
 
 		double y = 4;
 		double cardWidth = Math.Max(120, contentWidth - CardX * 2);

@@ -104,9 +104,9 @@ public static class ImmAdvancedValueValidator
 			return true;
 
 			case "Object":
-				JObject resultObject = new();
+				JObject resultObject = [];
 
-				foreach (ImmAdvancedSchema field in schema.Fields ?? new List<ImmAdvancedSchema>())
+				foreach (ImmAdvancedSchema field in schema.Fields ?? [])
 				{
 					if (field.Optional) { continue; }
 					if (!TryCreateValue(field, source, forceNonNull: false, out JToken fieldValue, out error)) { value = JValue.CreateNull(); return false; }
@@ -124,7 +124,7 @@ public static class ImmAdvancedValueValidator
 			return true;
 
 			case "Array":
-				JArray resultArray = new();
+				JArray resultArray = [];
 
 				for (int index = 0; index < schema.MinItems; index++)
 				{
@@ -136,9 +136,9 @@ public static class ImmAdvancedValueValidator
 			return true;
 
 			case "Tuple":
-				JArray tuple = new();
+				JArray tuple = [];
 
-				foreach (ImmAdvancedSchema item in schema.Items ?? new List<ImmAdvancedSchema>())
+				foreach (ImmAdvancedSchema item in schema.Items ?? [])
 				{
 					if (!TryCreateValue(item, source, forceNonNull: false, out JToken itemValue, out error)) { value = JValue.CreateNull(); return false; }
 					tuple.Add(itemValue);
@@ -180,7 +180,7 @@ public static class ImmAdvancedValueValidator
 		if (target != null && target.Type != JTokenType.Null && target is not JObject) { error = "mapped value is not an Object."; return false; }
 
 		JObject? targetObject = target as JObject;
-		JObject result = targetObject != null ? (JObject)targetObject.DeepClone() : new JObject();
+		JObject result = targetObject != null ? (JObject)targetObject.DeepClone() : [];
 
 		foreach (ImmAdvancedSchema field in schema.Fields)
 		{
@@ -228,7 +228,7 @@ public static class ImmAdvancedValueValidator
 		}
 
 		JObject? targetObject = target as JObject;
-		JObject result = new();
+		JObject result = [];
 
 		foreach (JProperty property in submittedObject.Properties())
 		{
@@ -264,7 +264,7 @@ public static class ImmAdvancedValueValidator
 		if (schema.Element == null) { error = "Array schema has no Element definition."; return false; }
 		if (!ValidateCollectionCount(schema, submittedArray.Count, out error)) { return false; }
 
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < submittedArray.Count; index++)
 		{
@@ -295,7 +295,7 @@ public static class ImmAdvancedValueValidator
 		if (submittedArray.Count != schema.Items.Count) { error = $"Tuple requires exactly {schema.Items.Count} items."; return false; }
 
 		JArray? targetArray = target as JArray;
-		JArray result = new();
+		JArray result = [];
 
 		for (int index = 0; index < schema.Items.Count; index++)
 		{

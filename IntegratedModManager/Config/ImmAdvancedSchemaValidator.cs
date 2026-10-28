@@ -30,9 +30,9 @@ public static class ImmAdvancedSchemaValidator
 		if (depth > MaximumDepth) { throw new InvalidDataException($"{prefix} exceeds the maximum Advanced nesting depth of {MaximumDepth}."); }
 		if (!SupportedTypes.Contains(schema.Type)) { throw new InvalidDataException($"{prefix}.Type '{schema.Type}' is not supported."); }
 
-		schema.Fields ??= new List<ImmAdvancedSchema>();
-		schema.Items ??= new List<ImmAdvancedSchema>();
-		schema.Options ??= new List<ImmConfigOption>();
+		schema.Fields ??= [];
+		schema.Items ??= [];
+		schema.Options ??= [];
 
 		if (objectField)
 		{
@@ -198,7 +198,7 @@ public static class ImmAdvancedSchemaValidator
 	{
 		if (schema.Options.Count == 0) { throw new InvalidDataException($"{prefix} Dropdown requires at least one Option."); }
 
-		List<JToken> values = new();
+		List<JToken> values = [];
 
 		for (int index = 0; index < schema.Options.Count; index++)
 		{

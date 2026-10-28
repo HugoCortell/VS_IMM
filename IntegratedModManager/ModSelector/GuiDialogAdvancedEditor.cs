@@ -42,9 +42,9 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 	private const double StateButtonWidth = 78;
 	private const double SmallGap = 6;
 
-	private readonly List<NavigationFrame> Navigation = new();
-	private readonly List<Action> Initializers = new();
-	private readonly Dictionary<JProperty, string> PendingDictionaryKeys = new();
+	private readonly List<NavigationFrame> Navigation = [];
+	private readonly List<Action> Initializers = [];
+	private readonly Dictionary<JProperty, string> PendingDictionaryKeys = [];
 
 	private ImmAdvancedSchema? RootSchema;
 	private ImmConfigSource ConfigSource;
@@ -357,7 +357,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 
 	private List<EditorRow> BuildObjectRows(ImmAdvancedSchema schema, double contentWidth)
 	{
-		List<EditorRow> result = new();
+		List<EditorRow> result = [];
 		double outerWidth = Math.Max(120, contentWidth - 8);
 		double columnGap = 8;
 		const double minimumCellWidth = 116;
@@ -367,7 +367,7 @@ public sealed class GuiDialogAdvancedEditor : GuiDialog
 		double cellWidth = (outerWidth - columnGap * (columns - 1)) / columns;
 		double rowY = 4;
 		int column = 0;
-		List<EditorRow> pendingRow = new();
+		List<EditorRow> pendingRow = [];
 
 		void FlushRow()
 		{

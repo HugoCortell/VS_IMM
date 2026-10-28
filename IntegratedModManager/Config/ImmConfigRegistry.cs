@@ -44,9 +44,9 @@ public sealed class ImmConfigRegistry
 {
 	private static readonly HashSet<string> SupportedTypes = new(StringComparer.Ordinal) { "Boolean", "String", "Integer", "Decimal", "Slider", "Dropdown", "Array", "Advanced" };
 	private readonly Dictionary<string, ImmConfigDescriptor> Descriptors = new(StringComparer.OrdinalIgnoreCase);
-	private readonly List<ImmRegisteredDescriptor> RegisteredDescriptorList = new();
-	private readonly List<ImmRegisteredDependency> RegisteredDependencies = new();
-	private readonly Dictionary<int, ImmRegisteredDependency> DependenciesByRuntimeId = new();
+	private readonly List<ImmRegisteredDescriptor> RegisteredDescriptorList = [];
+	private readonly List<ImmRegisteredDependency> RegisteredDependencies = [];
+	private readonly Dictionary<int, ImmRegisteredDependency> DependenciesByRuntimeId = [];
 	public IReadOnlyList<ImmRegisteredDescriptor> RegisteredDescriptors => RegisteredDescriptorList;
 	public IReadOnlyList<ImmRegisteredDependency> Dependencies => RegisteredDependencies;
 
@@ -134,10 +134,10 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidateDescriptor(string modId, ImmConfigDescriptor descriptor)
 	{
-		descriptor.Configuration ??= new List<ImmConfigBlock>();
-		descriptor.Dependencies ??= new List<ImmDependencyEntry>();
-		descriptor.Constants ??= new Dictionary<string, JToken>();
-		descriptor.ContentPatches ??= new List<ImmContentPatchTarget>();
+		descriptor.Configuration ??= [];
+		descriptor.Dependencies ??= [];
+		descriptor.Constants ??= [];
+		descriptor.ContentPatches ??= [];
 
 		if (descriptor.Configuration.Count == 0 && descriptor.Dependencies.Count == 0 && descriptor.ContentPatches.Count == 0)
 		{
@@ -172,7 +172,7 @@ public sealed class ImmConfigRegistry
 
 			if (block.ConfigSource != ImmConfigSource.PatchSettings) { continue; }
 
-			block.Settings ??= new List<ImmConfigEntry>();
+			block.Settings ??= [];
 
 			for (int entryIndex = 0; entryIndex < block.Settings.Count; entryIndex++)
 			{
@@ -267,7 +267,7 @@ public sealed class ImmConfigRegistry
 			}
 		}
 
-		block.Settings ??= new List<ImmConfigEntry>();
+		block.Settings ??= [];
 		HashSet<string> maps = new(StringComparer.Ordinal);
 
 		for (int entryIndex = 0; entryIndex < block.Settings.Count; entryIndex++)
@@ -307,9 +307,9 @@ public sealed class ImmConfigRegistry
 			throw new InvalidDataException($"{prefix}.ConfigSide is not supported.");
 		}
 
-		entry.Options ??= new List<ImmConfigOption>();
+		entry.Options ??= [];
 
-		entry.Targets ??= new List<ImmContentPatchTarget>();
+		entry.Targets ??= [];
 
 		ValidateControlMetadata(entry, source, prefix);
 
@@ -429,7 +429,7 @@ public sealed class ImmConfigRegistry
 
 	private static void ValidatePatchTarget(ImmContentPatchTarget target, string prefix, bool hasOwningSetting, HashSet<string> patchSettingCodes, HashSet<string> constantCodes)
 	{
-		target.Paths ??= new List<string>();
+		target.Paths ??= [];
 
 		bool hasAsset = !string.IsNullOrWhiteSpace(target.Asset);
 		bool hasPattern = !string.IsNullOrWhiteSpace(target.AssetPattern);
@@ -535,7 +535,7 @@ public sealed class ImmConfigRegistry
 			throw new InvalidDataException($"{prefix}.Severity is not supported.");
 		}
 
-		entry.Criteria ??= new List<ImmDependencyCriterion>();
+		entry.Criteria ??= [];
 
 		for (int criterionIndex = 0; criterionIndex < entry.Criteria.Count; criterionIndex++)
 		{
