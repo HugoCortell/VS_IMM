@@ -1,11 +1,5 @@
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 namespace IntegratedModManager.Config;

@@ -1,9 +1,3 @@
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 namespace IntegratedModManager.Config;
 
 public sealed class ImmAtomicFileBatch

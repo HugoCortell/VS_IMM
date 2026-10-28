@@ -1,5 +1,3 @@
-
-using System;
 using Cairo;
 using IntegratedModManager.Config;
 using IntegratedModManager.UI;

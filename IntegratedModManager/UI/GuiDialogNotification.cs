@@ -1,8 +1,5 @@
-
-using System;
 using IntegratedModManager.Config;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace IntegratedModManager.UI;
 

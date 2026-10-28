@@ -1,5 +1,3 @@
-
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Vintagestory.API.Client;

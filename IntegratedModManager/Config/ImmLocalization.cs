@@ -1,6 +1,3 @@
-
-using System;
-using System.Linq;
 using Vintagestory.API.Config;
 
 namespace IntegratedModManager.Config;

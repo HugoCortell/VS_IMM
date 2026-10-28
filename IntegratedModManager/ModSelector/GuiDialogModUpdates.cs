@@ -1,10 +1,6 @@
-
-using System;
-using System.Linq;
 using Cairo;
 using IntegratedModManager.Config;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace IntegratedModManager.ModSelector;
 

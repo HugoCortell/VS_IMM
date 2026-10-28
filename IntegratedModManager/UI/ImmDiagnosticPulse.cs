@@ -1,6 +1,3 @@
-
-using System;
-using Cairo;
 using IntegratedModManager.Config;
 using Vintagestory.API.Client;
 using Vintagestory.API.MathTools;

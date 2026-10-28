@@ -1,8 +1,4 @@
-
-using System;
-using System.Linq;
 using Newtonsoft.Json;
-using Vintagestory.API.Common;
 
 namespace IntegratedModManager.Config;
 
