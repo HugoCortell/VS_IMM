@@ -16,7 +16,8 @@ public sealed class ImmPatchSettingsStore
 	{
 		Api = api;
 		Registry = registry;
-		RootPath = Path.Combine(api.DataBasePath, "moddata", IntegratedModManagerSystem.ModId, "patchsettings");
+
+		RootPath = Path.Combine(api.DataBasePath, "ModData", IntegratedModManagerSystem.ModId, "patchsettings");
 	}
 
 	public string GetPath(string modId) { ValidateModIdForPath(modId); return Path.Combine(RootPath, modId + ".json"); }
