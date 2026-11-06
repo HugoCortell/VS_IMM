@@ -116,23 +116,23 @@ public sealed class ImmConfigRegistry
 		return false;
 	}
 
-    public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) => DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!);
+	public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) => DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!);
 
-    private static ImmConfigDescriptor ParseDescriptor(IAsset asset)
+	private static ImmConfigDescriptor ParseDescriptor(IAsset asset)
 	{
-        using var stream = new MemoryStream(asset.Data);
+		using var stream = new MemoryStream(asset.Data);
 		using StreamReader stringReader = new(stream, Encoding.UTF8);
 		using JsonTextReader jsonReader = new(stringReader)
-        {
-            DateParseHandling = DateParseHandling.None, 
-            FloatParseHandling = FloatParseHandling.Double
-        };
+		{
+			DateParseHandling = DateParseHandling.None, 
+			FloatParseHandling = FloatParseHandling.Double
+		};
 
 		JsonSerializer serializer = JsonSerializer.CreateDefault();
 		return serializer.Deserialize<ImmConfigDescriptor>(jsonReader) ?? throw new InvalidDataException("Descriptor was empty.");
 	}
 
-    private static void ValidateDescriptor(string modId, ImmConfigDescriptor descriptor)
+	private static void ValidateDescriptor(string modId, ImmConfigDescriptor descriptor)
 	{
 		descriptor.Configuration ??= [];
 		descriptor.Dependencies ??= [];
