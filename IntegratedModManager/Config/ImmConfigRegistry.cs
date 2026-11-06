@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Text;
 using Vintagestory.API.Common;
 
 namespace IntegratedModManager.Config;
@@ -65,7 +66,7 @@ public sealed class ImmConfigRegistry
 
 			try
 			{
-				ImmConfigDescriptor descriptor = ParseDescriptor(asset.ToText());
+				ImmConfigDescriptor descriptor = ParseDescriptor(asset);
 				ValidateDescriptor(modId, descriptor);
 
 				Descriptors[modId] = descriptor;
@@ -115,12 +116,17 @@ public sealed class ImmConfigRegistry
 		return false;
 	}
 
-    public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) => DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!);
+	public bool TryGetDependency(int runtimeId, out ImmRegisteredDependency dependency) => DependenciesByRuntimeId.TryGetValue(runtimeId, out dependency!);
 
-    private static ImmConfigDescriptor ParseDescriptor(string text)
+	private static ImmConfigDescriptor ParseDescriptor(IAsset asset)
 	{
-		using StringReader stringReader = new(text);
-		using JsonTextReader jsonReader = new(stringReader) { DateParseHandling = DateParseHandling.None, FloatParseHandling = FloatParseHandling.Double };
+		using var stream = new MemoryStream(asset.Data);
+		using StreamReader stringReader = new(stream, Encoding.UTF8);
+		using JsonTextReader jsonReader = new(stringReader)
+		{
+			DateParseHandling = DateParseHandling.None, 
+			FloatParseHandling = FloatParseHandling.Double
+		};
 
 		JsonSerializer serializer = JsonSerializer.CreateDefault();
 		return serializer.Deserialize<ImmConfigDescriptor>(jsonReader) ?? throw new InvalidDataException("Descriptor was empty.");
