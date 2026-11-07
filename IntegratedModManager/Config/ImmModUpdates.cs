@@ -38,7 +38,7 @@ internal sealed class ImmModUpdateEntry
 	public bool HostedInstallAllowed = true;
 }
 
-public sealed class ImmModUpdateService : IDisposable
+public sealed partial class ImmModUpdateService : IDisposable
 {
 	private const string ModDbApiUrl = "https://mods.vintagestory.at/api/";
 	private const int ChangelogLimit = 32768;
@@ -47,12 +47,17 @@ public sealed class ImmModUpdateService : IDisposable
 	private const int RetractedErrorCode = 4101;
 	private const int ForcedRetractedErrorCode = 4102;
 
-	private static readonly Regex BrRegex = new(@"<\s*br\s*/?\s*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-	private static readonly Regex ListItemStartRegex = new(@"<\s*li(?:\s[^>]*)?>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-	private static readonly Regex ListItemEndRegex = new(@"<\s*/\s*li\s*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-	private static readonly Regex ParagraphEndRegex = new(@"<\s*/\s*p\s*>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-	private static readonly Regex HtmlTagRegex = new(@"<[^>]+>", RegexOptions.Compiled);
-	private static readonly Regex ExcessBlankLinesRegex = new(@"\n[ \t]*\n(?:[ \t]*\n)+", RegexOptions.Compiled);
+	[GeneratedRegex(@"<\s*br\s*/?\s*>", RegexOptions.IgnoreCase)] private static partial Regex BrRegex();
+	
+	[GeneratedRegex(@"<\s*li(?:\s[^>]*)?>", RegexOptions.IgnoreCase)] private static partial Regex ListItemStartRegex();
+	
+	[GeneratedRegex(@"<\s*/\s*li\s*>", RegexOptions.IgnoreCase)] private static partial Regex ListItemEndRegex();
+
+	[GeneratedRegex(@"<\s*/\s*p\s*>", RegexOptions.IgnoreCase)] private static partial Regex ParagraphEndRegex();
+
+	[GeneratedRegex(@"<[^>]+>")] private static partial Regex HtmlTagRegex();
+
+	[GeneratedRegex(@"\n[ \t]*\n(?:[ \t]*\n)+")] private static partial Regex ExcessBlankLinesRegex();
 
 	private readonly ICoreServerAPI Api;
 	private readonly HttpClient Http = new() { BaseAddress = new Uri(ModDbApiUrl), Timeout = TimeSpan.FromSeconds(15) };
@@ -509,13 +514,13 @@ public sealed class ImmModUpdateService : IDisposable
 	{
 		if (string.IsNullOrWhiteSpace(html)) { return ""; }
 
-		string text = BrRegex.Replace(html, "\n");
-		text = ListItemStartRegex.Replace(text, "• ");
-		text = ListItemEndRegex.Replace(text, "\n");
-		text = ParagraphEndRegex.Replace(text, "\n\n");
-		text = HtmlTagRegex.Replace(text, "");
+		string text = BrRegex().Replace(html, "\n");
+		text = ListItemStartRegex().Replace(text, "• ");
+		text = ListItemEndRegex().Replace(text, "\n");
+		text = ParagraphEndRegex().Replace(text, "\n\n");
+		text = HtmlTagRegex().Replace(text, "");
 		text = WebUtility.HtmlDecode(text).Replace("\r\n", "\n").Replace('\r', '\n');
-		text = ExcessBlankLinesRegex.Replace(text, "\n\n").Trim();
+		text = ExcessBlankLinesRegex().Replace(text, "\n\n").Trim();
 
 		return text.Length <= ChangelogLimit ? text : text[..ChangelogLimit].TrimEnd() + "\n…";
 	}
