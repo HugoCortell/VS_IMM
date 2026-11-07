@@ -626,6 +626,22 @@ public sealed class ImmConfigRegistry
 				}
 			break;
 
+			case ImmDependencyCriterionType.StratumSetting:
+				ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
+
+				if (criterion.Target != null || criterion.Backend != ImmDependencyBackend.Unknown || !string.IsNullOrWhiteSpace(criterion.Output) || !string.IsNullOrWhiteSpace(criterion.Behavior))
+				{
+					throw new InvalidDataException($"{prefix} StratumSetting may only declare Path, Operator, and Value.");
+				}
+
+				if (string.IsNullOrWhiteSpace(criterion.Path) || criterion.Path.Split('.').Any(part => part.Length == 0 || !char.IsLetter(part[0]) || part.Any(c => !char.IsLetterOrDigit(c) && c != '_')))
+				{
+					throw new InvalidDataException($"{prefix}.Path must be a dot-separated Stratum property path.");
+				}
+
+				ValidateSettingComparisonValue(criterion.Value, criterion.Operator, patchSetting: false, $"{prefix}.Value");
+			break;
+
 			case ImmDependencyCriterionType.CollectibleBehavior:
 				ValidatePresenceOperator(criterion.Operator, $"{prefix}.Operator");
 				ValidateCollectibleCriterionTarget(criterion.Target, $"{prefix}.Target");

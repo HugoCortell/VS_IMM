@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -31,6 +32,7 @@ public sealed class ImmDependencyService
 	private readonly bool OptimumActive;
 	private readonly bool StratumActive;
 	private readonly string? StratumVersion;
+	private readonly PropertyInfo? StratumConfigProperty;
 
 	private List<ImmActiveDependency> Active = [];
 	private readonly HashSet<int> PendingRestartRuntimeIds = [];
@@ -50,6 +52,7 @@ public sealed class ImmDependencyService
 		OptimumActive = runtimeAssembly.GetType("Optimum.OptimumInfo", throwOnError: false) != null;
 		Type? stratumInfo = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false);
 		StratumActive = stratumInfo != null;
+		StratumConfigProperty = runtimeAssembly.GetType("Vintagestory.Server.StratumRuntime", throwOnError: false)?.GetProperty("Config", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 		try { StratumVersion = stratumInfo?.GetProperty("Version")?.GetValue(null) as string; }
 		catch (Exception exception) { api.Logger.Warning("[integratedmodmanager] Could not read Stratum version: {0}", exception.Message); }
 		if (StratumActive && !IsValidStratumVersion(StratumVersion))
@@ -170,6 +173,8 @@ public sealed class ImmDependencyService
 
 			case ImmDependencyCriterionType.Backend: return TryEvaluateBackend(criterion, out matched, out error);
 
+			case ImmDependencyCriterionType.StratumSetting: return TryEvaluateStratumSetting(criterion, out matched, out error);
+
 			case ImmDependencyCriterionType.CollectibleBehavior: return TryEvaluateCollectibleBehavior(criterion, collectibles, out matched, out error);
 
 			case ImmDependencyCriterionType.CollectibleAttribute: return TryEvaluateCollectibleAttribute(criterion, collectibles, out matched, out error);
@@ -213,6 +218,42 @@ public sealed class ImmDependencyService
 			ImmDependencyOperator.LessThan => comparison < 0,
 			_ => false
 		};
+		return true;
+	}
+
+	private bool TryEvaluateStratumSetting(ImmDependencyCriterion criterion, out bool matched, out string error)
+	{
+		matched = false;
+		error = "";
+		if (!StratumActive) { return true; }
+
+		try
+		{
+			object? value = StratumConfigProperty?.GetValue(null);
+			foreach (string part in criterion.Path.Split('.'))
+			{
+				if (value is null) { break; }
+				PropertyInfo? property = value.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+				value = property?.GetValue(value);
+			}
+
+			if (value != null)
+			{
+				JToken current = JToken.FromObject(value);
+				if (current is JValue && current.Type is not (JTokenType.Null or JTokenType.Undefined))
+				{
+					return TryCompare(current, criterion.Value!, criterion.Operator, out matched, out error);
+				}
+			}
+		}
+		catch (Exception exception)
+		{
+			Api.Logger.Warning("[integratedmodmanager] Could not read Stratum setting '{0}': {1}", criterion.Path, exception.Message);
+		}
+
+		// Unknown or unavailable settings cannot be considered equal to the requested safe value.
+		// This keeps NotEqual-based incompatibility reports visible on unsupported Stratum builds.
+		matched = criterion.Operator == ImmDependencyOperator.NotEqual;
 		return true;
 	}
 

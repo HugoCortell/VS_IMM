@@ -20,7 +20,8 @@ public enum ImmDependencyCriterionType
 	HasModID,
 	CollectibleBehavior,
 	CollectibleAttribute,
-	Backend
+	Backend,
+	StratumSetting
 }
 
 [JsonConverter(typeof(StringEnumConverter))]
