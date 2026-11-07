@@ -54,7 +54,7 @@ public sealed class ImmDependencyService
 		catch (Exception exception) { api.Logger.Warning("[integratedmodmanager] Could not read Stratum version: {0}", exception.Message); }
 		if (StratumActive && !IsValidStratumVersion(StratumVersion))
 		{
-			api.Logger.Warning("[integratedmodmanager] Stratum version is unavailable or unrecognized; version comparisons will treat it as older than the requested version.");
+			api.Logger.Warning("[integratedmodmanager] Stratum version is unrecognized. Assuming the version is older than requested.");
 		}
 	}
 
@@ -199,8 +199,7 @@ public sealed class ImmDependencyService
 
 		if (!exists) { matched = false; return true; }
 
-		// An unknown version is conservatively considered older (for minimum-version warnings).
-		if (!TryCompareStratumVersions(StratumVersion, criterion.Value?.Value<string>(), out int comparison))
+		if (!TryCompareStratumVersions(StratumVersion, criterion.Value?.Value<string>(), out int comparison)) // Treated as older just to be safe
 		{
 			matched = criterion.Operator == ImmDependencyOperator.LessThan;
 			return true;

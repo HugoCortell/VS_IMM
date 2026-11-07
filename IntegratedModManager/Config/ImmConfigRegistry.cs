@@ -621,7 +621,7 @@ public sealed class ImmConfigRegistry
 					ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
 					if (criterion.Backend != ImmDependencyBackend.Stratum || criterion.Value?.Type != JTokenType.String || !ImmDependencyService.IsValidStratumVersion(criterion.Value?.Value<string>()))
 					{
-						throw new InvalidDataException($"{prefix}.Value must be a valid Stratum version string (e.g. 1.22.7-stratum.3-indev.1), and Backend must be Stratum.");
+						throw new InvalidDataException($"{prefix}.Value must be a valid Stratum version string (such as 1.22.7-stratum.3-indev.1), and Backend must be Stratum.");
 					}
 				}
 			break;
