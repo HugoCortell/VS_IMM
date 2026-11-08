@@ -602,17 +602,44 @@ public sealed class ImmConfigRegistry
 			break;
 
 			case ImmDependencyCriterionType.Backend:
-				ValidatePresenceOperator(criterion.Operator, $"{prefix}.Operator");
-
 				if (criterion.Backend == ImmDependencyBackend.Unknown || !Enum.IsDefined(typeof(ImmDependencyBackend), criterion.Backend))
 				{
 					throw new InvalidDataException($"{prefix}.Backend must be Optimum or Stratum.");
 				}
 
-				if (criterion.Target != null || !string.IsNullOrWhiteSpace(criterion.Output) || !string.IsNullOrWhiteSpace(criterion.Behavior) || !string.IsNullOrWhiteSpace(criterion.Path) || criterion.Value != null)
+				if (criterion.Target != null || !string.IsNullOrWhiteSpace(criterion.Output) || !string.IsNullOrWhiteSpace(criterion.Behavior) || !string.IsNullOrWhiteSpace(criterion.Path))
 				{
-					throw new InvalidDataException($"{prefix} Backend criteria may only declare Backend and Operator.");
+					throw new InvalidDataException($"{prefix} Backend criteria may only declare Backend, Operator, and (for version comparisons) Value.");
 				}
+
+				if (criterion.Operator is ImmDependencyOperator.Exists or ImmDependencyOperator.NotExists)
+				{
+					if (criterion.Value != null) { throw new InvalidDataException($"{prefix}.Value must be omitted for {criterion.Operator}."); }
+				}
+				else
+				{
+					ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
+					if (criterion.Backend != ImmDependencyBackend.Stratum || criterion.Value?.Type != JTokenType.String || !ImmDependencyService.IsValidStratumVersion(criterion.Value?.Value<string>()))
+					{
+						throw new InvalidDataException($"{prefix}.Value must be a valid Stratum version string (such as 1.22.7-stratum.3-indev.1), and Backend must be Stratum.");
+					}
+				}
+			break;
+
+			case ImmDependencyCriterionType.StratumSetting:
+				ValidateComparisonOperator(criterion.Operator, $"{prefix}.Operator");
+
+				if (criterion.Target != null || criterion.Backend != ImmDependencyBackend.Unknown || !string.IsNullOrWhiteSpace(criterion.Output) || !string.IsNullOrWhiteSpace(criterion.Behavior))
+				{
+					throw new InvalidDataException($"{prefix} StratumSetting may only declare Path, Operator, and Value.");
+				}
+
+				if (string.IsNullOrWhiteSpace(criterion.Path) || criterion.Path.Split('.').Any(part => part.Length == 0 || !char.IsLetter(part[0]) || part.Any(c => !char.IsLetterOrDigit(c) && c != '_')))
+				{
+					throw new InvalidDataException($"{prefix}.Path must be a dot-separated Stratum property path.");
+				}
+
+				ValidateSettingComparisonValue(criterion.Value, criterion.Operator, patchSetting: false, $"{prefix}.Value");
 			break;
 
 			case ImmDependencyCriterionType.CollectibleBehavior:

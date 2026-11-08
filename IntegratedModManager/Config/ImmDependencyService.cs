@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Reflection;
 using Newtonsoft.Json.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -29,6 +31,8 @@ public sealed class ImmDependencyService
 	private readonly ImmExternalManagerOwnership ExternalManagers;
 	private readonly bool OptimumActive;
 	private readonly bool StratumActive;
+	private readonly string? StratumVersion;
+	private readonly PropertyInfo? StratumConfigProperty;
 
 	private List<ImmActiveDependency> Active = [];
 	private readonly HashSet<int> PendingRestartRuntimeIds = [];
@@ -46,7 +50,15 @@ public sealed class ImmDependencyService
 
 		var runtimeAssembly = api.GetType().Assembly;
 		OptimumActive = runtimeAssembly.GetType("Optimum.OptimumInfo", throwOnError: false) != null;
-		StratumActive = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false) != null;
+		Type? stratumInfo = runtimeAssembly.GetType("Vintagestory.Server.StratumInfo", throwOnError: false);
+		StratumActive = stratumInfo != null;
+		StratumConfigProperty = runtimeAssembly.GetType("Vintagestory.Server.StratumRuntime", throwOnError: false)?.GetProperty("Config", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+		try { StratumVersion = stratumInfo?.GetProperty("Version")?.GetValue(null) as string; }
+		catch (Exception exception) { api.Logger.Warning("[integratedmodmanager] Could not read Stratum version: {0}", exception.Message); }
+		if (StratumActive && !IsValidStratumVersion(StratumVersion))
+		{
+			api.Logger.Warning("[integratedmodmanager] Stratum version is unrecognized. Assuming the version is older than requested.");
+		}
 	}
 
     public ImmActiveDependency[] GetForMod(string sourceModId) => [.. Active.Where(dependency => string.Equals(dependency.SourceModId, sourceModId, StringComparison.OrdinalIgnoreCase))];
@@ -161,6 +173,8 @@ public sealed class ImmDependencyService
 
 			case ImmDependencyCriterionType.Backend: return TryEvaluateBackend(criterion, out matched, out error);
 
+			case ImmDependencyCriterionType.StratumSetting: return TryEvaluateStratumSetting(criterion, out matched, out error);
+
 			case ImmDependencyCriterionType.CollectibleBehavior: return TryEvaluateCollectibleBehavior(criterion, collectibles, out matched, out error);
 
 			case ImmDependencyCriterionType.CollectibleAttribute: return TryEvaluateCollectibleAttribute(criterion, collectibles, out matched, out error);
@@ -181,8 +195,65 @@ public sealed class ImmDependencyService
 			_ => false
 		};
 
-		matched = criterion.Operator == ImmDependencyOperator.Exists ? exists : !exists;
 		error = "";
+		if (criterion.Operator is ImmDependencyOperator.Exists or ImmDependencyOperator.NotExists)
+		{
+			matched = criterion.Operator == ImmDependencyOperator.Exists ? exists : !exists;
+			return true;
+		}
+
+		if (!exists) { matched = false; return true; }
+
+		if (!TryCompareStratumVersions(StratumVersion, criterion.Value?.Value<string>(), out int comparison)) // Treated as older just to be safe
+		{
+			matched = criterion.Operator == ImmDependencyOperator.LessThan;
+			return true;
+		}
+
+		matched = criterion.Operator switch
+		{
+			ImmDependencyOperator.Equal => comparison == 0,
+			ImmDependencyOperator.NotEqual => comparison != 0,
+			ImmDependencyOperator.GreaterThan => comparison > 0,
+			ImmDependencyOperator.LessThan => comparison < 0,
+			_ => false
+		};
+		return true;
+	}
+
+	private bool TryEvaluateStratumSetting(ImmDependencyCriterion criterion, out bool matched, out string error)
+	{
+		matched = false;
+		error = "";
+		if (!StratumActive) { return true; }
+
+		try
+		{
+			object? value = StratumConfigProperty?.GetValue(null);
+			foreach (string part in criterion.Path.Split('.'))
+			{
+				if (value is null) { break; }
+				PropertyInfo? property = value.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+				value = property?.GetValue(value);
+			}
+
+			if (value != null)
+			{
+				JToken current = JToken.FromObject(value);
+				if (current is JValue && current.Type is not (JTokenType.Null or JTokenType.Undefined))
+				{
+					return TryCompare(current, criterion.Value!, criterion.Operator, out matched, out error);
+				}
+			}
+		}
+		catch (Exception exception)
+		{
+			Api.Logger.Warning("[integratedmodmanager] Could not read Stratum setting '{0}': {1}", criterion.Path, exception.Message);
+		}
+
+		// Unknown or unavailable settings cannot be considered equal to the requested safe value.
+		// This keeps NotEqual-based incompatibility reports visible on unsupported Stratum builds.
+		matched = criterion.Operator == ImmDependencyOperator.NotEqual;
 		return true;
 	}
 
@@ -392,6 +463,84 @@ public sealed class ImmDependencyService
 
 		try { value = token.Value<double>(); return double.IsFinite(value); }
 		catch { return false; }
+	}
+
+	internal static bool IsValidStratumVersion(string? value) => TryParseStratumVersion(value, out _, out _, out _);
+
+	private static bool TryCompareStratumVersions(string? current, string? expected, out int comparison)
+	{
+		comparison = 0;
+		if (!TryParseStratumVersion(current, out Version currentGame, out int currentRevision, out string[] currentPrerelease)
+			|| !TryParseStratumVersion(expected, out Version expectedGame, out int expectedRevision, out string[] expectedPrerelease)) { return false; }
+
+		comparison = currentGame.CompareTo(expectedGame);
+		if (comparison == 0) { comparison = currentRevision.CompareTo(expectedRevision); }
+		if (comparison == 0) { comparison = CompareStratumPrerelease(currentPrerelease, expectedPrerelease); }
+		return true;
+	}
+
+	private static bool TryParseStratumVersion(string? value, out Version game, out int revision, out string[] prerelease)
+	{
+		game = new Version(0, 0, 0);
+		revision = 0;
+		prerelease = [];
+		if (string.IsNullOrWhiteSpace(value)) { return false; }
+
+		string version = value.Trim();
+		if (version.StartsWith('v') || version.StartsWith('V')) { version = version[1..]; }
+		int metadata = version.IndexOf('+');
+		if (metadata >= 0) { version = version[..metadata]; }
+
+		const string marker = "-stratum.";
+		int markerIndex = version.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+		if (markerIndex <= 0 || !Version.TryParse(version[..markerIndex], out Version? parsedGame) || parsedGame.Build < 0 || parsedGame.Revision >= 0) { return false; }
+
+		string remainder = version[(markerIndex + marker.Length)..];
+		int suffixIndex = remainder.IndexOf('-');
+		string revisionText = suffixIndex < 0 ? remainder : remainder[..suffixIndex];
+		if (!int.TryParse(revisionText, NumberStyles.None, CultureInfo.InvariantCulture, out revision)) { return false; }
+
+		if (suffixIndex >= 0)
+		{
+			string suffix = remainder[(suffixIndex + 1)..];
+			if (suffix.Length == 0) { return false; }
+			prerelease = suffix.Split('.');
+			if (prerelease.Any(part => part.Length == 0 || part.Any(c => !char.IsAsciiLetterOrDigit(c) && c != '-'))) { return false; }
+		}
+
+		game = parsedGame;
+		return true;
+	}
+
+	private static int CompareStratumPrerelease(string[] current, string[] expected)
+	{
+		// Stable releases sort after their own prereleases, e.g. .3 > .3-indev.1.
+		if (current.Length == 0) { return expected.Length == 0 ? 0 : 1; }
+		if (expected.Length == 0) { return -1; }
+
+		for (int index = 0; index < Math.Min(current.Length, expected.Length); index++)
+		{
+			string left = current[index];
+			string right = expected[index];
+			bool leftNumeric = left.All(char.IsAsciiDigit);
+			bool rightNumeric = right.All(char.IsAsciiDigit);
+			int order;
+
+			if (leftNumeric && rightNumeric)
+			{
+				// Compare digit strings without overflow (indev.10 > indev.2).
+				left = left.TrimStart('0');
+				right = right.TrimStart('0');
+				order = left.Length.CompareTo(right.Length);
+				if (order == 0) { order = string.CompareOrdinal(left, right); }
+			}
+			else if (leftNumeric != rightNumeric) { order = leftNumeric ? -1 : 1; }
+			else { order = string.CompareOrdinal(left, right); }
+
+			if (order != 0) { return order; }
+		}
+
+		return current.Length.CompareTo(expected.Length);
 	}
 
 	private bool TryApplySettingResolution(string sourceModId, ImmDependencyResolution resolution, out string error)
